@@ -175,10 +175,6 @@ function selectTimePeriod()
 	{
 		$_SESSION['period'] = "all";
 	}
-	else
-	{
-		$_SESSION['period'] = "";
-	}
 
 	echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"change_period\"><br>\n" .
