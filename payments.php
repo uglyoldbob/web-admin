@@ -390,12 +390,20 @@ if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
 		}
 		if (getPeriodComparison("date_earned") != "")
 		{
-			$query = $query . " AND" . getPeriodComparison("date_earned");
+			if ($category == "")
+			{
+				$query = $query . " WHERE" . 
+					getPeriodComparison("date_earned");
+			}
+			else
+			{
+				$query = $query . " AND" . 
+					getPeriodComparison("date_earned");
+			}
 		}
 		$query = $query . " ORDER BY date_paid DESC LIMIT " . 
 			($start_page*30) . ", " . ($start_page*30+30);
 	}
-		
 	$payment_results = mysql_query($query, $database);
 
 	$assets = 0.0;

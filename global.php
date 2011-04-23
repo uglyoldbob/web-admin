@@ -177,7 +177,6 @@ function selectTimePeriod()
 	}
 
 	echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-		"	<input type=\"hidden\" name=\"action\" value=\"change_period\"><br>\n" .
 		"	<select name=timeperiod>\n";
 	
 	echo "		<option ";
@@ -193,7 +192,7 @@ function selectTimePeriod()
 	echo "		<option ";
 	if ($_SESSION['period'] == "2012")
 		echo "selected ";
-	echo	"value=\"2011\">2012 Tax Year</option>\n";
+	echo	"value=\"2012\">2012 Tax Year</option>\n";
 	echo "	<input type=\"submit\" value=\"Go\"/>\n" .
 		"</form>";
 }
@@ -202,11 +201,13 @@ function getPeriodComparison($fieldname)
 {	//returns the proper portion of a mysql statement to filter for the time period selected
 	if ($_SESSION['period'] == "2011")
 	{
-		return " $fieldname > 2010-04-14 AND $fieldname < 2011-04-16";
+		return " $fieldname  > '2010-04-14'" .
+			" AND $fieldname  < '2011-04-16'";
 	}
 	else if ($_SESSION['period'] == "2012")
 	{
-		return " $fieldname > 2011-04-14 AND $fieldname < 2012-04-16";
+		return " $fieldname  > '2011-04-14'" .
+			" AND $fieldname < '2012-04-16'";
 	}
 	else
 	{
