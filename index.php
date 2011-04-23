@@ -18,6 +18,7 @@ $database = openDatabase();
 
 login_code();
 login_button($database);
+selectTimePeriod();
 
 if (isset($_SESSION['username']))
 {

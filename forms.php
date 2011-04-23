@@ -292,7 +292,12 @@ function print_inspections($contact, $start_page, $database)
 		//check for filtering 
 	if ($contact == 0)
 	{
-		$query = "SELECT * FROM inspections ORDER BY id DESC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
+		$query = "SELECT * FROM inspections";
+		if (getPeriodComparison("datetime") != "")
+		{
+			$query = $query . " AND" . getPeriodComparison("datetime");
+		}
+		$query = $query . " ORDER BY id DESC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
 	}
 	else
 	{
@@ -300,7 +305,12 @@ function print_inspections($contact, $start_page, $database)
 		print_contact($contact, $database);
 		echo "</h3><br >\n";
 		echo '<a href="' . bottomPageURL() . '/inspections.php">Go to all inspections</a>' . "<br >\n";
-		$query = "SELECT * FROM inspections WHERE inspector=" . $contact . " ORDER BY id DESC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
+		$query = "SELECT * FROM inspections WHERE inspector=" . $contact;
+		if (getPeriodComparison("datetime") != "")
+		{
+			$query = $query . " AND" . getPeriodComparison("datetime");
+		}
+		$query = $query . " ORDER BY id DESC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
 	}
 			
 	$payment_results = mysql_query($query, $database);

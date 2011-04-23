@@ -34,6 +34,7 @@ $database = openDatabase();
 
 login_code();
 login_button($database);
+selectTimePeriod();
 
 echo '<a href="' . bottomPageURL() . '">Return to main</a>' . "<br >\n";
 
@@ -64,10 +65,10 @@ if ($_POST["action"] == "update")
 	{
 		if (checkContactPermission($id_num, $database))
 		{	//has unlimited access to the contact
-			$query = "REPLACE INTO `contacts` " . 
+			$query = "REPLACE INTO `contacts` " .
 					 "(emp_id, last_name, first_name, classification, payment_eligible, " .
-					 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " . 
-					 "VALUES (" . 
+					 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
+					 "VALUES (" .
 					 "'" . $id_num . "'," .
 					 "'" . $last_name .  "'," .
 					 "'" . $first_name .  "'," .
@@ -87,10 +88,10 @@ if ($_POST["action"] == "update")
 		}
 		else
 		{	//limited access to the contact
-				$query = "REPLACE INTO `contacts` " . 
+				$query = "REPLACE INTO `contacts` " .
 					 "(emp_id, last_name, first_name, classification, payment_eligible, " .
-					 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " . 
-					 "VALUES (" . 
+					 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
+					 "VALUES (" .
 					 "'" . $id_num . "'," .
 					 "'" . $last_name .  "'," .
 					 "'" . $first_name .  "'," .
@@ -108,29 +109,29 @@ if ($_POST["action"] == "update")
 					 "'" . $zip . "'" .
 					 ");";
 		}
-		$query = "UPDATE `contacts` SET " . 
-				"`last_name` = '" . $last_name . 
-				"', `first_name` = '" . $first_name . 
+		$query = "UPDATE `contacts` SET " .
+				"`last_name` = '" . $last_name .
+				"', `first_name` = '" . $first_name .
 				"', `classification` = '" . $classification .
-				"', `payment_eligible` = " . $eligibility . 
-				", `ssn` = '" . $ssn . 
+				"', `payment_eligible` = " . $eligibility .
+				", `ssn` = '" . $ssn .
 				"', `phone_mobile` = '" . $mobile .
-				"', `phone_home` = '" . $home . 
-				"', `phone_other` = '" . $other . 
+				"', `phone_home` = '" . $home .
+				"', `phone_other` = '" . $other .
 				"', `website` = '" . $website .
 				"', `email` = '" . $email .
-				"', `address` = '" . $street . 
-				"', `city` = '" . $city . 
+				"', `address` = '" . $street .
+				"', `city` = '" . $city .
 				"', `state` = '" . $state .
 				"', `zipcode` = '" . $zip .
 				"' WHERE `emp_id` = " . $id_num . ";";
 	}
 	else
 	{
-		$query = "INSERT INTO `contacts` " . 
+		$query = "INSERT INTO `contacts` " .
 				 "(last_name, first_name, classification, payment_eligible, " .
-				 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " . 
-				 "VALUES (" . 
+				 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
+				 "VALUES (" .
 				 "'" . $last_name .  "'," .
 				 "'" . $first_name .  "'," .
 				 "'" . $classification . "'," .
@@ -239,7 +240,7 @@ if (($_POST["action"] == "edit") || ($contact != 0))
 				}
 				if ($row['email'] != "")
 				{
-					echo "Contact via e-mail at " . $row['email'] . 
+					echo "Contact via e-mail at " . $row['email'] .
 						' <a href="mailto:' . $row['email'] . '">e-mail</a>' . "<br>\n";
 				}
 				
@@ -300,7 +301,7 @@ else
 		echo "	<tr>\n";
 
 		echo "		<td>\n";
-					 
+					
 		echo "			<a href=\"". bottomPageURL() . "/contacts.php?contact=" . $row['emp_id'] . "\">View</a>\n";
 		echo "		</td>\n";
 

@@ -131,6 +131,7 @@ $database = openDatabase();
 //make sure the user is logged in properly
 login_code();
 login_button($database);
+selectTimePeriod();
 
 echo 'This page lists locations where inspections have been performed. A location can be listed even though a non-building inspection was performed.' . "<br >\n";
 
@@ -206,7 +207,11 @@ else //if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
 			 $row['city'] . ", " . $row['state'] . " " . $row['zip'] . "<br >\n" .
 			 $row['description'];
 		//print all inspections done here
-		$query = "SELECT * FROM inspections WHERE prop_id = " .$row['id'] . " LIMIT 1";
+		$query = "SELECT * FROM inspections WHERE prop_id = " .$row['id'];
+		if (getPeriodComparison("datetime") != "")
+		{
+			$query = $query . " AND" . getPeriodComparison("datetime");
+		}
 		$payment_results = mysql_query($query, $database);
 
 		//also located in inspections.php (move to a function later)

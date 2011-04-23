@@ -129,6 +129,7 @@ $database = openDatabase();
 //make sure the user is logged in properly
 login_code();
 login_button($database);
+selectTimePeriod();
 
 echo '<a href="' . bottomPageURL() . '">Return to main</a>' . "<br >\n";
 

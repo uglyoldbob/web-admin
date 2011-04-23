@@ -160,6 +160,64 @@ function login_button($database)
 	}
 }
 
+function selectTimePeriod()
+{	//used to select which (time period)'s information will be viewed
+
+	if ($_POST['timeperiod'] == "2011")
+	{
+		$_SESSION['period'] = "2011";
+	}
+	else if ($_POST['timeperiod'] == "2012")
+	{
+		$_SESSION['period'] = "2012";
+	}
+	else if ($_POST['timeperiod'] == "all")
+	{
+		$_SESSION['period'] = "all";
+	}
+	else
+	{
+		$_SESSION['period'] = "";
+	}
+
+	echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"change_period\"><br>\n" .
+		"	<select name=timeperiod>\n";
+	
+	echo "		<option ";
+	if ($_SESSION['period'] == "all")
+		echo "selected ";
+	echo	"value=\"all\">Everything</option>\n";
+	
+	echo "		<option ";
+	if ($_SESSION['period'] == "2011")
+		echo "selected ";
+	echo	"value=\"2011\">2011 Tax Year</option>\n";
+	
+	echo "		<option ";
+	if ($_SESSION['period'] == "2012")
+		echo "selected ";
+	echo	"value=\"2011\">2012 Tax Year</option>\n";
+	echo "	<input type=\"submit\" value=\"Go\"/>\n" .
+		"</form>";
+}
+
+function getPeriodComparison($fieldname)
+{	//returns the proper portion of a mysql statement to filter for the time period selected
+	if ($_SESSION['period'] == "2011")
+	{
+		return " $fieldname > 2010-04-14 AND $fieldname < 2011-04-16";
+	}
+	else if ($_SESSION['period'] == "2012")
+	{
+		return " $fieldname > 2011-04-14 AND $fieldname < 2012-04-16";
+	}
+	else
+	{
+		return "";
+	}
+}
+
 //open database connection
 //be sure to either change account information here or something
 function openDatabase()
@@ -307,8 +365,12 @@ function get_category_sum($contact, $category, $database)
 	$query = "SELECT * FROM payments WHERE (paid_by = " . $contact .
 		" OR pay_to = " . $contact . ")" .
 		" AND `category` = '" .
-		$category . "'" . 
-		" ORDER BY date_paid DESC ";
+		$category . "'";
+	if (getPeriodComparison("date_earned") != "")
+	{
+		$query = $query . " AND" . getPeriodComparison("date_earned");
+	}
+	$query = $query . " ORDER BY date_paid DESC ";
 	$payment_results = mysql_query($query, $database);
 
 	$assets = 0.0;

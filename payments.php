@@ -56,8 +56,8 @@ if (is_numeric($start_page) == FALSE)
 		}
 		else 
 		{
-			$.post("payeeId.php", 
-				{queryString: ""+textId+""}, 
+			$.post("payeeId.php",
+				{queryString: ""+textId+""},
 				function(data)
 			{
 				if(data.length >0) 
@@ -133,6 +133,7 @@ if (is_numeric($start_page) == FALSE)
 
 login_code();
 login_button($database);
+selectTimePeriod();
 
 echo '<a href="' . bottomPageURL() . '">Return to main</a>' . "<br >\n";
 
@@ -247,6 +248,10 @@ if ($_POST["action"] == "edit")
 	{
 		$query = "SELECT * FROM payments WHERE payment_id = " .
 			$id_num;
+		if (getPeriodComparison("date_earned") != "")
+		{
+			$query = $query . " AND" . getPeriodComparison("date_earned");
+		}
 	}
 	else
 	{
@@ -315,8 +320,12 @@ if ($contact != 0)
 
 	$query = "SELECT COUNT( *  ) AS `Rows` , `category`" .
 		"FROM `payments` WHERE (paid_by = " . $contact .
-		" OR pay_to = " . $contact . ")" . 
-		" GROUP BY `category` ORDER BY `category`";
+		" OR pay_to = " . $contact . ")";
+	if (getPeriodComparison("date_earned") != "")
+	{
+		$query = $query . " AND" . getPeriodComparison("date_earned");
+	}
+	$query = $query . " GROUP BY `category` ORDER BY `category`";
 	$categories = mysql_query($query, $database);
 	while($row = mysql_fetch_array($categories))
 	{
@@ -364,6 +373,10 @@ if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
 			$query = $query . " AND `category` = '" .
 				$category . "'";
 		}
+		if (getPeriodComparison("date_earned") != "")
+		{
+			$query = $query . " AND" . getPeriodComparison("date_earned");
+		}
 		$query = $query . " ORDER BY date_paid DESC LIMIT " . 
 			($start_page*30) . ", " . ($start_page*30+30);
 	}
@@ -375,7 +388,10 @@ if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
 			$query = $query . " WHERE `category` = '" .
 				$category . "'";
 		}
-
+		if (getPeriodComparison("date_earned") != "")
+		{
+			$query = $query . " AND" . getPeriodComparison("date_earned");
+		}
 		$query = $query . " ORDER BY date_paid DESC LIMIT " . 
 			($start_page*30) . ", " . ($start_page*30+30);
 	}
