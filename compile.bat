@@ -1,1 +1,2 @@
-javac application.java
+CALL ant
+pause
