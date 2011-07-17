@@ -22,6 +22,7 @@ public class DatabaseManager
 			_log.info("Loading the database driver");
 			Class.forName(Config.g().DB_DRIVER).newInstance();
 			new DatabaseConnection().close();
+			_log.info("Done loading database driver");
 		}
 		catch (Exception ex) 
 		{

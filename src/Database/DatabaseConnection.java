@@ -40,7 +40,6 @@ public class DatabaseConnection
 	
 	public ResultSet issueCommand(String statement)
 	{
-		_log.info("Command: " + statement);
 		try 
 		{
 			_stmt = _conn.createStatement();
