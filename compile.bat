@@ -1,2 +1,0 @@
-CALL ant
-pause
