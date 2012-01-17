@@ -393,7 +393,7 @@ if ($_POST["action"] == "")
 				echo "<h2>Information for location " . $row['description'] . "</h2><br >\n";
 			else
 				echo "<h2>Information for top-level locations</h2><br >\n";
-			if ($location != 0)
+			if ($root_location == 0)
 			{
 				echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row2['position'] . '">Return to ' . 
 					$row2['description'] . '</a>' . "<br >\n";
@@ -409,7 +409,7 @@ if ($_POST["action"] == "")
 		die('Invalid location (' . $location . ') specified');
 	}
 	
-	if ($location != 0)
+	if ($root_location == 0)
 	{
 		echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"del_loc\"><br>\n" .
@@ -424,12 +424,15 @@ if ($_POST["action"] == "")
 	
 	while($row = mysql_fetch_array($results))
 	{
-		if ($locations_exist == 0)
+		if ($row['id'] != $root_number)
 		{
-			echo "<h3>Locations : </h3><br >\n";
-			$locations_exist = 1;
+			if ($locations_exist == 0)
+			{
+				echo "<h3>Locations : </h3><br >\n";
+				$locations_exist = 1;
+			}
+			echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
 		}
-		echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
 	}
 	
 	if ($locations_exist == 0)
@@ -438,9 +441,17 @@ if ($_POST["action"] == "")
 	}
 	
 	echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-		 "	<input type=\"hidden\" name=\"action\" value=\"add_loc\"><br>\n" .
-		 "	<input type=\"submit\" value=\"Add locations to " . $loc_name . "\">\n" .
-		 "</form>";
+		 "	<input type=\"hidden\" name=\"action\" value=\"add_loc\"><br>\n";
+		 
+	if ($root_location == 0)
+	{
+		echo "	<input type=\"submit\" value=\"Add locations to " . $loc_name . "\">\n";
+	}
+	else
+	{
+		echo "	<input type=\"submit\" value=\"Add locations\">\n";
+	}
+	echo "</form>";
 	
 	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND location = " . $location . ";";
 	$results = mysql_query($query, $database);
@@ -463,9 +474,17 @@ if ($_POST["action"] == "")
 	}
 	
 	echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-		 "	<input type=\"hidden\" name=\"action\" value=\"add_equ\"><br>\n" .
-		 "	<input type=\"submit\" value=\"Add equipment to " . $loc_name . "\">\n" .
-		 "</form>";
+		 "	<input type=\"hidden\" name=\"action\" value=\"add_equ\"><br>\n";
+	if ($root_location == 0)
+	{
+		echo "	<input type=\"submit\" value=\"Add equipment to " . $loc_name . "\">\n";
+	}
+	else
+	{
+		echo "	<input type=\"submit\" value=\"Add equipment\">\n";
+	}
+	
+	echo "</form>";
 }
 
 closeDatabase($database);
