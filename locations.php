@@ -152,10 +152,6 @@ login_button($database);
 
 echo '<a href="' . bottomPageURL() . '">Return to main</a>' . "<br >\n";
 
-if ($_POST["action"] == "apply")
-{
-}
-
 if ($_POST["action"] == "del_loc")
 {
 	if ($root_location == 1)
@@ -334,6 +330,81 @@ if ($_POST["action"] == "do_equ")
 	$_POST["action"] = "";
 }
 
+if ($_POST["action"] == "confirm_del_equ")
+{
+	$amount = $_POST['amount'];	//possible number of items to delete
+	if (is_numeric($location) == FALSE)
+		$location = 0;
+		
+	$an_error = 0;
+		
+	for ($i = 0; $i < $amount; $i++)
+	{
+		$query = "DELETE FROM equipment WHERE owner = " . $_SESSION['id'] . 
+			" AND id = " . mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
+		if (!mysql_query($query, $database))
+		{
+			echo "Error: " . mysql_error() . "<br >\n";
+			echo $query . "<br >\n";
+			//die('Error: ' . mysql_error());
+			$an_error = 1;
+		}
+	}
+	
+	if ($an_error == 0)
+	{
+		echo "Equipment deleted successfully<br >\n";
+	}
+	$_POST["action"] = "";
+}
+
+if ($_POST["action"] == "del_equ")
+{
+	$amount = $_POST['amount'];	//possible number of items to delete
+	if (is_numeric($location) == FALSE)
+		$location = 0;
+	
+	$j = 0;	//actual number of items to delete
+	
+	echo "<h1> Are you sure you want to DELETE this equipment?</h1>\n";
+	echo "<form method='post'>\n";
+	
+	for ($i = 0; $i < $amount; $i++)
+	{
+		if (mysql_real_escape_string($_POST['data'][$i]['delete']) == "on")
+		{
+			$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND id = " .
+				mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
+			$results = mysql_query($query, $database);
+			if ($row = mysql_fetch_array($results))
+			{
+				echo $row['quantity'] . " " . $row['unit'] . " of " .
+					$row['name'] . " (" . $row['description'] . ")<br >\n";
+				echo "	<input type=\"hidden\" name=\"data[" . $j . "][id]\" value=\"" . 
+					mysql_real_escape_string($_POST['data'][$i]['id']) . "\">\n";
+				$j = $j + 1;
+			}
+		}
+	}
+	
+	echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
+	echo "	<input type=\"hidden\" name=\"action\" value=\"confirm_del_equ\"><br>\n";
+	echo "  <input type=\"hidden\" name=\"amount\" value=" . $j . "><br >\n";
+	if ($j > 0)
+	{
+		echo "	<input type='submit' value='YES' >\n";
+	}
+	echo "</form>\n";
+	if ($j == 0)
+	{
+		echo "No equipment was selected to be deleted<br >\n";
+	}
+	
+	echo "<form method='post'>\n";
+	echo "	<input type='submit' value='NO' >\n";
+	echo "</form>\n";
+}
+
 if ($_POST["action"] == "add_equ")
 {
 	echo "<form method='post'>\n";
@@ -468,8 +539,11 @@ if ($_POST["action"] == "")
 		{
 			echo "<h3>Equipment : </h3><br >\n";
 			$equipment_exist = 1;
+			$i = 0;
+			echo "<form method='post'>\n";
 			echo "<table border=\"1\">\n";
 			echo "	<tr>\n";
+			echo "		<th></th>\n";
 			echo "		<th>Quantity</th>\n";
 			echo "		<th>Units</th>\n";
 			echo "		<th>Name</th>\n";
@@ -480,6 +554,12 @@ if ($_POST["action"] == "")
 		//echo $row['quantity'] . " " . $row['unit'] . " " . $row['name'] . ", (" . $row['description'] . ")<br >\n";
 
 		echo "	<tr>\n";
+		
+		echo "		<td>";
+		echo "			<input name=\"data[" . $i . "][delete]\" type=\"checkbox\">\n";
+		echo "			<input type=\"hidden\" name=\"data[" . $i . "][id]\" value=\"" . $row['id'] . "\">\n";
+		echo "		</td>\n";
+		$i = $i + 1;
 
 		echo "		<td>";
 		echo $row['quantity'];
@@ -507,6 +587,11 @@ if ($_POST["action"] == "")
 	else
 	{
 		echo "</table><br>\n";
+		echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
+		echo "	<input type=\"hidden\" name=\"action\" value=\"del_equ\"><br>\n";
+		echo "  <input type=\"hidden\" name=\"amount\" value=" . $i . "><br >\n";
+		echo "	<input type='submit' value='Delete selected equipment' >\n";
+		echo "</form>\n";
 	}
 	
 	echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
