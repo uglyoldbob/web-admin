@@ -417,7 +417,8 @@ if ($_POST["action"] == "")
 			 "</form>";
 	}
 	
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND position = " . $location . ";";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND position = " . $location . 
+		" ORDER BY description;";
 	$results = mysql_query($query, $database);
 	
 	$locations_exist = 0;
@@ -453,7 +454,8 @@ if ($_POST["action"] == "")
 	}
 	echo "</form>";
 	
-	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND location = " . $location . ";";
+	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND location = " . $location . 
+		" ORDER BY name;";
 	$results = mysql_query($query, $database);
 	$equipment_exist = 0;
 	
