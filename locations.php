@@ -395,7 +395,7 @@ if ($_POST["action"] == "")
 				echo "<h2>Information for top-level locations</h2><br >\n";
 			if ($root_location == 0)
 			{
-				echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row2['position'] . '">Return to ' . 
+				echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row2['id'] . '">Return to ' . 
 					$row2['description'] . '</a>' . "<br >\n";
 			}
 		}
