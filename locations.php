@@ -290,7 +290,7 @@ if ($_POST["action"] == "do_equ")
 	echo "You added : <br >\n";
 	$query = "INSERT INTO equipment (owner, location, quantity, unit, name, description) VALUES ";
 	$first_record = 0;
-	for ($i = 0; $i < 5; $i++)
+	for ($i = 0; $i < 10; $i++)
 	{
 		if ($_POST['data'][$i]['quantity'] != "")
 		{
@@ -389,8 +389,9 @@ if ($_POST["action"] == "")
 		$results2 = mysql_query($query2, $database);
 		if ($row2 = mysql_fetch_array($results2))
 		{
+			$loc_name = $row['description'];
 			if ($root_location == 0)
-				echo "<h2>Information for location " . $row['description'] . "</h2><br >\n";
+				echo "<h2>Information for location " . $row['description'] . ' (' . $row['location'] . ")</h2><br >\n";
 			else
 				echo "<h2>Information for top-level locations</h2><br >\n";
 			if ($root_location == 0)
@@ -413,7 +414,8 @@ if ($_POST["action"] == "")
 	{
 		echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"del_loc\"><br>\n" .
-			 "	<input type=\"submit\" value=\"Delete this location\">\n" .
+			 "	<input type=\"submit\" value=\"Delete this location (" .
+			 	 $loc_name . ")\">\n" .
 			 "</form>";
 	}
 	
@@ -432,7 +434,8 @@ if ($_POST["action"] == "")
 				echo "<h3>Locations : </h3><br >\n";
 				$locations_exist = 1;
 			}
-			echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
+			echo '<a href="' . bottomPageURL() . 'locations.php?id=' . $row['id'] . '">' . $row['description'] . 
+				' (' . $row['location'] . ')</a>' . "<br >\n";
 		}
 	}
 	
@@ -465,14 +468,45 @@ if ($_POST["action"] == "")
 		{
 			echo "<h3>Equipment : </h3><br >\n";
 			$equipment_exist = 1;
+			echo "<table border=\"1\">\n";
+			echo "	<tr>\n";
+			echo "		<th>Quantity</th>\n";
+			echo "		<th>Units</th>\n";
+			echo "		<th>Name</th>\n";
+			echo "		<th>Description</th>\n";
+			echo "	</tr>\n";
 		}
 		//echo '<a href="' . bottomPageURL() . 'equipment.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
-		echo $row['quantity'] . " " . $row['unit'] . " " . $row['name'] . ", (" . $row['description'] . ")<br >\n";
+		//echo $row['quantity'] . " " . $row['unit'] . " " . $row['name'] . ", (" . $row['description'] . ")<br >\n";
+
+		echo "	<tr>\n";
+
+		echo "		<td>";
+		echo $row['quantity'];
+		echo "		</td>\n";
+			
+		echo "		<td>";
+		echo $row['unit'];
+		echo "		</td>\n";
+			
+		echo "		<td>";
+		echo $row['name'];
+		echo "		</td>\n";
+			
+		echo "		<td>";
+		echo $row['description'];
+		echo "		</td>\n";
+			
+		echo "	</tr>\n";
 	}
 	
 	if ($equipment_exist == 0)
 	{
 		echo "<h3>There is no equipment here</h3><br >\n";
+	}
+	else
+	{
+		echo "</table><br>\n";
 	}
 	
 	echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
