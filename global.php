@@ -132,7 +132,8 @@ function login_button($database)
 					"	<input type=\"hidden\" name=\"action\" value=\"logout\"><br>\n" .
 					"	<input type=\"submit\" value=\"Logout\">\n" .
 					"</form>";
-			$_POST["action"] = "";
+			if ($_POST["action"] == "login")
+				$_POST["action"] = "";
 		}
 		else
 		{	//force logout and print error message
