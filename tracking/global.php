@@ -315,4 +315,58 @@ function get_category_sum($contact, $category, $database)
 	return $value;
 }
 
+function list_location($pre_name, $loc_num, $database)
+{
+	echo "		<option value=\"" . $loc_num . "\">" . $pre_name . "</option>\n";
+	
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND position = " . $loc_num . ";";
+	$results = mysql_query($query, $database);
+	while ($row = mysql_fetch_array($results))
+	{
+		if ($row['id'] != $loc_num)
+		{	
+			list_location($pre_name . ',' . $row['description'], $row['id'], $database);
+		}
+	}
+}
+
+function get_location($equ, $database)
+{
+	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND id = " . $equ . ";";
+	$results = mysql_query($query, $database);
+	if ($row = mysql_fetch_array($results))
+	{
+		return $row['location'];	
+	}
+	else
+	{
+		die ("Invalid item specified");
+	}
+}
+
+function print_location($location, $database)
+{
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = " . $location . ";";
+	$results = mysql_query($query, $database);
+	if ($row = mysql_fetch_array($results))
+	{
+		if ($row['position'] != $location)
+		{
+			print_location($row['position'], $database);
+			echo ", " . $row['description'];
+			if ($row['location'] != 0)
+			{
+				echo "[" . $row['location'] . "]";
+			}
+		}
+		else
+		{
+			echo $row['description'];
+			if ($row['location'] != 0)
+			{
+				echo "[" . $row['location'] . "]";
+			}
+		}
+	}
+}
 ?>

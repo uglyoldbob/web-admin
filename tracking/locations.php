@@ -358,7 +358,82 @@ if ($_POST["action"] == "confirm_del_equ")
 	$_POST["action"] = "";
 }
 
-if ($_POST["action"] == "del_equ")
+if ($_POST['action'] == "move_equ")
+{
+	$amount = $_POST['amount'];	//possible number of items to delete
+	if (is_numeric($location) == FALSE)
+		$location = 0;
+	
+	$move_to = $_POST['move_to'];
+	if (is_numeric($move_to) == FALSE)
+	{
+		die("Invalid location specified");
+	}
+	
+		
+	$an_error = 0;
+		
+	for ($i = 0; $i < $amount; $i++)
+	{
+		$query = "UPDATE equipment SET location = " . $move_to . " WHERE OWNER = " . $_SESSION['id'] . 
+			" AND id = " . mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
+		if (!mysql_query($query, $database))
+		{
+			echo "Error: " . mysql_error() . "<br >\n";
+			echo $query . "<br >\n";
+			//die('Error: ' . mysql_error());
+			$an_error = 1;
+		}
+	}
+	
+	if ($an_error == 0)
+	{
+		echo "Equipment moved successfully<br >\n";
+	}
+	$_POST["action"] = "";
+
+}
+
+if (($_POST["action"] == "del_equ") && ($_POST["move"] != ""))
+{
+	$amount = $_POST['amount'];	//possible number of items to delete
+	
+	echo "<form method='POST'>\n";
+	for ($i = 0; $i < $amount; $i++)
+	{
+		if (mysql_real_escape_string($_POST['data'][$i]['delete']) == "on")
+		{
+			$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND id = " .
+				mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
+			$results = mysql_query($query, $database);
+			if ($row = mysql_fetch_array($results))
+			{
+				echo $row['quantity'] . " " . $row['unit'] . " of " .
+					$row['name'] . " (" . $row['description'] . ")<br >\n";
+				echo "	<input type=\"hidden\" name=\"data[" . $j . "][id]\" value=\"" . 
+					mysql_real_escape_string($_POST['data'][$i]['id']) . "\">\n";
+				$j = $j + 1;
+			}
+		}
+	}
+
+
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = position;";
+	$results = mysql_query($query, $database);
+	if ($row = mysql_fetch_array($results))
+	{
+		echo "	<select name=\"move_to\">\n";
+		echo "		<option value=\"nothing\">Select a location</option>\n";
+		list_location("MASTER", $row['id'], $database);
+		echo "	</select>\n";
+		echo "	<input type=\"hidden\" name=\"action\" value=\"move_equ\"><br>\n";
+		echo "  <input type=\"hidden\" name=\"amount\" value=" . $j . "><br >\n";
+		echo "	<input type='submit' value='GO' >\n";
+		echo "</form>\n";
+	}
+}
+
+if (($_POST["action"] == "del_equ") && ($_POST["delete"] != ""))
 {
 	$amount = $_POST['amount'];	//possible number of items to delete
 	if (is_numeric($location) == FALSE)
@@ -590,7 +665,8 @@ if ($_POST["action"] == "")
 		echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
 		echo "	<input type=\"hidden\" name=\"action\" value=\"del_equ\"><br>\n";
 		echo "  <input type=\"hidden\" name=\"amount\" value=" . $i . "><br >\n";
-		echo "	<input type='submit' value='Delete selected equipment' >\n";
+		echo "	<input type='submit' value='Delete selected equipment' name=\"delete\">\n";
+		echo "	<input type='submit' value='Move selected equipment' name=\"move\">\n";
 		echo "</form>\n";
 	}
 	

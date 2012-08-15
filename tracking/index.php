@@ -21,6 +21,7 @@ login_button($database);
 if (isset($_SESSION['username']))
 {
 	echo '<a href="' . bottomPageURL() . 'locations.php">Browse locations</a>' . "<br >\n";
+	echo '<a href="' . bottomPageURL() . 'search.php">Search</a>' . "<br >\n";
 }
 
 
