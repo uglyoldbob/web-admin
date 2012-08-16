@@ -27,7 +27,7 @@ echo '<a href="' . bottomPageURL() . '">Return to main</a>' . "<br >\n";
 
 if ($_POST['action'] == "search")
 {
-	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND name LIKE '%" . 
+	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND name LIKE '%" . 
 		mysql_real_escape_string($_POST['search']) . "%' or description LIKE '%" .
 				mysql_real_escape_string($_POST['search']) . "%' or unit LIKE '%" .
 				mysql_real_escape_string($_POST['search']) . "%';";

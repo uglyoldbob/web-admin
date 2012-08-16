@@ -16,27 +16,27 @@ function curPageURL()
 	{
 		$pageURL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
 	}
+	
 	return $pageURL;
 }
 
-function bottomPageURL()
-{	//TODO: rename this function, its not very accurately named
-	//TODO: fix this function
-	//this is supposed to get the address of the current folder the page is in (https://www.example.com/folder)
+function rootPageURL()
+{
 	$pageURL = 'http';
-	if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
-		$pageURL .= "://";
+	if ($_SERVER["HTTPS"] == "on") 
+		{$pageURL .= "s";}
+	$pageURL .= "://";
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
 	{
-		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"];
+		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"]."/webtest";
 	}
 	else
 	{
-		$pageURL .= $_SERVER["SERVER_NAME"];
+		$pageURL .= $_SERVER["SERVER_NAME"]."/webtest";
 	}
+	
 	return $pageURL;
 }
-
 	
 function start_my_session()
 {
@@ -82,13 +82,14 @@ function login_code()
 
 function quiet_login($database)
 {
+	$retv = 0;
 	if (isset($_SESSION['username']))
 	{
 		$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
 		$results = mysql_query($query, $database);
 		if ($row = mysql_fetch_array($results))
 		{
-			$_SESSION['id'] = $row['emp_id'];
+			$_SESSION['user']['emp_id'] = $row['emp_id'];
 			//good
 		}
 		else
@@ -100,9 +101,9 @@ function quiet_login($database)
 					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 					"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Login\"/>\n" .
-					"</form>";
-			exit(1);	
+					"	<input type=\"submit\" value=\"Login\">\n" .
+					"</form>\n";
+			$retv = 1;	
 		}
 	}
 	else
@@ -111,28 +112,30 @@ function quiet_login($database)
 				"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-				"	<input type=\"submit\" value=\"Login\" />\n" .
-				"</form>";
-		exit(1);
+				"	<input type=\"submit\" value=\"Login\">\n" .
+				"</form>\n";
+		$retv = 1;
 	}
+	return $retv;
 }
 
 function login_button($database)
 {	
+	$retv = 0;
 	if (isset($_SESSION['username']))
 	{
 		$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
 		$results = mysql_query($query, $database);
 		if ($row = mysql_fetch_array($results))
 		{
-			$_SESSION['id'] = $row['emp_id'];
+			$_SESSION['user'] = $row;
 			echo 	"<h3>Welcome ";
-			print_contact($row['emp_id'], $database);
+			print_contact($_SESSION['user']['emp_id'], $database);
 			echo	"</h3><br >\n";
-			echo	"<form action=\"" . bottomPageURL() . "\" method=\"post\">\n" .
+			echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 					"	<input type=\"hidden\" name=\"action\" value=\"logout\"><br>\n" .
-					"	<input type=\"submit\" value=\"Logout\"/>\n" .
-					"</form>";
+					"	<input type=\"submit\" value=\"Logout\">\n" .
+					"</form>\n";
 		}
 		else
 		{	//force logout and print error message
@@ -143,9 +146,9 @@ function login_button($database)
 					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 					"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Login\"/>\n" .
-					"</form>";
-			exit(1);	
+					"	<input type=\"submit\" value=\"Login\">\n" .
+					"</form>\n";
+			$retv = 1;
 		}
 	}
 	else
@@ -154,10 +157,11 @@ function login_button($database)
 				"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-				"	<input type=\"submit\" value=\"Login\"/>\n" .
-				"</form>";
-		exit(1);
+				"	<input type=\"submit\" value=\"Login\">\n" .
+				"</form>\n";
+		$retv = 1;
 	}
+	return $retv;
 }
 
 function selectTimePeriod()
@@ -176,7 +180,7 @@ function selectTimePeriod()
 		$_SESSION['period'] = "all";
 	}
 
-	echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+	echo	"<form action=\"" . rootPageURL() . "\" method=\"post\">\n" .
 		"	<select name=timeperiod>\n";
 	
 	echo "		<option ";
@@ -193,21 +197,21 @@ function selectTimePeriod()
 	if ($_SESSION['period'] == "2012")
 		echo "selected ";
 	echo	"value=\"2012\">2012 Tax Year</option>\n";
-	echo "	<input type=\"submit\" value=\"Go\"/>\n" .
-		"</form>";
+	echo "	<input type=\"submit\" value=\"Go\">\n" .
+		"</form>\n";
 }
 
 function getPeriodComparison($fieldname)
 {	//returns the proper portion of a mysql statement to filter for the time period selected
 	if ($_SESSION['period'] == "2011")
 	{
-		return " $fieldname  > '2010-04-14'" .
-			" AND $fieldname  < '2011-04-16'";
+		return " $fieldname  > '2010-12-31'" .
+			" AND $fieldname  < '2012-01-01'";
 	}
 	else if ($_SESSION['period'] == "2012")
 	{
-		return " $fieldname  > '2011-04-14'" .
-			" AND $fieldname < '2012-04-16'";
+		return " $fieldname  > '2011-12-31'" .
+			" AND $fieldname < '2013-01-01'";
 	}
 	else
 	{
@@ -246,7 +250,7 @@ function openDatabase()
 		unset($_SESSION['password']);
 		die ('Invalid login credentials');
 	}
-	mysql_select_db("thermal", $dbase);
+	mysql_select_db("webtest", $dbase);
 	return $dbase;
 }
 
@@ -262,7 +266,7 @@ function closeDataBase($dbase)
 	//2 = access all reports
 function checkPermission($database, $element)
 {
-	$query = "SELECT permissions FROM contacts WHERE emp_id=" . $_SESSION['id'];
+	$query = "SELECT permissions FROM contacts WHERE emp_id=" . $_SESSION['user']['emp_id'];
 	$results = mysql_query($query, $database);
 	if($row = @mysql_fetch_array($results))
 	{

@@ -304,7 +304,7 @@ function print_inspections($contact, $start_page, $database)
 		echo "<h3>Inspections done by ";
 		print_contact($contact, $database);
 		echo "</h3><br >\n";
-		echo '<a href="' . bottomPageURL() . '/inspections.php">Go to all inspections</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/inspections.php">Go to all inspections</a>' . "<br >\n";
 		$query = "SELECT * FROM inspections WHERE inspector=" . $contact;
 		if (getPeriodComparison("datetime") != "")
 		{
@@ -347,7 +347,7 @@ function print_inspections($contact, $start_page, $database)
 		echo "		<td>" . $row['type'] . "</td>\n";
 		
 		echo "		<td>";
-		echo "<a href=\"" . bottomPageURL() . "/inspections.php?contact=" . $row['inspector'] . "\"> ";
+		echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $row['inspector'] . "\"> ";
 		print_contact($row['inspector'], $database);
 		echo "</a>";
 		echo "</td>\n";
@@ -356,7 +356,7 @@ function print_inspections($contact, $start_page, $database)
 		echo "		<td>$" . $row['price'] . "</td>\n";
 		
 		echo "		<td>";
-		echo "<a href=\"" . bottomPageURL() . "/payments.php?contact=" . $row['paid_by'] . "\"> ";
+		echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $row['paid_by'] . "\"> ";
 		print_contact($row['paid_by'], $database);
 		echo "</a>";
 		echo "</td>\n";
@@ -369,7 +369,7 @@ function print_inspections($contact, $start_page, $database)
 		}
 		else
 		{
-			echo "		<td>" . '<a href="' . bottomPageURL() . '/reports/' . $row['report'] . '" target="_blank">Download</a></td>' . "\n";
+			echo "		<td>" . '<a href="' . rootPageURL() . '/reports/' . $row['report'] . '" target="_blank">Download</a></td>' . "\n";
 		}
 		
 		echo "	</tr>\n";	
@@ -378,8 +378,8 @@ function print_inspections($contact, $start_page, $database)
 	echo "</table><br>\n";
 	
 	if ($start_page > 0)
-		echo '<a href="' . bottomPageURL() . '/inspections.php?page=' . ($start_page-1) . '">Previous page</a>  ';
-	echo '<a href="' . bottomPageURL() . '/inspections.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/inspections.php?page=' . ($start_page-1) . '">Previous page</a>  ';
+	echo '<a href="' . rootPageURL() . '/inspections.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
 	
 	echo "	<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 		 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .

@@ -11,7 +11,7 @@ $database = openDatabase();
 if (is_numeric($location) == FALSE)
 	$location = 0;
 
-$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = position;";
+$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
 $results = mysql_query($query, $database);
 if ($row = mysql_fetch_array($results))
 {
@@ -161,21 +161,21 @@ if ($_POST["action"] == "del_loc")
 	
 	$scan_loc = 0;
 	
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = " . $location . ";";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{
 		$return_to = $row['position'];
 	}
 	
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND position = " . $location . ";";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND position = " . $location . ";";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{
 		$scan_loc = 1;
 	}
 	
-	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND location = " . $location . ";";
+	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND location = " . $location . ";";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{
@@ -187,7 +187,7 @@ if ($_POST["action"] == "del_loc")
 		die('This location cannot be deleted because it contains locations/equipment');
 	}
 	
-	$query = "DELETE FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = " . $location . ";";
+	$query = "DELETE FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
 	if (!mysql_query($query, $database))
 	{
 		echo "Error: " . mysql_error() . "<br >\n";
@@ -216,7 +216,7 @@ if ($_POST["action"] == "do_loc")
 			{
 				$query = $query . ", ";
 			}
-			$query = $query . "(\"" . $_SESSION['id'] . "\", \"" . 
+			$query = $query . "(\"" . $_SESSION['user']['emp_id'] . "\", \"" . 
 				mysql_real_escape_string($_POST['position']) . "\", \"" .
 				mysql_real_escape_string($_POST['data'][$i]['description']) . "\", \"" .
 				mysql_real_escape_string($_POST['data'][$i]['location']) . "\")";
@@ -294,7 +294,7 @@ if ($_POST["action"] == "do_equ")
 			{
 				$query = $query . ", ";
 			}
-			$query = $query . "(\"" . $_SESSION['id'] . "\", \"" . 
+			$query = $query . "(\"" . $_SESSION['user']['emp_id'] . "\", \"" . 
 				mysql_real_escape_string($_POST['position']) . "\", \"" .
 				mysql_real_escape_string($_POST['data'][$i]['quantity']) . "\", \"" .
 				mysql_real_escape_string($_POST['data'][$i]['unit']) . "\", \"" .
@@ -340,7 +340,7 @@ if ($_POST["action"] == "confirm_del_equ")
 		
 	for ($i = 0; $i < $amount; $i++)
 	{
-		$query = "DELETE FROM equipment WHERE owner = " . $_SESSION['id'] . 
+		$query = "DELETE FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . 
 			" AND id = " . mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
 		if (!mysql_query($query, $database))
 		{
@@ -375,7 +375,7 @@ if ($_POST['action'] == "move_equ")
 		
 	for ($i = 0; $i < $amount; $i++)
 	{
-		$query = "UPDATE equipment SET location = " . $move_to . " WHERE OWNER = " . $_SESSION['id'] . 
+		$query = "UPDATE equipment SET location = " . $move_to . " WHERE OWNER = " . $_SESSION['user']['emp_id'] . 
 			" AND id = " . mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
 		if (!mysql_query($query, $database))
 		{
@@ -403,7 +403,7 @@ if (($_POST["action"] == "del_equ") && ($_POST["move"] != ""))
 	{
 		if (mysql_real_escape_string($_POST['data'][$i]['delete']) == "on")
 		{
-			$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND id = " .
+			$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " .
 				mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
 			$results = mysql_query($query, $database);
 			if ($row = mysql_fetch_array($results))
@@ -418,7 +418,7 @@ if (($_POST["action"] == "del_equ") && ($_POST["move"] != ""))
 	}
 
 
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = position;";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{
@@ -448,7 +448,7 @@ if (($_POST["action"] == "del_equ") && ($_POST["delete"] != ""))
 	{
 		if (mysql_real_escape_string($_POST['data'][$i]['delete']) == "on")
 		{
-			$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND id = " .
+			$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " .
 				mysql_real_escape_string($_POST['data'][$i]['id']) . ";";
 			$results = mysql_query($query, $database);
 			if ($row = mysql_fetch_array($results))
@@ -526,12 +526,12 @@ if ($_POST["action"] == "add_equ")
 
 if ($_POST["action"] == "")
 {
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = " . $location . ";";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{
 		$loc_name = $row['description'];
-		$query2 = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = " . $row['position'] . ";";
+		$query2 = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $row['position'] . ";";
 		$results2 = mysql_query($query2, $database);
 		if ($row2 = mysql_fetch_array($results2))
 		{
@@ -565,7 +565,7 @@ if ($_POST["action"] == "")
 			 "</form>";
 	}
 	
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND position = " . $location . 
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND position = " . $location . 
 		" ORDER BY description;";
 	$results = mysql_query($query, $database);
 	
@@ -603,7 +603,7 @@ if ($_POST["action"] == "")
 	}
 	echo "</form>";
 	
-	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND location = " . $location . 
+	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND location = " . $location . 
 		" ORDER BY name;";
 	$results = mysql_query($query, $database);
 	$equipment_exist = 0;

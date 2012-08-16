@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 3.3.9.2
+-- version 3.4.10.1deb1
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 15, 2012 at 08:28 PM
--- Server version: 5.1.41
--- PHP Version: 5.3.2-1ubuntu4.14
+-- Generation Time: Aug 16, 2012 at 03:01 AM
+-- Server version: 5.5.24
+-- PHP Version: 5.3.10-1ubuntu3.2
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -16,24 +17,8 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Database: `thermal`
+-- Database: `webtest`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `accounts`
---
-
-CREATE TABLE IF NOT EXISTS `accounts` (
-  `name` varchar(255) NOT NULL,
-  `last_name` varchar(255) NOT NULL,
-  `first_name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `password` varchar(100) NOT NULL,
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 -- --------------------------------------------------------
 
@@ -43,7 +28,8 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 
 CREATE TABLE IF NOT EXISTS `contacts` (
   `emp_id` int(11) NOT NULL AUTO_INCREMENT,
-  `last_name` varchar(55) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `middle_name` varchar(255) NOT NULL,
   `first_name` varchar(255) NOT NULL,
   `username` varchar(32) NOT NULL,
   `password` blob,
@@ -59,8 +45,11 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `city` varchar(255) NOT NULL,
   `state` varchar(5) NOT NULL,
   `zipcode` varchar(5) NOT NULL,
+  `permission_contacts` int(10) unsigned NOT NULL,
+  `permission_payments` int(10) unsigned NOT NULL,
+  `permission_jobs` int(10) unsigned NOT NULL,
   UNIQUE KEY `emp_id` (`emp_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=19 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20 ;
 
 -- --------------------------------------------------------
 
@@ -140,6 +129,17 @@ CREATE TABLE IF NOT EXISTS `inspections` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `jobs`
+--
+
+CREATE TABLE IF NOT EXISTS `jobs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `locations`
 --
 
@@ -213,3 +213,20 @@ CREATE TABLE IF NOT EXISTS `status_codes` (
   `Description` varchar(255) NOT NULL,
   UNIQUE KEY `code` (`code`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tasks`
+--
+
+CREATE TABLE IF NOT EXISTS `tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

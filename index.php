@@ -1,34 +1,55 @@
 <?php
 session_start();	//start php session
 header('Content-type: text/html; charset=utf-8');
+
 include("global.php");
 
 $database = openDatabase();
 
 ?>
-
-<!DOCTYPE HTML SYSTEM>
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Thermal Specialists Management System</title>
 </head>
 <body>
 
+<!--Firefox source viewer marks the second submit button on a page as a syntax error -->
+
 <?php
 
-login_code();
-login_button($database);
-selectTimePeriod();
-
-if (isset($_SESSION['username']))
+$stop = 0;
+echo '<div>' . "\n";
+if (login_code() == 1)
 {
-	echo '<a href="/payments.php">Look at all payments</a>' . "<br >\n";
-	echo '<a href="/codb.php">Cost of doing business calculator</a>' . "<br >\n";
-	echo '<a href="/contacts.php">Browse all contacts</a>' . "<br >\n";
-	echo '<a href="/inspections.php">View all inspections</a>' . "<br >\n";
-	echo '<a href="/properties.php">View where inspections have been done</a>' . "<br >\n";
+	$stop = 1;
 }
-
+if (login_button($database) == 1)
+{
+	$stop = 1;
+}
+echo "</div>\n";
+if ($stop == 0)
+{
+	selectTimePeriod();
+	
+	if (isset($_SESSION['username']))
+	{
+		if ($_SESSION['user']['permission_payments'] != 0)
+		{
+			echo '<a href="' . rootPageURL() . '/payments.php">Look at all payments</a>' . "<br >\n";
+		}
+		if ($_SESSION['user']['permission_contacts'] != 0)
+		{
+			echo '<a href="' . rootPageURL() . '/contacts.php">Browse all contacts</a>' . "<br >\n";
+		}
+		if ($_SESSION['user']['permission_jobs'] != 0)
+		{
+			echo '<a href="' . rootPageURL() . '/inspections.php">View all inspections</a>' . "<br >\n";
+		}
+		echo '<a href="' . rootPageURL() . '/properties.php">View where inspections have been done</a>' . "<br >\n";
+	}
+}
 
 closeDatabase($database);
 

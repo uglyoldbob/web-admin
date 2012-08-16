@@ -127,23 +127,35 @@ $database = openDatabase();
 <?php
 
 //make sure the user is logged in properly
-login_code();
-login_button($database);
-selectTimePeriod();
-
-echo '<a href="' . bottomPageURL() . '">Return to main</a>' . "<br >\n";
-
-if (($_POST["action"] == "edit"))
+$stop = 0;
+echo '<div>' . "\n";
+if (login_code() == 1)
 {
-	echo "Cannot edit inspection listings currently<br >\n";
+	$stop = 1;
 }
-else	//if (($_POST["action"] == "")
+if (login_button($database) == 1)
 {
-	print_inspections($contact, $start_page, $database);
+	$stop = 1;
 }
-
-//bcmul, bcadd,
-//
+echo "</div>\n";
+if ($stop == 0)
+{
+	selectTimePeriod();
+	
+	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
+	
+	if (($_POST["action"] == "edit"))
+	{
+		echo "Cannot edit inspection listings currently<br >\n";
+	}
+	else	//if (($_POST["action"] == "")
+	{
+		print_inspections($contact, $start_page, $database);
+	}
+	
+	//bcmul, bcadd,
+	//
+}
 
 closeDatabase($database);
 

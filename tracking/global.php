@@ -88,7 +88,7 @@ function quiet_login($database)
 		$results = mysql_query($query, $database);
 		if ($row = mysql_fetch_array($results))
 		{
-			$_SESSION['id'] = $row['emp_id'];
+			$_SESSION['user']['emp_id'] = $row['emp_id'];
 			//good
 		}
 		else
@@ -125,7 +125,7 @@ function login_button($database)
 		$results = mysql_query($query, $database);
 		if ($row = mysql_fetch_array($results))
 		{
-			$_SESSION['id'] = $row['id'];
+			$_SESSION['user']['emp_id'] = $row['id'];
 			echo 	"<h3>Welcome " . $row['first_name'] . " ". $row['last_name'];
 			echo	"</h3><br >\n";
 			echo	"<form action=\"" . bottomPageURL() . "\" method=\"post\">\n" .
@@ -319,7 +319,7 @@ function list_location($pre_name, $loc_num, $database)
 {
 	echo "		<option value=\"" . $loc_num . "\">" . $pre_name . "</option>\n";
 	
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND position = " . $loc_num . ";";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND position = " . $loc_num . ";";
 	$results = mysql_query($query, $database);
 	while ($row = mysql_fetch_array($results))
 	{
@@ -332,7 +332,7 @@ function list_location($pre_name, $loc_num, $database)
 
 function get_location($equ, $database)
 {
-	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND id = " . $equ . ";";
+	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $equ . ";";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{
@@ -346,7 +346,7 @@ function get_location($equ, $database)
 
 function print_location($location, $database)
 {
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['id'] . " AND id = " . $location . ";";
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
 	$results = mysql_query($query, $database);
 	if ($row = mysql_fetch_array($results))
 	{

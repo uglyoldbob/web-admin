@@ -22,7 +22,7 @@ if ($row = @mysql_fetch_array($results))
 	}
 	else
 	{
-		if ($row['inspector'] == $_SESSION['id'])
+		if ($row['inspector'] == $_SESSION['user']['emp_id'])
 		{	//good
 			$permission = true;
 		}
