@@ -17,11 +17,13 @@ $database = openDatabase();
 
 ?>
 
-<!DOCTYPE HTML SYSTEM>
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Thermal Specialists Inspections List</title>
 </head>
+
+<body>
 
 <script type="text/javascript" src="jquery-1.2.1.pack.js"></script>
 <script type="text/javascript">
@@ -120,9 +122,6 @@ $database = openDatabase();
 	}
 	
 </script>
-
-
-<body>
 
 <?php
 

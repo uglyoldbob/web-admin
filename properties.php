@@ -202,7 +202,7 @@ if ($stop == 0)
 				echo '<a href="' . rootPageURL() . '/properties.php?page=' . ($start_page-1) . '">Previous page</a>  ';
 			echo '<a href="' . rootPageURL() . '/properties.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
 			
-			echo "	<form action=\"" . rootPageURL() . "properties.php\" method=\"post\">\n" .
+			echo "	<form action=\"" . rootPageURL() . "/properties.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"new\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 				 "		<input type=\"submit\" value=\"Insert new location\"/>\n" .
@@ -243,7 +243,7 @@ if ($stop == 0)
 				echo "	<tr>\n";
 				
 				echo "		<td>";// . $row['payment_id'];
-				echo "	<form action=\"" . rootPageURL() . "inspections.php\" method=\"post\">\n" .
+				echo "	<form action=\"" . rootPageURL() . "/inspections.php\" method=\"post\">\n" .
 					 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 					 "		<input type=\"hidden\" name=\"id\" value=\"" . $row['payment_id'] . "\">\n" .
 					 "		<input type=\"submit\" value=\"Edit\"/>\n" .
@@ -360,12 +360,12 @@ function location_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comm
 	echo '	<b>Comments: </b>Comments: <input type="text" value="' . $comments . '" name="comments" id="comments" size=127 ><br >' . "\n";
 	echo '	<input type="submit" value="Update"/>' . "\n";
 	echo '</form>' . "\n";
-	echo '<form method="POST" action="' . rootPageURL() . 'payments.php">' . "\n";
+	echo '<form method="POST" action="' . rootPageURL() . '/payments.php">' . "\n";
 	echo '	<input type="hidden" name="action" value="edit">' . "\n";
 	echo '	<input type="hidden" name="id" value=' . $id . ">\n";
 	echo '	<input type="submit" value="Refresh"/>' . "\n";
 	echo '</form>' . "\n";
-	echo '<form method="POST" action="' . rootPageURL() . 'payments.php" >' . "\n";
+	echo '<form method="POST" action="' . rootPageURL() . '/payments.php" >' . "\n";
 	echo '	<input type="submit" value="Cancel"/>' . "\n";
 	echo '</form>' . "\n";
 }

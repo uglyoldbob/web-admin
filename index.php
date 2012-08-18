@@ -14,8 +14,6 @@ $database = openDatabase();
 </head>
 <body>
 
-<!--Firefox source viewer marks the second submit button on a page as a syntax error -->
-
 <?php
 
 $stop = 0;
@@ -48,6 +46,7 @@ if ($stop == 0)
 			echo '<a href="' . rootPageURL() . '/inspections.php">View all inspections</a>' . "<br >\n";
 		}
 		echo '<a href="' . rootPageURL() . '/properties.php">View where inspections have been done</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/jobs.php">View job list</a>' . "<br >\n";
 	}
 }
 

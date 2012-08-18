@@ -23,7 +23,7 @@ $database = openDatabase();
 
 ?>
 
-<!DOCTYPE HTML SYSTEM>
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Thermal Specialists Contact Listing</title>

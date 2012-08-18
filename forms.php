@@ -3,8 +3,23 @@
 if ('forms.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	die ('<h2>Direct File Access Prohibited</h2>');
 
+function job_form()
+{
+	echo "<div>\n";
+	echo '<form method="POST" action="jobs.php">' . "\n";
+	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
+	
+	echo '	<b>Customer Name: </b> <input type="text" name="customer" id="customer" size=75 ><br >' . "\n";
+	echo '	<b>Comments: </b> <input type="text" name="comments" id="comments" size=500 ><br >' . "\n";
+	
+	echo "	<input type=\"submit\" value=\"Create this job\"/>\n";
+	echo '</form>' . "\n";
+	echo "</div>\n";
+}
+
 function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comments, $category, $database)
 {
+	echo "<div>\n";
 	echo '<form method="POST" action="payments.php">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	if ($id != 0)
@@ -79,6 +94,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '	<input type="submit" value="Cancel"/>' . "\n";
 	echo '</form>' . "\n";
 	echo "TODO: Cancel button should take you to the previous page (it will not use javascript)<br>\n";
+	echo "</div>\n";
 }
 
 function contact_form($id, $last_name, $first_name, $classify, $eligible, $ssn, $mobile, $home, $other,

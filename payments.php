@@ -17,11 +17,13 @@ if (is_numeric($start_page) == FALSE)
 
 ?>
 
-<!DOCTYPE HTML SYSTEM>
+<!DOCTYPE HTML>
 <html>
 <head>
 <title>Thermal Specialists Payment Details</title>
 </head>
+
+<body>
 
 <script type="text/javascript" src="jquery-1.2.1.pack.js"></script>
 <script type="text/javascript">
@@ -126,8 +128,6 @@ if (is_numeric($start_page) == FALSE)
 	}
 	
 </script>
-
-<body>
 
 <?php
 
@@ -313,6 +313,7 @@ if ($stop == 0)
 		}
 	}
 	
+	echo "<div>\n";
 	
 	if ($contact != 0)
 	{
@@ -553,7 +554,7 @@ if ($stop == 0)
 					'">Previous page</a>  ';
 			echo '<a href="' . rootPageURL() . '/payments.php?page=' . 
 				($start_page+1) . '">Next page</a>' . "<br >\n";
-			
+
 			echo "	<form action=\"" . rootPageURL() . 
 				"/payments.php\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
@@ -566,6 +567,7 @@ if ($stop == 0)
 		}
 	}
 	
+	echo "</div>\n";
 	//bcmul, bcadd,
 	//
 }

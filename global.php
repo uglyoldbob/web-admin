@@ -180,8 +180,9 @@ function selectTimePeriod()
 		$_SESSION['period'] = "all";
 	}
 
-	echo	"<form action=\"" . rootPageURL() . "\" method=\"post\">\n" .
-		"	<select name=timeperiod>\n";
+	echo "<div>\n" .
+		 "<form action=\"" . rootPageURL() . "\" method=\"post\">\n" .
+		 "	<select name=timeperiod>\n";
 	
 	echo "		<option ";
 	if ($_SESSION['period'] == "all")
@@ -197,8 +198,10 @@ function selectTimePeriod()
 	if ($_SESSION['period'] == "2012")
 		echo "selected ";
 	echo	"value=\"2012\">2012 Tax Year</option>\n";
+	echo	"	</select>\n";
 	echo "	<input type=\"submit\" value=\"Go\">\n" .
-		"</form>\n";
+		"</form>\n" .
+		"</div>\n";
 }
 
 function getPeriodComparison($fieldname)
