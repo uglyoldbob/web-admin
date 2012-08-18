@@ -3,7 +3,6 @@ session_start();	//start php session
 header('Content-type: text/html; charset=utf-8');
 
 include("global.php");
-require("passwords.php");
 
 openDatabase();
 
@@ -19,11 +18,7 @@ openDatabase();
 
 $stop = 0;
 echo '<div>' . "\n";
-if (login_code() == 1)
-{
-	$stop = 1;
-}
-if (login_button(0) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }

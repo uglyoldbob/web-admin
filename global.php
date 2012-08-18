@@ -3,6 +3,8 @@
 if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	die ('<h2>Direct File Access Prohibited</h2>');
 
+include("passwords.php");
+
 $config = parse_ini_file("/etc/web-admin/config.ini");
 	
 function curPageURL()
@@ -83,29 +85,63 @@ function openDatabase()
 	//mysqli_set_charset()
 }
 
-function login_code()
+function login_code($quiet)
 {	//prints and executes code for the login script
+	//return value of 1 means don't do anything else
+		//the login script has closed the fence for some reason
+	global $mysql_db, $config;
+	$retv = 0;
+	
+	if (($_SERVER["HTTPS"] != "on") && ($config['require_https'] == 1))
+	{
+		echo "HTTPS is required<br >\n";
+		$retv = 1;
+	}
 	if ($_POST["action"] == "login")
 	{	//retrieve submitted username and password, if applicable
-		$username = $_POST["user"];
-		$passworder = $_POST["password"];
+		$username = $mysql_db->real_escape_string($_POST["user"]);
+		$passworder = $mysql_db->real_escape_string($_POST["password"]);
 	
 		$_SESSION['username'] = $username;
 		$_SESSION['password'] = $passworder;
 			//password is briefly stored in plain text when the user logs in
 			//it is unset or replaced with the hash in the login_button function
 	}
-	if ($_POST["action"] == "logout")
+	else if ($_POST["action"] == "logout")
 	{
 		unset($_SESSION['username']);
 		unset($_SESSION['password']);
 	}
-}
+	else if ($_POST["action"] == "change_pass")
+	{
+		$retv = 1;
+		if ($quiet == 0)
+		{
+			echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+					"	<input type=\"hidden\" name=\"action\" value=\"apply_pass\"><br>\n" .
+					"	Old password: <input type=\"password\" name=\"pass1\" ><br>\n" .
+					"	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .
+					"	New password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
+					"	<input type=\"submit\" value=\"Change my password\">\n" .
+					"</form>\n";
+		}
+	}
+	else if ($_POST["action"] == "apply_pass")
+	{
+		$oldpass = $mysql_db->real_escape_string($_POST['pass1']);
+		$newpass = $mysql_db->real_escape_string($_POST['pass2']);
+		$passmatch = $mysql_db->real_escape_string($_POST['pass3']);
+		if ($newpass == $passmatch)
+		{
+			$uid = $_SESSION['user']['emp_id'];
+			store_user_pword($uid, $oldpass, $newpass);
+		}
+		else
+		{
+			echo "<h3>Passwords do not match</h3><br >\n";
+		}
+	}
 
-function login_button($quiet)
-{
-	global $mysql_db;
-	$retv = 0;
 	if (isset($_SESSION['username']))
 	{
 		$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
@@ -113,24 +149,48 @@ function login_button($quiet)
 		if ($results)
 		{
 			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_logins'] >= $config['max_fail_logins'])
+			{	//TODO: set time period for waiting to login
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+			}
+			
 			if ($_POST["action"] == "login")
+			{
 				$_SESSION['password'] = hash_password($_SESSION['password'], $row['salt']);
+			}
 			if ($row['password'] == $_SESSION['password'])
 			{
 				$_SESSION['user'] = $row;
 				if ($quiet == 0)
 				{
+					if ($_POST["action"] == "login")
+					{
+						$query = "UPDATE contacts SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+						$mysql_db->query($query);
+						$query = "UPDATE contacts SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+						$mysql_db->query($query);
+					}
 					echo 	"<h3>Welcome ";
 					print_contact($_SESSION['user']['emp_id']);
 					echo	"</h3><br >\n";
 					echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-							"	<input type=\"hidden\" name=\"action\" value=\"logout\"><br>\n" .
+							"	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
 							"	<input type=\"submit\" value=\"Logout\">\n" .
 							"</form>\n";
+					if ($_POST["action"] != "change_pass")
+					{
+						echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+								"	<input type=\"hidden\" name=\"action\" value=\"change_pass\">\n" .
+								"	<input type=\"submit\" value=\"Change my password\">\n" .
+								"</form><br >\n";
+					}
 				}
 			}
 			else
 			{	//password fail match
+				$query = "UPDATE contacts SET fail_logins=fail_logins+1 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+				$mysql_db->query($query);
 				unset($_SESSION['username']);
 				unset($_SESSION['password']);
 				echo	"<h3>Invalid username or password</h3><br >\n" . 
@@ -171,32 +231,62 @@ function login_button($quiet)
 	return $retv;
 }
 
-function store_user_pword($uid, $pass)
+function store_user_pword($uid, $oldpass, $newpass)
 {
-	global $mysql_db;
-	$salt = generate_salt();
+	global $mysql_db, $config;
 	
-	$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
-	if ($mysql_db->query($query) == TRUE)
+	$query = "SELECT * FROM contacts WHERE emp_id = '" . $uid . "' LIMIT 1;";
+	
+	$results = $mysql_db->query($query);
+	if ($results)
 	{
-		echo "User salt stored successfully<br >\n";
+		$row = $results->fetch_array(MYSQLI_BOTH);
+		if ($row['fail_pass_change'] >= $config['max_fail_pass_changes'])
+		{
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			echo	"<h3>Invalid username or password</h3><br >\n";
+		}
+		else if ($row['password'] == hash_password($oldpass, $row['salt']))
+		{	//ok the old password matches
+			$salt = generate_salt();
+	
+			$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+			if ($mysql_db->query($query) == TRUE)
+			{
+				echo "User salt stored successfully<br >\n";
+				$hash_pass = hash_password($newpass, $salt);
+				$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+				if ($mysql_db->query($query) == TRUE)
+				{
+					echo "User password stored successfully<br >\n";
+				}
+				else
+				{
+					echo "Failed to save user password<br >\n";
+				}
+			}
+			else
+			{
+				echo "Failed to save user salt<br >\n";
+			}
+		}
+		else
+		{	//password fail match
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			$query = "UPDATE contacts SET fail_pass_change=fail_pass_change+1 WHERE emp_id = " . $uid . ";";
+			$mysql_db->query($query);
+			echo	"<h3>Invalid username or password</h3><br >\n";
+		}
 	}
 	else
-	{
-		echo "Failed to save user salt<br >\n";
+	{	//contact not found
+		unset($_SESSION['username']);
+		unset($_SESSION['password']);
+		echo	"<h3>Invalid username or password</h3><br >\n";	
 	}
-	
-	$hash_pass = hash_password($pass, $salt);
-	$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
-	if ($mysql_db->query($query) == TRUE)
-	{
-		echo "User password stored successfully<br >\n";
-	}
-	else
-	{
-		echo "Failed to save user password<br >\n";
-	}
-	
+	$results->close();
 }
 
 function selectTimePeriod()

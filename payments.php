@@ -133,11 +133,7 @@ if (is_numeric($start_page) == FALSE)
 
 $stop = 0;
 echo '<div>' . "\n";
-if (login_code() == 1)
-{
-	$stop = 1;
-}
-if (login_button(0) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }

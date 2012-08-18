@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 18, 2012 at 02:18 AM
+-- Generation Time: Aug 18, 2012 at 05:12 PM
 -- Server version: 5.5.24
 -- PHP Version: 5.3.10-1ubuntu3.2
 
@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `username` varchar(32) NOT NULL,
   `password` char(64) DEFAULT NULL,
   `salt` char(64) NOT NULL,
+  `fail_logins` int(11) NOT NULL DEFAULT '0',
+  `fail_pass_change` int(11) NOT NULL DEFAULT '0',
   `classification` varchar(25) NOT NULL DEFAULT 'Employee',
   `payment_eligible` tinyint(1) NOT NULL DEFAULT '0',
   `ssn` varchar(11) NOT NULL,
