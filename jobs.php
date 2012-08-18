@@ -17,7 +17,7 @@ $start_page = $_GET["page"];
 if (is_numeric($start_page) == FALSE)
 	$start_page = 0;
 
-$database = openDatabase();
+openDatabase();
 
 ?>
 
@@ -136,7 +136,7 @@ if (login_code() == 1)
 {
 	$stop = 1;
 }
-if (login_button($database) == 1)
+if (login_button(0) == 1)
 {
 	$stop = 1;
 }
@@ -174,7 +174,7 @@ if ($stop == 0)
 	//
 }
 
-closeDatabase($database);
+closeDatabase();
 
 ?>
 

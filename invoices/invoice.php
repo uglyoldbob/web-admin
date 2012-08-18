@@ -3,18 +3,18 @@ include("../global.php");
 
 start_my_session();
 login_code();
-$database = openDatabase();
-quiet_login($database);
+openDatabase();
+login_button(1);
 
-$filename = mysql_real_escape_string($_GET['id']);
+$filename = $mysql_db->real_escape_string($_GET['id']);
 $filesize = 5;
 
 //verify permissions first
 
 $query = "SELECT * FROM payments WHERE invoice='" . $filename . ".pdf'";
-$results = mysql_query($query, $database);
+$results = $mysql_db->query($query);
 $permission = false;
-if ($row = @mysql_fetch_array($results))
+if ($row = @$results->fetch_array(MYSQLI_BOTH))
 {
 	//permission is valid when they are logged in (probably too simple)
 	$permission = true;
@@ -85,4 +85,5 @@ else
 	exit();
 }
 
+closeDatabase();
 ?>

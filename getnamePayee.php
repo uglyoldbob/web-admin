@@ -1,9 +1,13 @@
 ﻿<?php
 
+	$config = parse_ini_file("/etc/web-admin/config.ini");
+
 	// PHP5 Implementation - uses MySQLi.
 	// mysqli('localhost', 'yourUsername', 'yourPassword', 'yourDatabase');
 		
-	$db = new mysqli('localhost', 'thermal', 't@st1ng', 'thermal');
+	$db = new mysqli($config["database_server"], 
+		$config["database_username"], $config["database_password"], 
+		$config["database_name"], $config["database_port"]);
 	
 	if(!$db) 
 	{
@@ -17,7 +21,7 @@
 		{
 			$queryString = $db->real_escape_string($_POST['queryString']);
 			
-			// Is the string length greater than 0?
+			// Is the string length greater than 0?                    
 			
 			if(strlen($queryString) >0) 
 			{

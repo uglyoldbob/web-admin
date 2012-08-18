@@ -16,7 +16,7 @@ $details = $_GET["details"];
 if (is_numeric($details) == FALSE)
 	$details = 0;
 
-$database = openDatabase();
+openDatabase();
 ?>
 
 <!DOCTYPE HTML SYSTEM>
@@ -134,7 +134,7 @@ if (login_code() == 1)
 {
 	$stop = 1;
 }
-if (login_button($database) == 1)
+if (login_button(0) == 1)
 {
 	$stop = 1;
 }
@@ -163,7 +163,7 @@ if ($stop == 0)
 			$query = "SELECT * FROM properties WHERE id = " .$details . " LIMIT 1";
 		}
 			
-		$payment_results = mysql_query($query, $database);
+		$payment_results = $mysql_db->query($query);
 		
 		if ($details == 0)
 		{
@@ -177,7 +177,7 @@ if ($stop == 0)
 			echo "		<th>Description</th>\n";
 			echo "	</tr>\n";
 				
-			while($row = mysql_fetch_array($payment_results))
+			while($row = $payment_results->fetch_array(MYSQLI_BOTH))
 			{
 				echo "	<tr>\n";
 				
@@ -212,7 +212,7 @@ if ($stop == 0)
 		{	//detailed information for a single property
 			//lists all property information and includes history of all inspections done
 			echo '<a href="' . rootPageURL() . '/properties.php">Return to all properties</a>' . "<br >\n";
-			$row = mysql_fetch_array($payment_results);
+			$row = $payment_results->fetch_array(MYSQLI_BOTH);
 			echo "Address: " . "<br >\n" . $row['address'] . "<br >\n" .
 				 $row['city'] . ", " . $row['state'] . " " . $row['zip'] . "<br >\n" .
 				 $row['description'];
@@ -222,7 +222,7 @@ if ($stop == 0)
 			{
 				$query = $query . " AND" . getPeriodComparison("datetime");
 			}
-			$payment_results = mysql_query($query, $database);
+			$payment_results = $mysqldb->mysql_query($query);
 	
 			//also located in inspections.php (move to a function later)
 			//displaying the location should be optional
@@ -238,7 +238,7 @@ if ($stop == 0)
 			echo "		<th>Comments</th>\n";
 			echo "	</tr>\n";
 			
-			while($row = mysql_fetch_array($payment_results))
+			while($row = $payment_results->fetch_array(MYSQLI_BOTH))
 			{
 				echo "	<tr>\n";
 				
@@ -251,14 +251,14 @@ if ($stop == 0)
 				echo "</td>\n";
 				
 	//			echo "		<td>";
-	//			print_prop($row['prop_id'],$database);
+	//			print_prop($row['prop_id']);
 	//			echo "</td>\n";
 				
 				echo "		<td>" . $row['type'] . "</td>\n";
 				
 				echo "		<td>";
 				echo "<a href=\"" . rootPageURL() .  "/contacts.php?contact=" . $row['inspector'] . "\"> ";
-				print_contact($row['inspector'], $database);
+				print_contact($row['inspector']);
 				echo "</a>";
 				echo "</td>\n";
 				
@@ -267,7 +267,7 @@ if ($stop == 0)
 				
 				echo "		<td>";
 				echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $row['paid_by'] . "\"> ";
-				print_contact($row['paid_by'], $database);
+				print_contact($row['paid_by']);
 				echo "</a>";
 				echo "</td>\n";
 				
@@ -312,9 +312,9 @@ if ($stop == 0)
 	}
 }
 
-closeDatabase($database);
+closeDatabase();
 
-function location_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comments, $database)
+function location_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comments)
 {
 	echo '<form method="POST" action="' . rootPageURL() . '/payments.php">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
@@ -323,7 +323,7 @@ function location_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comm
 	echo '<b>Payment by: </b>Contact Name: <input type="text" autocomplete="off" value="';
 	if ($payee_id != 0)
 	{
-		print_contact($payee_id, $database);
+		print_contact($payee_id);
 	}
 	else
 	{
@@ -340,7 +340,7 @@ function location_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comm
 	echo '	<b>Payment to: </b>Contact Name: <input type="text" autocomplete="off" value="';
 	if ($payer_id != 0)
 	{
-		print_contact($payer_id, $database);
+		print_contact($payer_id);
 	}
 	else
 	{

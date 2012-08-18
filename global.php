@@ -2,6 +2,8 @@
 
 if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	die ('<h2>Direct File Access Prohibited</h2>');
+
+$config = parse_ini_file("/etc/web-admin/config.ini");
 	
 function curPageURL()
 {
@@ -22,17 +24,18 @@ function curPageURL()
 
 function rootPageURL()
 {
+	global $config;
 	$pageURL = 'http';
 	if ($_SERVER["HTTPS"] == "on") 
 		{$pageURL .= "s";}
 	$pageURL .= "://";
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
 	{
-		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"]."/webtest";
+		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"]. $config["location"];
 	}
 	else
 	{
-		$pageURL .= $_SERVER["SERVER_NAME"]."/webtest";
+		$pageURL .= $_SERVER["SERVER_NAME"].$config["location"];
 	}
 	
 	return $pageURL;
@@ -63,6 +66,23 @@ function start_my_session()
 
 }
 
+//open database connection
+function openDatabase()
+{
+	global $mysql_db, $config;
+	$mysql_db = new mysqli($config["database_server"], 
+		$config["database_username"], $config["database_password"], 
+		$config["database_name"], $config["database_port"]);
+	if ($mysql_db->connect_errno)
+	{
+		echo "Failed to connect to MySQL: (" . $mysq_db->connect_errno . ") " .
+			$mysq_db->connect_error . "<br >\n";
+		die("Database connection failed");
+	}
+	//TODO: implement calling this function
+	//mysqli_set_charset()
+}
+
 function login_code()
 {	//prints and executes code for the login script
 	if ($_POST["action"] == "login")
@@ -72,6 +92,8 @@ function login_code()
 	
 		$_SESSION['username'] = $username;
 		$_SESSION['password'] = $passworder;
+			//password is briefly stored in plain text when the user logs in
+			//it is unset or replaced with the hash in the login_button function
 	}
 	if ($_POST["action"] == "logout")
 	{
@@ -80,23 +102,52 @@ function login_code()
 	}
 }
 
-function quiet_login($database)
+function login_button($quiet)
 {
+	global $mysql_db;
 	$retv = 0;
 	if (isset($_SESSION['username']))
 	{
 		$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
-		$results = mysql_query($query, $database);
-		if ($row = mysql_fetch_array($results))
+		$results = $mysql_db->query($query);
+		if ($results)
 		{
-			$_SESSION['user']['emp_id'] = $row['emp_id'];
-			//good
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($_POST["action"] == "login")
+				$_SESSION['password'] = hash_password($_SESSION['password'], $row['salt']);
+			if ($row['password'] == $_SESSION['password'])
+			{
+				$_SESSION['user'] = $row;
+				if ($quiet == 0)
+				{
+					echo 	"<h3>Welcome ";
+					print_contact($_SESSION['user']['emp_id']);
+					echo	"</h3><br >\n";
+					echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+							"	<input type=\"hidden\" name=\"action\" value=\"logout\"><br>\n" .
+							"	<input type=\"submit\" value=\"Logout\">\n" .
+							"</form>\n";
+				}
+			}
+			else
+			{	//password fail match
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				echo	"<h3>Invalid username or password</h3><br >\n" . 
+					"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
+					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
+					"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
+					"	<input type=\"submit\" value=\"Login\">\n" .
+					"</form>\n";
+				$retv = 1;
+			}
 		}
 		else
-		{	//force logout and print error message
+		{	//contact not found
 			unset($_SESSION['username']);
 			unset($_SESSION['password']);
-			echo	"<h3>Unregistered username</h3><br >\n" . 
+			echo	"<h3>Invalid username or password</h3><br >\n" . 
 					"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
@@ -105,6 +156,7 @@ function quiet_login($database)
 					"</form>\n";
 			$retv = 1;	
 		}
+		$results->close();
 	}
 	else
 	{
@@ -119,49 +171,32 @@ function quiet_login($database)
 	return $retv;
 }
 
-function login_button($database)
-{	
-	$retv = 0;
-	if (isset($_SESSION['username']))
+function store_user_pword($uid, $pass)
+{
+	global $mysql_db;
+	$salt = generate_salt();
+	
+	$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+	if ($mysql_db->query($query) == TRUE)
 	{
-		$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
-		$results = mysql_query($query, $database);
-		if ($row = mysql_fetch_array($results))
-		{
-			$_SESSION['user'] = $row;
-			echo 	"<h3>Welcome ";
-			print_contact($_SESSION['user']['emp_id'], $database);
-			echo	"</h3><br >\n";
-			echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-					"	<input type=\"hidden\" name=\"action\" value=\"logout\"><br>\n" .
-					"	<input type=\"submit\" value=\"Logout\">\n" .
-					"</form>\n";
-		}
-		else
-		{	//force logout and print error message
-			unset($_SESSION['username']);
-			unset($_SESSION['password']);
-			echo	"<h3>Unregistered username</h3><br >\n" . 
-					"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
-					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-					"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Login\">\n" .
-					"</form>\n";
-			$retv = 1;
-		}
+		echo "User salt stored successfully<br >\n";
 	}
 	else
 	{
-		echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-				"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
-				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-				"	<input type=\"submit\" value=\"Login\">\n" .
-				"</form>\n";
-		$retv = 1;
+		echo "Failed to save user salt<br >\n";
 	}
-	return $retv;
+	
+	$hash_pass = hash_password($pass, $salt);
+	$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+	if ($mysql_db->query($query) == TRUE)
+	{
+		echo "User password stored successfully<br >\n";
+	}
+	else
+	{
+		echo "Failed to save user password<br >\n";
+	}
+	
 }
 
 function selectTimePeriod()
@@ -222,108 +257,28 @@ function getPeriodComparison($fieldname)
 	}
 }
 
-//open database connection
-//be sure to either change account information here or something
-function openDatabase()
+//close the database connection
+function closeDataBase()
 {
-	if (isset($_SESSION['username']))
-	{
-		$username = $_SESSION['username'];
-		$passworder = $_SESSION['password'];
-	}
-	else
-	{
-		$username = $_POST["user"];
-		$passworder = $_POST["password"];
-	
-		$_SESSION['username'] = $username;
-		$_SESSION['password'] = $passworder;
-	}
-	
-	if ($username == "")
-	{
-		$username = "anon";
-		$passworder = "";
-	}
-	
-	$dbase = @mysql_connect("localhost", $username, $passworder);
-	if (!$dbase)
-	{
-		unset($_SESSION['username']);
-		unset($_SESSION['password']);
-		die ('Invalid login credentials');
-	}
-	mysql_select_db("webtest", $dbase);
-	return $dbase;
+	global $mysql_db;
+	$mysql_db->close();
 }
 
-function closeDataBase($dbase)
-{
-	//close the database connection
-	mysql_close($dbase);
-}
-
-//permission flags
-	//0 = access to all contacts when true
-	//1 = public contact when true
-	//2 = access all reports
-function checkPermission($database, $element)
-{
-	$query = "SELECT permissions FROM contacts WHERE emp_id=" . $_SESSION['user']['emp_id'];
-	$results = mysql_query($query, $database);
-	if($row = @mysql_fetch_array($results))
-	{
-		$perms = str_split($row['permissions']);
-		if ($perms[$element] == '1')
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{	//definitely return false
-		return false;
-	}
-}
-	
-function checkContactPermission($contact, $database)
-{	//determines if contact access is unlimited (returns true)
-	
-	$query = "SELECT permissions FROM contacts WHERE emp_id=" . $contact;
-	$results = mysql_query($query, $database);
-	if($row = mysql_fetch_array($results))
-	{
-		$perms = str_split($row['permissions']);
-		if ($perms[$flag_id] == '1')
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-	else
-	{	//definitely return false
-		return false;
-	}
-}
-
-function print_contact($contact_id, $database)
+function print_contact($contact_id)
 {	//outputs the contact name
+	global $mysql_db;
 	$query = "SELECT * FROM contacts WHERE emp_id = " . $contact_id;
-	$contact_results = mysql_query($query, $database);
 	
-	if ($row = mysql_fetch_array($contact_results))
+	$contact_results = $mysql_db->query($query);
+	
+	if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
 	{
 		echo $row['last_name'];
 		if ($row['first_name'] != "")
 		{
 			echo ", " . $row['first_name'];
 		}
+		$contact_results->free();
 	}
 	else
 	{
@@ -333,10 +288,11 @@ function print_contact($contact_id, $database)
 
 function print_prop($prop_id, $database)
 {	//prints property information
+	global $mysql_db;
 	$query = "SELECT * FROM properties WHERE id = " . $prop_id;
-	$contact_results = mysql_query($query, $database);
+	$contact_results = $mysql_db->query($query);
 	
-	if ($row = mysql_fetch_array($contact_results))
+	if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
 	{
 		echo $row['address'];
 		if ($row['city'] != "")
@@ -356,6 +312,7 @@ function print_prop($prop_id, $database)
 		{
 			echo " " . $row['description'];
 		}
+		$contact_results->free();
 	}
 	else
 	{
@@ -366,6 +323,7 @@ function print_prop($prop_id, $database)
 
 function get_category_sum($contact, $category, $database)
 {
+	global $mysql_db;
 	$query = "SELECT * FROM payments WHERE (paid_by = " . $contact .
 		" OR pay_to = " . $contact . ")" .
 		" AND `category` = '" .
@@ -375,13 +333,13 @@ function get_category_sum($contact, $category, $database)
 		$query = $query . " AND" . getPeriodComparison("date_earned");
 	}
 	$query = $query . " ORDER BY date_paid DESC ";
-	$payment_results = mysql_query($query, $database);
+	$payment_results = $mysql_db->query($query);
 
 	$assets = 0.0;
 	$liable = 0.0;
 	$o_assets = 0.0;
 	$o_liable = 0.0;	
-	while($row = mysql_fetch_array($payment_results))
+	while($row = $payment_results->fetch_array(MYSQLI_BOTH))
 	{
 		if ($row['date_paid'] != "0000-00-00")
 		{
@@ -405,9 +363,8 @@ function get_category_sum($contact, $category, $database)
 				$o_liable += $row['amount_earned'];
 			}
 		}
-
-
 	}
+	$payment_results->free();
 	$value = "$" . $assets . " [$" . $o_assets . "], " .
 		"($" . $liable . ") [($" . $o_liable . ")]";
 //	echo "Assets: $" . $assets . "<br>\n";

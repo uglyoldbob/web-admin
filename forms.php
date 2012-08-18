@@ -17,8 +17,9 @@ function job_form()
 	echo "</div>\n";
 }
 
-function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comments, $category, $database)
+function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comments, $category)
 {
+	global $mysql_db;
 	echo "<div>\n";
 	echo '<form method="POST" action="payments.php">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
@@ -27,7 +28,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '<b>Payment by: </b>Contact Name: <input type="text" autocomplete="off" value="';
 	if ($payee_id != 0)
 	{
-		print_contact($payee_id, $database);
+		print_contact($payee_id);
 	}
 	else
 	{
@@ -44,7 +45,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '	<b>Payment to: </b>Contact Name: <input type="text" autocomplete="off" value="';
 	if ($payer_id != 0)
 	{
-		print_contact($payer_id, $database);
+		print_contact($payer_id);
 	}
 	else
 	{
@@ -66,8 +67,8 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 
 	$query = "SELECT COUNT( *  ) AS `Rows` , `category`" .
 		"FROM `payments` GROUP BY `category` ORDER BY `category`";
-	$categories = mysql_query($query, $database);
-	while($row = mysql_fetch_array($categories))
+	$categories = $mysql_db->query($query);
+	while($row = $categories->fetch_array(MYSQLI_BOTH))
 	{
 		if ($category == $row['category'])
 		{
@@ -303,9 +304,10 @@ function contact_form($id, $last_name, $first_name, $classify, $eligible, $ssn, 
 	}
 }
 
-function print_inspections($contact, $start_page, $database)
+function print_inspections($contact, $start_page)
 {	//prints inspections done by a specific contact id number
 		//check for filtering 
+	global $mysql_db;
 	if ($contact == 0)
 	{
 		$query = "SELECT * FROM inspections";
@@ -318,7 +320,7 @@ function print_inspections($contact, $start_page, $database)
 	else
 	{
 		echo "<h3>Inspections done by ";
-		print_contact($contact, $database);
+		print_contact($contact);
 		echo "</h3><br >\n";
 		echo '<a href="' . rootPageURL() . '/inspections.php">Go to all inspections</a>' . "<br >\n";
 		$query = "SELECT * FROM inspections WHERE inspector=" . $contact;
@@ -329,7 +331,7 @@ function print_inspections($contact, $start_page, $database)
 		$query = $query . " ORDER BY id DESC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
 	}
 			
-	$payment_results = mysql_query($query, $database);
+	$payment_results = $mysql_db->_query($query);
 	
 	echo "<table border=\"1\">\n";
 	echo "	<tr>\n";
@@ -344,7 +346,7 @@ function print_inspections($contact, $start_page, $database)
 	echo "		<th>Report</th>\n";
 	echo "	</tr>\n";
 	
-	while($row = mysql_fetch_array($payment_results))
+	while($row = $payment_results->fetch_array(MYSQLI_BOTH))
 	{
 		echo "	<tr>\n";
 		
@@ -357,14 +359,14 @@ function print_inspections($contact, $start_page, $database)
 		echo "</td>\n";
 		
 		echo "		<td>";
-		print_prop($row['prop_id'],$database);
+		print_prop($row['prop_id']);
 		echo "</td>\n";
 		
 		echo "		<td>" . $row['type'] . "</td>\n";
 		
 		echo "		<td>";
 		echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $row['inspector'] . "\"> ";
-		print_contact($row['inspector'], $database);
+		print_contact($row['inspector']);
 		echo "</a>";
 		echo "</td>\n";
 		
@@ -373,7 +375,7 @@ function print_inspections($contact, $start_page, $database)
 		
 		echo "		<td>";
 		echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $row['paid_by'] . "\"> ";
-		print_contact($row['paid_by'], $database);
+		print_contact($row['paid_by']);
 		echo "</a>";
 		echo "</td>\n";
 		

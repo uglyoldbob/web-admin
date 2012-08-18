@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 16, 2012 at 03:01 AM
+-- Generation Time: Aug 18, 2012 at 02:18 AM
 -- Server version: 5.5.24
 -- PHP Version: 5.3.10-1ubuntu3.2
 
@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `middle_name` varchar(255) NOT NULL,
   `first_name` varchar(255) NOT NULL,
   `username` varchar(32) NOT NULL,
-  `password` blob,
+  `password` char(64) DEFAULT NULL,
+  `salt` char(64) NOT NULL,
   `classification` varchar(25) NOT NULL DEFAULT 'Employee',
   `payment_eligible` tinyint(1) NOT NULL DEFAULT '0',
   `ssn` varchar(11) NOT NULL,
@@ -72,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `cost_estimations` (
   `employees` int(11) NOT NULL,
   `notes` varchar(255) NOT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=13 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -134,6 +135,40 @@ CREATE TABLE IF NOT EXISTS `inspections` (
 
 CREATE TABLE IF NOT EXISTS `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cust_billing` int(11) NOT NULL,
+  `cust_shipping` int(11) NOT NULL,
+  `job_name` varchar(255) NOT NULL,
+  `phone1` varchar(50) NOT NULL,
+  `phone2` varchar(50) NOT NULL,
+  `phone3` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `job_status`
+--
+
+CREATE TABLE IF NOT EXISTS `job_status` (
+  `id` int(11) NOT NULL,
+  `datetime` datetime NOT NULL,
+  `what_happened` varchar(255) NOT NULL,
+  `new_status` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `job_tasks`
+--
+
+CREATE TABLE IF NOT EXISTS `job_tasks` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `datetime` datetime NOT NULL,
+  `job` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -170,7 +205,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `inspection` int(11) DEFAULT NULL,
   `invoice` varchar(255) DEFAULT NULL,
   UNIQUE KEY `payment_id` (`payment_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=82 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -213,19 +248,6 @@ CREATE TABLE IF NOT EXISTS `status_codes` (
   `Description` varchar(255) NOT NULL,
   UNIQUE KEY `code` (`code`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `tasks`
---
-
-CREATE TABLE IF NOT EXISTS `tasks` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `job` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

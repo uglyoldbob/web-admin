@@ -6,7 +6,7 @@ header('Content-type: text/html; charset=utf-8');
 require("forms.php");
 
 $contact = $_GET["contact"];
-$database = openDatabase();
+openDatabase();
 
 if (is_numeric($contact) == FALSE)
 	$contact = 0;
@@ -137,7 +137,7 @@ if (login_code() == 1)
 {
 	$stop = 1;
 }
-if (login_button($database) == 1)
+if (login_button(0) == 1)
 {
 	$stop = 1;
 }
@@ -178,10 +178,10 @@ if ($stop == 0)
 		}
 		
 		
-		$date_earned = mysql_real_escape_string($_POST["date_earned"]);
-		$date_paid = mysql_real_escape_string($_POST["date_paid"]);
-		$comments = mysql_real_escape_string($_POST["comments"]);
-		$categori = mysql_real_escape_string($_POST["categori"]); 
+		$date_earned = $mysql_db->real_escape_string($_POST["date_earned"]);
+		$date_paid = $mysql_db->real_escape_string($_POST["date_paid"]);
+		$comments = $mysql_db->real_escape_string($_POST["comments"]);
+		$categori = $mysql_db->real_escape_string($_POST["categori"]); 
 			//mis-spelling allows listing of all categories after
 			//a payment is created or updated
 		if ($error == 1)
@@ -201,11 +201,12 @@ if ($stop == 0)
 					"'" . $date_earned . "', '" . $comments .
 					"', '" . $categori . "', '" . $date_paid .
 					"');";
-				if (!mysql_query($query, $database))
+				
+				if ($mysql_db->query($query) != TRUE)
 				{
-					echo "Error: " . mysql_error() . "<br >\n";
+					echo "Error: " . $mysql_db->error() . "<br >\n";
 					exit(1);
-					//die('Error: ' . mysql_error());
+					//die('Error: ' . $mysql_db->error());
 				}
 				echo "Payment entry created.<br >\n";
 			}
@@ -219,11 +220,11 @@ if ($stop == 0)
 					'\', `category` = \'' . $categori .
 					'\', `date_paid` = \'' . $date_paid . '\'' . 
 					' WHERE `payment_id` = ' . $pay_id . ';';
-				if (!mysql_query($query, $database))
+				if ($mysql_db->query($query) != TRUE)
 				{
-					echo "Error: " . mysql_error() . "<br >\n";
+					echo "Error: " . $mysql_db->error() . "<br >\n";
 					exit(1);
-					//die('Error: ' . mysql_error());
+					//die('Error: ' . $mysql_db->error());
 				}
 				echo "Payment entry updated.<br >\n";
 			}
@@ -281,20 +282,19 @@ if ($stop == 0)
 			{
 				$payer = 0;
 			}
-			payment_form(0, $payee, $payer, '', '', '', '', '', $database);
+			payment_form(0, $payee, $payer, '', '', '', '', '');
 		}
 		else
 		{
-			$payment_results = mysql_query($query, $database);
+			$payment_results = $mysql_db->query($query);
 				
-			if($row = mysql_fetch_array($payment_results))
+			if($row = $payment_results->fetch_array(MYSQLI_BOTH))
 			{	//function payment_form($id, $payee_id, $payer_id, 
 				//$amount, $earned, $paid, $comments, $category)
 				payment_form($row['payment_id'], $row['paid_by'],
 					$row['pay_to'], $row['amount_earned'],
 					$row['date_earned'], $row['date_paid'], 
-					$row['comments'], $row['category'], 
-					$database);
+					$row['comments'], $row['category']);
 			}
 			else
 			{
@@ -318,7 +318,7 @@ if ($stop == 0)
 	if ($contact != 0)
 	{
 		echo "<h3>Payment Details for: ";
-		print_contact($contact, $database);
+		print_contact($contact);
 		echo "</h3>\n<a href=\"" . rootPageURL() . "/payments.php\"> " . 
 			" Back to all payments</a><br >\n\n";
 		
@@ -327,7 +327,7 @@ if ($stop == 0)
 			"	<input type=\"hidden\" name=\"action\"" . 
 			" value=\"view\">\n" .
 			"	<input type=\"submit\" value=\"View  ";
-		print_contact($contact, $database);
+		print_contact($contact);
 		echo "'s Information\"/>\n" . "</form>\n";
 	
 		$query = "SELECT COUNT( *  ) AS `Rows` , `category`" .
@@ -338,8 +338,8 @@ if ($stop == 0)
 			$query = $query . " AND" . getPeriodComparison("date_earned");
 		}
 		$query = $query . " GROUP BY `category` ORDER BY `category`";
-		$categories = mysql_query($query, $database);
-		while($row = mysql_fetch_array($categories))
+		$categories = $mysql_db->query($query);
+		while($row = $categories->fetch_array(MYSQLI_BOTH))
 		{
 			if ($row['Rows'] != 0)
 			{
@@ -351,14 +351,13 @@ if ($stop == 0)
 				' value="' . $row['category'] . '">' . "\n" .
 				'	<input type="submit" value=' . 
 				'"View Category: ' . $row['category']  . " " .
-				get_category_sum($contact, 
-					$row['category'], $database) .
+				get_category_sum($contact, $row['category']) .
 				'"/>' . "\n</form>\n";
 			}
 		}
 		$balance = 0;
 		$due_balance = 0;
-		$category = mysql_real_escape_string($_GET["category"]);
+		$category = $mysql_db->real_escape_string($_GET["category"]);
 	}
 	
 	if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
@@ -416,14 +415,14 @@ if ($stop == 0)
 			$query = $query . " ORDER BY date_paid DESC LIMIT " . 
 				($start_page*30) . ", " . ($start_page*30+30);
 		}
-		$payment_results = mysql_query($query, $database);
+		$payment_results = $mysql_db->query($query);
 	
 		$assets = 0.0;
 		$liable = 0.0;
 		$o_assets = 0.0;
 		$o_liable = 0.0;	
 	
-		while($row = mysql_fetch_array($payment_results))
+		while($row = $payment_results->fetch_array(MYSQLI_BOTH))
 		{
 			echo "	<tr>\n";
 			
@@ -442,14 +441,14 @@ if ($stop == 0)
 			echo "		<td>";
 			echo "<a href=\"" . rootPageURL() . 
 				"/payments.php?contact=" . $row['pay_to'] . "\"> ";
-			print_contact($row['pay_to'], $database);
+			print_contact($row['pay_to']);
 			echo "</a>";
 			echo "</td>\n";
 			
 			echo "		<td>";
 			echo "<a href=\"" . rootPageURL() . 
 				"/payments.php?contact=" . $row['paid_by'] . "\"> ";
-			print_contact($row['paid_by'], $database);
+			print_contact($row['paid_by']);
 			echo "</a>";
 			echo "</td>\n";
 			
@@ -572,7 +571,7 @@ if ($stop == 0)
 	//
 }
 
-closeDatabase($database);
+closeDatabase();
 
 ?>
 

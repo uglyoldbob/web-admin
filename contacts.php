@@ -18,7 +18,7 @@ if (is_numeric($contact) == FALSE)
 	$contact = 0;
 }
 
-$database = openDatabase();
+openDatabase();
 //TODO : create a header.php
 
 ?>
@@ -38,7 +38,7 @@ if (login_code() == 1)
 {
 	$stop = 1;
 }
-if (login_button($database) == 1)
+if (login_button(0) == 1)
 {
 	$stop = 1;
 }
@@ -55,26 +55,26 @@ if ($stop == 0)
 		$id_num = $contact;
 		if (is_numeric($id_num) == FALSE)
 			$id_num = 0;
-		$last_name = mysql_real_escape_string($_POST["last_name"]);
-		$first_name = mysql_real_escape_string($_POST["first_name"]);
-		$classification = mysql_real_escape_string($_POST["classify"]);
+		$last_name = $mysql_db->real_escape_string($_POST["last_name"]);
+		$first_name = $mysql_db->real_escape_string($_POST["first_name"]);
+		$classification = $mysql_db->real_escape_string($_POST["classify"]);
 		$eligibility = $_POST["eligible"];
 		if (is_numeric($eligibility) == FALSE)
 			$eligibility = 0;
-		$ssn = mysql_real_escape_string($_POST["ssn"]);
-		$mobile = mysql_real_escape_string($_POST["mobile"]);
-		$home = mysql_real_escape_string($_POST["home"]);
-		$other = mysql_real_escape_string($_POST["other"]);
-		$website = mysql_real_escape_string($_POST["website"]);
-		$email = mysql_real_escape_string($_POST["email"]);
-		$street = mysql_real_escape_string($_POST["street"]);
-		$city = mysql_real_escape_string($_POST["city"]);
-		$state = mysql_real_escape_string($_POST["state"]);
-		$zip = mysql_real_escape_string($_POST["zip"]);
+		$ssn = $mysql_db->real_escape_string($_POST["ssn"]);
+		$mobile = $mysql_db->real_escape_string($_POST["mobile"]);
+		$home = $mysql_db->real_escape_string($_POST["home"]);
+		$other = $mysql_db->real_escape_string($_POST["other"]);
+		$website = $mysql_db->real_escape_string($_POST["website"]);
+		$email = $mysql_db->real_escape_string($_POST["email"]);
+		$street = $mysql_db->real_escape_string($_POST["street"]);
+		$city = $mysql_db->real_escape_string($_POST["city"]);
+		$state = $mysql_db->real_escape_string($_POST["state"]);
+		$zip = $mysql_db->real_escape_string($_POST["zip"]);
 	
 		if ($id_num != 0)
 		{
-			if (checkContactPermission($id_num, $database))
+			if (checkContactPermission($id_num))
 			{	//has unlimited access to the contact
 				$query = "REPLACE INTO `contacts` " .
 						 "(emp_id, last_name, first_name, classification, payment_eligible, " .
@@ -159,11 +159,11 @@ if ($stop == 0)
 					 "'" . $zip . "'" .
 					 ");";
 		}
-		if (!mysql_query($query, $database))
+		if (!$mysql_db->query($query))
 		{
-			echo "Error: " . mysql_error() . "<br >\n";
+			echo "Error: " . $mysql_db->error() . "<br >\n";
 			echo $query . "<br >\n";
-			//die('Error: ' . mysql_error());
+			//die('Error: ' . $mysql_db->error());
 		}
 		else
 		{
@@ -181,8 +181,8 @@ if ($stop == 0)
 		if ($value != 0)
 		{	//display existing contact
 			$query = "SELECT * FROM contacts WHERE emp_id = " . $value;
-			$results = mysql_query($query, $database);
-			if($row = mysql_fetch_array($results))
+			$results = $mysql_db->query($query);
+			if($row = $results->fetch_array(MYSQLI_BOTH))
 			{
 				if ($_POST["action"] != "edit")
 				{	//viewing profile
@@ -193,7 +193,7 @@ if ($stop == 0)
 					echo "<h3>Editing Details for: ";
 				}
 	
-				print_contact($value, $database);
+				print_contact($value);
 				echo "</h3>\n";
 				echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $value . "\">View payments</a><br>\n";
 				echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $value . "\">View inspections</a><br>\n";
@@ -215,7 +215,7 @@ if ($stop == 0)
 	
 				if ($_POST["action"] != "edit")
 				{	//viewing profile
-					print_contact($contact, $database);
+					print_contact($contact);
 					if ($row['website'] != "")
 					{
 						echo " : Visit their website by ";
@@ -294,7 +294,7 @@ if ($stop == 0)
 		{
 			$query = "SELECT * FROM contacts ORDER BY last_name ASC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
 		}
-		$contact_results = mysql_query($query, $database);
+		$contact_results = $mysql_db->query($query);
 	
 		echo "<table border=\"1\">\n";
 		echo "	<tr>\n";
@@ -307,7 +307,7 @@ if ($stop == 0)
 		echo "		<th>Can be paid?</th>\n";
 		echo "	</tr>\n";
 	
-		while($row = mysql_fetch_array($contact_results))
+		while($row = $contact_results->fetch_array(MYSQLI_BOTH))
 		{
 			echo "	<tr>\n";
 	
@@ -357,7 +357,7 @@ if ($stop == 0)
 	}
 }
 
-closeDatabase($database);
+closeDatabase();
 
 ?>
 

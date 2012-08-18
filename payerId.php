@@ -1,8 +1,13 @@
 ﻿<?php
+
+	$config = parse_ini_file("/etc/web-admin/config.ini");
+
 	// PHP5 Implementation - uses MySQLi.
 	// mysqli('localhost', 'yourUsername', 'yourPassword', 'yourDatabase');
 		
-	$db = new mysqli('localhost', 'thermal', 'y5E2hSLgR8m9', 'thermal');
+	$db = new mysqli($config["database_server"], 
+		$config["database_username"], $config["database_password"], 
+		$config["database_name"], $config["database_port"]);
 	
 	if(!$db) 
 	{

@@ -3,8 +3,9 @@ session_start();	//start php session
 header('Content-type: text/html; charset=utf-8');
 
 include("global.php");
+require("passwords.php");
 
-$database = openDatabase();
+openDatabase();
 
 ?>
 <!DOCTYPE HTML>
@@ -22,7 +23,7 @@ if (login_code() == 1)
 {
 	$stop = 1;
 }
-if (login_button($database) == 1)
+if (login_button(0) == 1)
 {
 	$stop = 1;
 }
@@ -50,7 +51,7 @@ if ($stop == 0)
 	}
 }
 
-closeDatabase($database);
+closeDatabase();
 
 ?>
 
