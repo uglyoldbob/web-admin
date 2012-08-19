@@ -9,8 +9,10 @@ function job_form()
 	echo '<form method="POST" action="jobs.php">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	
-	echo '	<b>Customer Name: </b> <input type="text" name="customer" id="customer" size=75 ><br >' . "\n";
-	echo '	<b>Comments: </b> <input type="text" name="comments" id="comments" size=500 ><br >' . "\n";
+	echo '	<b>Customer Name: </b> <input type="text" name="customer1" id="customer1" size=75 ><br >' . "\n";
+	
+	echo '	<b>Deliver to: </b> <input type="text" name="customer2" id="customer2" size=75 ><br >' . "\n";
+	echo '	<b>Comments: </b><br >' . "\n" . '<textarea name="comments" id="comments" rows=4 cols=75 ></textarea><br >' . "\n";
 	
 	echo "	<input type=\"submit\" value=\"Create this job\"/>\n";
 	echo '</form>' . "\n";
@@ -25,7 +27,10 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	if ($id != 0)
 		echo '<b>Payment ID: </b>Id number: <input type="text" value="' . $id . '"name=pay_id readonly=\"readonly\">' . "<br >\n";
-	echo '<b>Payment by: </b>Contact Name: <input type="text" autocomplete="off" value="';
+	echo '<b>Payment by: </b>';
+	echo "<div>\n";
+	echo 'Contact Name:' . "\n";
+	echo '<input type="text" autocomplete="off" value="';
 	if ($payee_id != 0)
 	{
 		print_contact($payee_id);
@@ -34,15 +39,26 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	{
 		$payee_id = '';
 	}
-	echo '" name="name_payer" id="name_payer" onkeyup="lookupPayer(this.value);" onblur="fillPayer();" >' . "\n";
-	echo '	 Contact ID #: ' . "\n";
-	echo '	 <input type="text" value="' . $payee_id . '" name="id_payer" id="id_payer" onkeyup="updateNamePayer(this.value);" onblur="fillPayer();" ><br >' . "\n";
+	echo '" name="name_payer" id="name_payer" 
+		onkeyup="lookupLastName(this.value, \'fillNames\', 
+			$(\'#payer_suggestions\'), 
+			$(\'#payer_autoSuggestionsList\'),
+			&quot;$(\'#name_payer\')&quot;,
+			&quot;$(\'#id_payer\')&quot;,
+			&quot;$(\'#payer_suggestions\')&quot;);"
+		 >' . "\n";
+		 //onblur="$(\'#payer_suggestions\').hide().delay(500);"
+		 //TODO when the onblur is added, autocomplete fails to insert data
 	echo '	<div id="payer_suggestions" style="display: none;">' . "\n";
 	echo '		<div id="payer_autoSuggestionsList">' . "\n";
 	echo '			&nbsp;' . "\n";
 	echo '		</div>' . "\n";
 	echo '	</div><br >' . "\n";
-	echo '	<b>Payment to: </b>Contact Name: <input type="text" autocomplete="off" value="';
+	echo "</div>\n";
+	echo '	 <input type="hidden" value="' . $payee_id . '" name="id_payer" id="id_payer">' . "\n";
+	echo '	<b>Payment to: </b>' . "\n";
+	echo "<div>\n";
+	echo 'Contact Name: <input type="text" autocomplete="off" value="';
 	if ($payer_id != 0)
 	{
 		print_contact($payer_id);
@@ -51,14 +67,24 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	{
 		$payer_id = '';
 	}
-	echo '" name="name_payee" id="name_payee"  onkeyup="lookupPayee(this.value);" onblur="fillPayee();" >' . "\n";
-	echo '	 Contact ID #: ' . "\n";
-	echo '	 <input type="text" value="' . $payer_id . '" name="id_payee" id="id_payee"  onkeyup="lookupPayee(this.value);" onblur="fillPayee();" ><br >' . "\n";
+	echo '" name="name_payee" id="name_payee"  
+		onkeyup="lookupLastName(this.value,	\'fillNames\', 
+			$(\'#payee_suggestions\'),
+			$(\'#payee_autoSuggestionsList\'),
+			&quot;$(\'#name_payee\')&quot;,
+			&quot;$(\'#id_payee\')&quot;,
+			&quot;$(\'#payee_suggestions\')&quot;);" 
+		 >' . "\n";
+		 //onblur="$(\'#payee_suggestions\').hide().delay(500);"
+		 //TODO when the onblur is added, autocomplete fails to insert data
 	echo '	<div id="payee_suggestions" style="display: none;">' . "\n";
 	echo '		<div id="payee_autoSuggestionsList">' . "\n";
 	echo '			&nbsp;' . "\n";
 	echo '		</div>' . "\n";
 	echo '	</div><br >' . "\n";
+	echo "</div>\n";
+	echo '	 <input type="hidden" value="' . $payer_id . '" name="id_payee" id="id_payee" ><br >' . "\n";
+	
 	echo '	<b>Amount of Payment: </b>Dollar amount: $<input type="text" value="' . $amount . '" name="amount_paid" id="amount_paid" ><br >' . "\n";
 	echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input type="text" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";
 	echo '	<b>Date Paid: </b>Date (YYYY-MM-DD): <input type="text" value="' . $paid . '" name="date_paid" id="date_paid" ><br >' . "\n";

@@ -21,110 +21,73 @@ if (is_numeric($start_page) == FALSE)
 <html>
 <head>
 <title>Thermal Specialists Payment Details</title>
+<link rel="stylesheet" type="text/css" href="css/payments.css" />
 </head>
 
 <body>
 
 <script type="text/javascript" src="jquery-1.2.1.pack.js"></script>
 <script type="text/javascript">
-	function lookupPayer(textId) 
+	function lookupLastName(textId, callId, suggestionBox, suggestionList, formName, formId, formSuggest) 
 	{	//operates the autocomplete for a textbox
 		if(textId.length == 0) 
 		{
 			// Hide the suggestion box.
-			$('#payer_suggestions').hide();
+			suggestionBox.hide();
 		}
 		else 
 		{
-			$.post("payerId.php", 
-				{queryString: ""+textId+""}, 
+			$.post("lastNameLookup.php", {queryString: ""+textId+"",
+					call: ""+callId+"",	
+					formName: ""+formName+"",
+					formId: ""+formId+"", 
+					formSuggest: ""+formSuggest+""}, 
 				function(data)
 			{
-				if(data.length >0) 
+				if(data.length >0)
 				{
-				$('#payer_suggestions').show();
-				$('#payer_autoSuggestionsList').html(data);
+				suggestionBox.show();
+				suggestionList.html(data);
 				}
 			});
 		}
 	} // lookup
 	
-	function lookupPayee(textId) 
-	{	//operates the autocomplete for a textbox
-		if(textId.length == 0) 
-		{
-			// Hide the suggestion box.
-			$('#payee_suggestions').hide();
-		}
-		else 
-		{
-			$.post("payeeId.php",
-				{queryString: ""+textId+""},
-				function(data)
-			{
-				if(data.length >0) 
-				{
-				$('#payee_suggestions').show();
-				$('#payee_autoSuggestionsList').html(data);
-				}
-			});
-		}
-	} // lookup
-	
-	function updateNamePayer(nameId)
+	function updateName(nameId, callId, suggestionBox, suggestionList, formName,formId, formSuggest)
 	{	//fills out the contact name when the contact id is changed
 		if(nameId.length == 0) 
 		{
 			// Hide the suggestion box.
-			$('#payer_suggestions').hide();
+			suggestionBox.hide();
 		}
 		else 
 		{
-			$.post("getnamePayer.php", {queryString: ""+nameId+""}, function(data)
-			{
-				if(data.length >0) 
-				{
-					$('#payer_suggestions').show();
-					$('#payer_autoSuggestionsList').html(data);
-				}
-			});
-		}
-	}
-	
-	function updateNamePayee(nameId)
-	{	//fills out the contact name when the contact id is changed
-		if(nameId.length == 0) 
-		{
-			// Hide the suggestion box.
-			$('#payee_suggestions').hide();
-		}
-		else 
-		{
-			$.post("getnamePayee.php", 
-				{queryString: ""+nameId+""}, 
+			$.post("getnamePayer.php", 
+				{queryString: ""+textId+"",
+					call: ""+callId+"",
+					formName: ""+formName+"",
+					formId: ""+formId+"",
+					formSuggest: ""+formSuggest+""}, 
 				function(data)
 			{
 				if(data.length >0) 
 				{
-				$('#payee_suggestions').show();
-				$('#payee_autoSuggestionsList').html(data);
+					suggestionBox.show();
+					suggestionList.html(data);
 				}
 			});
 		}
 	}
 	
-	function fillPayer(thisValue, thatValue) 
+	function fillNames(thisValue, thatValue, formName, id, suggest) 
 	{	//fills in the value when an autocomplete value is selected
-		$('#name_payer').val(thisValue);
-		$('#id_payer').val(thatValue);
-		setTimeout("$('#payer_suggestions').hide();", 200);
-	}
-	
-	function fillPayee(thisValue, thatValue) 
-	{	//fills in the value when an autocomplete value is selected
-		$('#name_payee').val(thisValue);
-		$('#id_payee').val(thatValue);
-		setTimeout("$('#payee_suggestions').hide();", 200);
+			
+		//$('#name_payer').val(thisValue);
+		formName.val(thisValue);
+		//$('#id_payer').val(thatValue);
+		id.val(thatValue);
+		//setTimeout("$('#payer_suggestions').hide();", 200);
+		suggest.hide().delay(200);
 	}
 	
 </script>

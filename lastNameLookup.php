@@ -20,6 +20,10 @@
 		if(isset($_POST['queryString'])) 
 		{
 			$queryString = $db->real_escape_string($_POST['queryString']);
+			$func = $db->real_escape_string($_POST['call']);
+			$name = ($_POST['formName']);
+			$id = ($_POST['formId']);
+			$suggest = ($_POST['formSuggest']);
 			
 			// Is the string length greater than 0?
 			
@@ -38,9 +42,11 @@
 				{
 					while ($result = $query ->fetch_object()) 
 					{
-	         			echo '<li onClick="fillPayer(\'' . 
+	         			echo '<li onClick="' . $func . '(\'' . 
 	         				$result->last_name . ', ' . $result->first_name . 
-	         				'\',\'' . $result->emp_id . '\');">' . 
+	         				'\',\'' . $result->emp_id . '\',' .
+	         				$name . ',' . $id . ',' . $suggest .
+	         				');">' . 
 	         				'[' . $result->emp_id . '] ' . $result->last_name . ', ' . $result->first_name . 
 	         				'</li>';
 	         		}

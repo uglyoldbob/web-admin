@@ -143,12 +143,14 @@ if ($stop == 0)
 	
 	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
 	
-	echo "<form action=\"" . rootPageURL() . "/jobs.php\" method=\"post\">\n" .
-		 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
-		 "	<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
-		 "	<input type=\"submit\" value=\"Create new job\"/>\n" .
-		 "</form>"; 
-	
+	if ($_POST["action"] != "edit")
+	{
+		echo "<form action=\"" . rootPageURL() . "/jobs.php\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
+			 "	<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
+			 "	<input type=\"submit\" value=\"Create new job\"/>\n" .
+			 "</form>";
+	}	
 	if (($_POST["action"] == "edit") || ($job != 0))
 	{
 		if ($job != 0)
@@ -160,6 +162,10 @@ if ($stop == 0)
 			echo "<a href=\"" . rootPageURL() . "/jobs.php\"> " . " Back to all jobs</a><br >\n<h3>Creating new job:</h3>\n";
 			job_form();
 		}
+	}
+	else if ($_POST["action"] == "apply")
+	{
+		print_r($_POST);
 	}
 	else	//if (($_POST["action"] == "")
 	{
