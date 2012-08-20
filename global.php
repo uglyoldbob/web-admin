@@ -233,6 +233,11 @@ function login_code($quiet)
 
 function store_user_pword($uid, $oldpass, $newpass)
 {
+	//TODO: store the number used for key stretching
+	//TODO: check the number actually used for key stretching against
+		//the configured number upon successful password entry
+		//regenerate the password if the numbers are different
+	
 	global $mysql_db, $config;
 	
 	$query = "SELECT * FROM contacts WHERE emp_id = '" . $uid . "' LIMIT 1;";

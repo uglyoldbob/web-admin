@@ -134,7 +134,8 @@ function generate_salt()
 
 function hash_password($pword, $salt)
 {
-	$count = 169000;
+	global $config;
+	$count = $config['key_stretching_value'];
 	$result = pbkdf2("sha256", $pword, $salt, $count, 32);
 	return $result;
 }

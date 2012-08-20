@@ -3,15 +3,50 @@
 if ('forms.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	die ('<h2>Direct File Access Prohibited</h2>');
 
+function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions, $autolist)
+{
+	echo "<div>\n";
+	echo $disp . "\n";
+	echo '<input type="text" autocomplete="off" value="';
+	if ($fill_val != 0)
+	{
+		print_contact($fill_val);
+	}
+	else
+	{
+		$fill_val = '';
+	}
+	echo '" name="' . $name . '" id="' . $name . '" 
+		onkeyup="lookupLastName(this.value, \'' . $fillfunc . '\', 
+			$(\'#' . $suggestions . '\'), 
+			$(\'#' . $autolist . '\'),
+			&quot;$(\'#' . $name . '\')&quot;,
+			&quot;$(\'#' . $id . '\')&quot;,
+			&quot;$(\'#' . $suggestions . '\')&quot;);"
+		 >' . "\n";
+		 //onblur="$(\'#' . $suggestions . '\').hide().delay(500);"
+		 //TODO when the onblur is added, autocomplete fails to insert data
+	echo '	<div id="' . $suggestions . '" style="display: none;">' . "\n";
+	echo '		<div id="' . $autolist . '">' . "\n";
+	echo '			&nbsp;' . "\n";
+	echo '		</div>' . "\n";
+	echo '	</div><br >' . "\n";
+	echo '	 <input type="hidden" value="' . $fill_val . '" name="' . $id . '" id="' . $id . '">' . "\n";
+	echo "</div>\n";
+}
+
 function job_form()
 {
 	echo "<div>\n";
 	echo '<form method="POST" action="jobs.php">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	
-	echo '	<b>Customer Name: </b> <input type="text" name="customer1" id="customer1" size=75 ><br >' . "\n";
 	
-	echo '	<b>Deliver to: </b> <input type="text" name="customer2" id="customer2" size=75 ><br >' . "\n";
+	make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
+		"fillNames", "cust1_suggest", "cust1_list");
+	make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
+		"fillNames", "cust2_suggest", "cust2_list");
+	
 	echo '	<b>Comments: </b><br >' . "\n" . '<textarea name="comments" id="comments" rows=4 cols=75 ></textarea><br >' . "\n";
 	
 	echo "	<input type=\"submit\" value=\"Create this job\"/>\n";
@@ -54,8 +89,8 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '			&nbsp;' . "\n";
 	echo '		</div>' . "\n";
 	echo '	</div><br >' . "\n";
-	echo "</div>\n";
 	echo '	 <input type="hidden" value="' . $payee_id . '" name="id_payer" id="id_payer">' . "\n";
+	echo "</div>\n";
 	echo '	<b>Payment to: </b>' . "\n";
 	echo "<div>\n";
 	echo 'Contact Name: <input type="text" autocomplete="off" value="';
@@ -82,8 +117,8 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '			&nbsp;' . "\n";
 	echo '		</div>' . "\n";
 	echo '	</div><br >' . "\n";
-	echo "</div>\n";
 	echo '	 <input type="hidden" value="' . $payer_id . '" name="id_payee" id="id_payee" ><br >' . "\n";
+	echo "</div>\n";
 	
 	echo '	<b>Amount of Payment: </b>Dollar amount: $<input type="text" value="' . $amount . '" name="amount_paid" id="amount_paid" ><br >' . "\n";
 	echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input type="text" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";
@@ -115,12 +150,11 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '<form method="POST" action="payments.php">' . "\n";
 	echo '	<input type="hidden" name="action" value="edit">' . "\n";
 	echo '	<input type="hidden" name="id" value=' . $id . ">\n";
-	echo '	<input type="submit" value="Refresh"/>' . "\n";
+	echo '	<input type="submit" value="Refresh">' . "\n";
 	echo '</form>' . "\n";
-	echo '<form method="POST" action="payments.php" >' . "\n";
-	echo '	<input type="submit" value="Cancel"/>' . "\n";
+	echo '<form>' . "\n";
+	echo '	<input type="button" value="Cancel" onclick="history.go(-1)">' . "\n";
 	echo '</form>' . "\n";
-	echo "TODO: Cancel button should take you to the previous page (it will not use javascript)<br>\n";
 	echo "</div>\n";
 }
 

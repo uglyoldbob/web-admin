@@ -53,32 +53,6 @@ if (is_numeric($start_page) == FALSE)
 		}
 	} // lookup
 	
-	function updateName(nameId, callId, suggestionBox, suggestionList, formName,formId, formSuggest)
-	{	//fills out the contact name when the contact id is changed
-		if(nameId.length == 0) 
-		{
-			// Hide the suggestion box.
-			suggestionBox.hide();
-		}
-		else 
-		{
-			$.post("getnamePayer.php", 
-				{queryString: ""+textId+"",
-					call: ""+callId+"",
-					formName: ""+formName+"",
-					formId: ""+formId+"",
-					formSuggest: ""+formSuggest+""}, 
-				function(data)
-			{
-				if(data.length >0) 
-				{
-					suggestionBox.show();
-					suggestionList.html(data);
-				}
-			});
-		}
-	}
-	
 	function fillNames(thisValue, thatValue, formName, id, suggest) 
 	{	//fills in the value when an autocomplete value is selected
 			
