@@ -23,6 +23,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Inspection Location List</title>
+<link rel="stylesheet" type="text/css" href="css/global.css" />
 </head>
 
 <script type="text/javascript" src="jquery-1.2.1.pack.js"></script>

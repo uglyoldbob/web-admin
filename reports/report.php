@@ -44,6 +44,7 @@ if ($permission == false)
 		 "<html>\n" . 
 		 "<head>\n" .
 		 "<title>Thermal Specialists Payment Details</title>\n" .
+		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/global.css\" />\n" .
 		 "</head>\n" .
 		 "<body>\n" .
 		 "<h3>The report cannot be retrieved.</h3>\n<br >\n" .
@@ -90,6 +91,7 @@ else
 		 "<html>" . 
 		 "<head>" .
 		 "<title>Thermal Specialists Payment Details</title>" .
+		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/global.css\" />\n" .
 		 "</head>" .
 		 "<body>" .
 		 "<h3>The report cannot be retrieved.</h3>" .

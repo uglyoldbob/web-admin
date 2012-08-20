@@ -21,6 +21,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Inspections List</title>
+<link rel="stylesheet" type="text/css" href="css/global.css" />
 </head>
 
 <body>

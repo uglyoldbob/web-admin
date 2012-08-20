@@ -27,6 +27,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Contact Listing</title>
+<link rel="stylesheet" type="text/css" href="css/global.css" />
 </head>
 <body>
 

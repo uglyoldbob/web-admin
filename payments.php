@@ -21,6 +21,7 @@ if (is_numeric($start_page) == FALSE)
 <html>
 <head>
 <title>Thermal Specialists Payment Details</title>
+<link rel="stylesheet" type="text/css" href="css/global.css" />
 <link rel="stylesheet" type="text/css" href="css/payments.css" />
 </head>
 

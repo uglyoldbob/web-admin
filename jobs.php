@@ -25,6 +25,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Jobss List</title>
+<link rel="stylesheet" type="text/css" href="css/global.css" />
 </head>
 
 <body>

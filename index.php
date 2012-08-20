@@ -11,6 +11,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Management System</title>
+<link rel="stylesheet" type="text/css" href="css/global.css" />
 </head>
 <body>
 
