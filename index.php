@@ -2,7 +2,7 @@
 session_start();	//start php session
 header('Content-type: text/html; charset=utf-8');
 
-include("include/global.php");
+include("global.php");
 
 openDatabase();
 

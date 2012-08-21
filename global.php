@@ -256,8 +256,8 @@ function store_user_pword($uid, $oldpass, $newpass)
 	
 	global $mysql_db, $config;
 	
-	$query = "SELECT fail_pass_change, max_fail_pass_change, " .
-			 "username, password, salt FROM contacts WHERE emp_id = '" . 
+	$query = "SELECT fail_pass_change, username, password, " .
+			 "salt FROM contacts WHERE emp_id = '" . 
 			 $uid . "' LIMIT 1;";
 	
 	$results = $mysql_db->query($query);
@@ -314,7 +314,6 @@ function store_user_pword($uid, $oldpass, $newpass)
 
 function selectTimePeriod()
 {	//used to select which (time period)'s information will be viewed
-
 	if (!(array_key_exists("timeperiod", $_POST)))
 	{
 		$_POST['timeperiod'] = "all";
@@ -334,7 +333,7 @@ function selectTimePeriod()
 	}
 
 	echo "<div>\n" .
-		 "<form action=\"" . rootPageURL() . "\" method=\"post\">\n" .
+		 "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 		 "	<select name=timeperiod>\n";
 	
 	echo "		<option ";
