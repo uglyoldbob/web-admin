@@ -6,6 +6,11 @@ header('Content-type: text/html; charset=utf-8');
 
 require("forms.php");
 
+if (!(array_key_exists("page", $_GET)))
+{
+	$_GET["page"] = "0";
+}
+
 $start_page = $_GET["page"];
 if (is_numeric($start_page) == FALSE)
 	$start_page = 0;
@@ -32,6 +37,10 @@ openDatabase();
 <body>
 
 <?php
+if (!(array_key_exists("action", $_POST)))
+{
+	$_POST["action"] = "";
+}
 
 $stop = 0;
 echo '<div>' . "\n";
@@ -259,6 +268,9 @@ if ($stop == 0)
 					
 					echo "Soon to print payment information<br>\n";
 					echo "Soon to print inspections performed (if applicable)<br>\n";
+					contact_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
+						$row['payment_eligible'], $row['ssn'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
+						$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode']);
 				}
 				else
 				{	//editing information

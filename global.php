@@ -6,12 +6,15 @@ if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 include("passwords.php");
 
 $config = parse_ini_file("/etc/web-admin/config.ini");
-	
+
 function curPageURL()
 {
 	$pageURL = 'http';
-	if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
-		$pageURL .= "://";
+	if (array_key_exists("HTTPS", $_SERVER))
+	{
+		if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+	}
+	$pageURL .= "://";
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
 	{
 		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
@@ -28,8 +31,10 @@ function rootPageURL()
 {
 	global $config;
 	$pageURL = 'http';
-	if ($_SERVER["HTTPS"] == "on") 
-		{$pageURL .= "s";}
+	if (array_key_exists("HTTPS", $_SERVER))
+	{
+		if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+	}
 	$pageURL .= "://";
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
 	{
@@ -91,6 +96,10 @@ function login_code($quiet)
 		//the login script has closed the fence for some reason
 	global $mysql_db, $config;
 	$retv = 0;
+	if (!(array_key_exists("HTTPS", $_SERVER)))
+	{
+		$_SERVER["HTTPS"] = "off";
+	}
 	
 	if (($_SERVER["HTTPS"] != "on") && ($config['require_https'] == 1))
 	{
@@ -302,6 +311,11 @@ function store_user_pword($uid, $oldpass, $newpass)
 function selectTimePeriod()
 {	//used to select which (time period)'s information will be viewed
 
+	if (!(array_key_exists("timeperiod", $_POST)))
+	{
+		$_POST['timeperiod'] = "all";
+	}
+	
 	if ($_POST['timeperiod'] == "2011")
 	{
 		$_SESSION['period'] = "2011";
