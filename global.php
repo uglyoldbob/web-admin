@@ -471,4 +471,47 @@ function get_category_sum($contact, $category, $database)
 	return $value;
 }
 
+function get_phone_options($id1, $id2)
+{
+	global $mysql_db;
+	for ($i = 0; $i < 2; $i++)
+	{
+		$query = "SELECT first_name, last_name, phone_mobile, phone_home, phone_other " .
+			"FROM contacts WHERE emp_id = ";
+		switch ($i)
+		{
+		case 0:
+			$query .= $id1;
+			break;
+		default:
+			$query .= $id2;
+			break;
+		}
+
+		$query .= " LIMIT 1;";
+		$result = $mysql_db->query($query);
+		if ($phonerow = $result->fetch_array(MYSQLI_BOTH))
+		{
+			for ($j = 0; $j < 3; $j++)
+			{
+				$phone[$i*3+$j]['name'] = $mysql_db->real_escape_string($phonerow['first_name']) .
+					" " . $mysql_db->real_escape_string($phonerow['last_name']);
+				switch($j)
+				{
+				case 1:
+					$phone[$i*3+$j]['number'] = $mysql_db->real_escape_string($phonerow['phone_home']);
+					break;
+				case 2:
+					$phone[$i*3+$j]['number'] = $mysql_db->real_escape_string($phonerow['phone_other']);
+					break;
+				default:
+					$phone[$i*3+$j]['number'] = $mysql_db->real_escape_string($phonerow['phone_mobile']);
+					break;
+				}
+			}
+		}
+	}
+	return $phone;
+}
+
 ?>

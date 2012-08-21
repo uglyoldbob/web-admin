@@ -161,6 +161,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 function contact_form($id, $last_name, $first_name, $classify, $eligible, $ssn, $mobile, $home, $other,
 	$website, $email, $street, $city, $state, $zip)
 {	//TODO: implement drop down box with a yes/no
+	echo "<b> If a customer wants to be contacted about a job, contact information must be entered here</b><br >\n";
 	if ($_POST["action"] != "edit")
 	{
 		echo "	<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 18, 2012 at 05:12 PM
+-- Generation Time: Aug 20, 2012 at 11:27 PM
 -- Server version: 5.5.24
 -- PHP Version: 5.3.10-1ubuntu3.2
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `permission_payments` int(10) unsigned NOT NULL,
   `permission_jobs` int(10) unsigned NOT NULL,
   UNIQUE KEY `emp_id` (`emp_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=20 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `equipment` (
   `description` varchar(255) NOT NULL,
   `last_known` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=574 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `inspections` (
   `comments` varchar(255) NOT NULL,
   `report` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -140,11 +140,13 @@ CREATE TABLE IF NOT EXISTS `jobs` (
   `cust_billing` int(11) NOT NULL,
   `cust_shipping` int(11) NOT NULL,
   `job_name` varchar(255) NOT NULL,
-  `phone1` varchar(50) NOT NULL,
-  `phone2` varchar(50) NOT NULL,
-  `phone3` varchar(50) NOT NULL,
+  `phone_notify_id` int(11) DEFAULT NULL,
+  `email` varchar(320) DEFAULT NULL,
+  `email2` varchar(320) DEFAULT NULL,
+  `comments` text,
+  `invoice` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -187,7 +189,7 @@ CREATE TABLE IF NOT EXISTS `locations` (
   `description` varchar(255) NOT NULL,
   `location` varchar(255) NOT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=96 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -207,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `payments` (
   `inspection` int(11) DEFAULT NULL,
   `invoice` varchar(255) DEFAULT NULL,
   UNIQUE KEY `payment_id` (`payment_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -223,7 +225,7 @@ CREATE TABLE IF NOT EXISTS `properties` (
   `zip` varchar(10) NOT NULL,
   `description` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -246,10 +248,10 @@ CREATE TABLE IF NOT EXISTS `status` (
 --
 
 CREATE TABLE IF NOT EXISTS `status_codes` (
-  `code` char(1) NOT NULL,
+  `code` int(11) NOT NULL AUTO_INCREMENT,
   `Description` varchar(255) NOT NULL,
   UNIQUE KEY `code` (`code`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
