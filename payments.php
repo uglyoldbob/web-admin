@@ -3,14 +3,22 @@ include("global.php");
 start_my_session();
 header('Content-type: text/html; charset=utf-8');
 
-require("forms.php");
+require("include/forms.php");
 
+if (!(array_key_exists("contact", $_GET)))
+{
+	$_GET["contact"] = "0";
+}
 $contact = $_GET["contact"];
 openDatabase();
 
 if (is_numeric($contact) == FALSE)
 	$contact = 0;
-	
+
+if (!(array_key_exists("page", $_GET)))
+{
+	$_GET["page"] = "0";
+}
 $start_page = $_GET["page"];
 if (is_numeric($start_page) == FALSE)
 	$start_page = 0;

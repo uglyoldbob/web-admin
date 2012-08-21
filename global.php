@@ -71,6 +71,10 @@ function start_my_session()
 		$_SESSION['HTTP_USER_AGENT'] = md5($_SERVER['HTTP_USER_AGENT']);
 	}
 
+	if (!(array_key_exists("action", $_POST)))
+	{
+		$_POST["action"] = "";
+	}
 }
 
 //open database connection

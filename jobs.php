@@ -3,7 +3,7 @@ include("global.php");
 start_my_session();
 header('Content-type: text/html; charset=utf-8');
 
-require("forms.php");
+require("include/forms.php");
 
 $contact = $_GET["contact"];
 if (is_numeric($contact) == FALSE)
