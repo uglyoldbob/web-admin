@@ -10,7 +10,7 @@ function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions
 	echo '<input type="text" autocomplete="off" value="';
 	if ($fill_val != 0)
 	{
-		print_contact($fill_val);
+		echo print_contact($fill_val);
 	}
 	else
 	{
@@ -68,7 +68,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '<input type="text" autocomplete="off" value="';
 	if ($payee_id != 0)
 	{
-		print_contact($payee_id);
+		echo print_contact($payee_id);
 	}
 	else
 	{
@@ -96,7 +96,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo 'Contact Name: <input type="text" autocomplete="off" value="';
 	if ($payer_id != 0)
 	{
-		print_contact($payer_id);
+		echo print_contact($payer_id);
 	}
 	else
 	{
@@ -381,7 +381,7 @@ function print_inspections($contact, $start_page)
 	else
 	{
 		echo "<h3>Inspections done by ";
-		print_contact($contact);
+		echo print_contact($contact);
 		echo "</h3><br >\n";
 		echo '<a href="' . rootPageURL() . '/inspections.php">Go to all inspections</a>' . "<br >\n";
 		$query = "SELECT * FROM inspections WHERE inspector=" . $contact;
@@ -420,14 +420,14 @@ function print_inspections($contact, $start_page)
 		echo "</td>\n";
 		
 		echo "		<td>";
-		print_prop($row['prop_id']);
+		echo print_prop($row['prop_id']);
 		echo "</td>\n";
 		
 		echo "		<td>" . $row['type'] . "</td>\n";
 		
 		echo "		<td>";
 		echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $row['inspector'] . "\"> ";
-		print_contact($row['inspector']);
+		echo print_contact($row['inspector']);
 		echo "</a>";
 		echo "</td>\n";
 		
@@ -436,7 +436,7 @@ function print_inspections($contact, $start_page)
 		
 		echo "		<td>";
 		echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $row['paid_by'] . "\"> ";
-		print_contact($row['paid_by']);
+		echo print_contact($row['paid_by']);
 		echo "</a>";
 		echo "</td>\n";
 		
@@ -456,9 +456,20 @@ function print_inspections($contact, $start_page)
 	
 	echo "</table><br>\n";
 	
+	if ($payment_results->num_rows > 30)
+	{
+		$next_page = 1;
+	}
+	else
+	{
+		$next_page = 0;
+	}
+	
+	
 	if ($start_page > 0)
 		echo '<a href="' . rootPageURL() . '/inspections.php?page=' . ($start_page-1) . '">Previous page</a>  ';
-	echo '<a href="' . rootPageURL() . '/inspections.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
+	if ($next_page == 1)
+		echo '<a href="' . rootPageURL() . '/inspections.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
 	
 	echo "	<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 		 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .

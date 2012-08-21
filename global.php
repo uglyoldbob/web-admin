@@ -171,13 +171,13 @@ function login_code($quiet)
 						$query = "UPDATE contacts SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
 						$mysql_db->query($query);
 					}
-					echo 	"<h3>Welcome ";
-					print_contact($_SESSION['user']['emp_id']);
-					echo	"</h3><br >\n";
-					echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-							"	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
-							"	<input type=\"submit\" value=\"Logout\">\n" .
-							"</form>\n";
+					echo "<h3>Welcome ";
+					echo print_contact($_SESSION['user']['emp_id']);
+					echo "</h3><br >\n";
+					echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+						 "	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
+						 "	<input type=\"submit\" value=\"Logout\">\n" .
+						 "</form>\n";
 					if ($_POST["action"] != "change_pass")
 					{
 						echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
@@ -193,21 +193,24 @@ function login_code($quiet)
 				$mysql_db->query($query);
 				unset($_SESSION['username']);
 				unset($_SESSION['password']);
-				echo	"<h3>Invalid username or password</h3><br >\n" . 
-					"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
-					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-					"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Login\">\n" .
-					"</form>\n";
+				echo	"<h3>Invalid username or password</h3><br >\n" .
+						"<b>Please login<br >\n" .
+						"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+						"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
+						"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
+						"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
+						"	<input type=\"submit\" value=\"Login\">\n" .
+						"</form>\n";
 				$retv = 1;
 			}
+			$results->close();
 		}
 		else
 		{	//contact not found
 			unset($_SESSION['username']);
 			unset($_SESSION['password']);
-			echo	"<h3>Invalid username or password</h3><br >\n" . 
+			echo	"<h3>Invalid username or password</h3><br >\n" .
+					"<b>Please login<br >\n" .
 					"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
@@ -216,11 +219,11 @@ function login_code($quiet)
 					"</form>\n";
 			$retv = 1;	
 		}
-		$results->close();
 	}
 	else
 	{
-		echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+		echo 	"<b>Please login<br >\n" .
+				"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 				"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
 				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
@@ -240,7 +243,9 @@ function store_user_pword($uid, $oldpass, $newpass)
 	
 	global $mysql_db, $config;
 	
-	$query = "SELECT * FROM contacts WHERE emp_id = '" . $uid . "' LIMIT 1;";
+	$query = "SELECT fail_pass_change, max_fail_pass_change, " .
+			 "username, password, salt FROM contacts WHERE emp_id = '" . 
+			 $uid . "' LIMIT 1;";
 	
 	$results = $mysql_db->query($query);
 	if ($results)
@@ -361,65 +366,82 @@ function closeDataBase()
 
 function print_contact($contact_id)
 {	//outputs the contact name
-	global $mysql_db;
-	$query = "SELECT * FROM contacts WHERE emp_id = " . $contact_id;
+	global $mysql_db, $config;
+
+	$output = "";
+
+	$query = "SELECT last_name, first_name FROM contacts WHERE emp_id = " . $contact_id;
 	
 	$contact_results = $mysql_db->query($query);
 	
+	$last_name_first = $config['last_name_first']; 
+	
 	if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
 	{
-		echo $row['last_name'];
-		if ($row['first_name'] != "")
+		if ($last_name_first == 1)
 		{
-			echo ", " . $row['first_name'];
+			if ($row['last_name'] != "")
+				$output .= $row['last_name'];
+			if ($row['first_name'] != "")
+				$output .= ', ' . $row['first_name'];
+		}
+		else
+		{
+			if ($row['first_name'] != "")
+				$output .= $row['first_name'];
+			if ($row['last_name'] != "")
+				$output .= ' ' . $row['last_name'];
 		}
 		$contact_results->free();
 	}
 	else
 	{
-		echo "ERROR";
+		$output .= "ERROR";
 	}
+	return $output;
 }
 
 function print_prop($prop_id, $database)
 {	//prints property information
 	global $mysql_db;
-	$query = "SELECT * FROM properties WHERE id = " . $prop_id;
+	$query = "SELECT address, city, state, zip, description FROM properties WHERE id = " . $prop_id;
+	$output = '';
 	$contact_results = $mysql_db->query($query);
 	
 	if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
 	{
-		echo $row['address'];
+		$output .= $row['address'];
 		if ($row['city'] != "")
 		{
-			echo ", " . $row['city'];
+			$output .= ", " . $row['city'];
 		}
 		if ($row['state'] != "")
 		{
-			echo " " . $row['state'];
+			$output .= " " . $row['state'];
 		}
 		if ($row['zip'] != "")
 		{
-			echo " " . $row['zip'];
+			$output .= " " . $row['zip'];
 		}
 		echo "<br >\n";
 		if ($row['description'] != "")
 		{
-			echo " " . $row['description'];
+			$output .= " " . $row['description'];
 		}
 		$contact_results->free();
 	}
 	else
 	{
-		echo "ERROR";
+		$output .= "ERROR";
 	}
+	return $output;
 }
 
 
 function get_category_sum($contact, $category, $database)
 {
 	global $mysql_db;
-	$query = "SELECT * FROM payments WHERE (paid_by = " . $contact .
+	$query = "SELECT date_paid, amount_earned, pay_to, paid_by FROM payments WHERE (paid_by = " . $contact .
 		" OR pay_to = " . $contact . ")" .
 		" AND `category` = '" .
 		$category . "'";
@@ -476,17 +498,12 @@ function get_phone_options($id1, $id2)
 	global $mysql_db;
 	for ($i = 0; $i < 2; $i++)
 	{
-		$query = "SELECT first_name, last_name, phone_mobile, phone_home, phone_other " .
+		$query = "SELECT phone_mobile, phone_home, phone_other " .
 			"FROM contacts WHERE emp_id = ";
-		switch ($i)
-		{
-		case 0:
+		if ($i == 0)
 			$query .= $id1;
-			break;
-		default:
+		else
 			$query .= $id2;
-			break;
-		}
 
 		$query .= " LIMIT 1;";
 		$result = $mysql_db->query($query);
@@ -494,8 +511,10 @@ function get_phone_options($id1, $id2)
 		{
 			for ($j = 0; $j < 3; $j++)
 			{
-				$phone[$i*3+$j]['name'] = $mysql_db->real_escape_string($phonerow['first_name']) .
-					" " . $mysql_db->real_escape_string($phonerow['last_name']);
+				if ($i == 0)
+					$phone[$i*3+$j]['name'] = print_contact($id1);
+				else
+					$phone[$i*3+$j]['name'] = print_contact($id2);
 				switch($j)
 				{
 				case 1:

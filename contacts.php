@@ -190,7 +190,7 @@ if ($stop == 0)
 					echo "<h3>Editing Details for: ";
 				}
 	
-				print_contact($value);
+				echo print_contact($value);
 				echo "</h3>\n";
 				echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $value . "\">View payments</a><br>\n";
 				echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $value . "\">View inspections</a><br>\n";
@@ -212,7 +212,7 @@ if ($stop == 0)
 	
 				if ($_POST["action"] != "edit")
 				{	//viewing profile
-					print_contact($contact);
+					echo print_contact($contact);
 					if ($row['website'] != "")
 					{
 						echo " : Visit their website by ";
@@ -341,10 +341,20 @@ if ($stop == 0)
 		}
 	
 		echo "</table><br>\n";
+		
+		if ($contact_results->num_rows > 30)
+		{
+			$next_page = 1;
+		}
+		else
+		{
+			$next_page = 0;
+		}
 	
 		if ($start_page > 0)
 			echo '<a href="' . rootPageURL() . '/contacts.php?page=' . ($start_page-1) . '">Previous page</a>  ';
-		echo '<a href="/contacts.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
+		if ($next_page == 1)
+			echo '<a href="/contacts.php?page=' . ($start_page+1) . '">Next page</a>' . "<br >\n";
 	
 		echo "			<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
 			 "				<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .

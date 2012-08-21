@@ -252,7 +252,7 @@ if ($stop == 0)
 	if ($contact != 0)
 	{
 		echo "<h3>Payment Details for: ";
-		print_contact($contact);
+		echo print_contact($contact);
 		echo "</h3>\n<a href=\"" . rootPageURL() . "/payments.php\"> " . 
 			" Back to all payments</a><br >\n\n";
 		
@@ -261,7 +261,7 @@ if ($stop == 0)
 			"	<input type=\"hidden\" name=\"action\"" . 
 			" value=\"view\">\n" .
 			"	<input type=\"submit\" value=\"View  ";
-		print_contact($contact);
+		echo print_contact($contact);
 		echo "'s Information\"/>\n" . "</form>\n";
 	
 		$query = "SELECT COUNT( *  ) AS `Rows` , `category`" .
@@ -375,14 +375,14 @@ if ($stop == 0)
 			echo "		<td>";
 			echo "<a href=\"" . rootPageURL() . 
 				"/payments.php?contact=" . $row['pay_to'] . "\"> ";
-			print_contact($row['pay_to']);
+			echo print_contact($row['pay_to']);
 			echo "</a>";
 			echo "</td>\n";
 			
 			echo "		<td>";
 			echo "<a href=\"" . rootPageURL() . 
 				"/payments.php?contact=" . $row['paid_by'] . "\"> ";
-			print_contact($row['paid_by']);
+			echo print_contact($row['paid_by']);
 			echo "</a>";
 			echo "</td>\n";
 			
@@ -460,6 +460,15 @@ if ($stop == 0)
 		
 		echo "</table><br>\n";
 		
+		if ($payment_results->num_rows > 30)
+		{
+			$next_page = 1;
+		}
+		else
+		{
+			$next_page = 0;
+		}
+		
 		if ($contact != 0)
 		{
 			if ($start_page > 0)
@@ -467,9 +476,12 @@ if ($stop == 0)
 					'/payments.php?contact=' . $contact . 
 					'&page=' . ($start_page-1) . 
 					'">Previous page</a>  ';
-			echo '<a href="' . rootPageURL() . '/payments.php?contact=' .
-				$contact . '&page=' . ($start_page+1) . 
-				'">Next page</a>' . "<br >\n";
+			if ($next_page == 1)
+			{
+				echo '<a href="' . rootPageURL() . '/payments.php?contact=' .
+					$contact . '&page=' . ($start_page+1) . 
+					'">Next page</a>' . "<br >\n";
+			}
 			
 			echo "Assets: $" . $assets . "<br>\n";
 			echo "Outstanding assets: $" . $o_assets . "<br>\n";
@@ -485,8 +497,11 @@ if ($stop == 0)
 				echo '<a href="' . rootPageURL() . 
 					'/payments.php?page=' . ($start_page-1) . 
 					'">Previous page</a>  ';
-			echo '<a href="' . rootPageURL() . '/payments.php?page=' . 
-				($start_page+1) . '">Next page</a>' . "<br >\n";
+			if ($next_page == 1)
+			{
+				echo '<a href="' . rootPageURL() . '/payments.php?page=' . 
+					($start_page+1) . '">Next page</a>' . "<br >\n";
+			}
 
 			echo "	<form action=\"" . rootPageURL() . 
 				"/payments.php\" method=\"post\">\n" .

@@ -137,9 +137,9 @@ if ($stop == 0)
 					 "	<input type=\"hidden\" name=\"id\" value=\"" . $job . "\">\n";
 				
 				echo "	<b>Billing name:</b> ";
-				print_contact($row['cust_billing']);
+				echo print_contact($row['cust_billing']);
 				echo "	<br >\n<b>Shipping name:</b> ";
-				print_contact($row['cust_shipping']);
+				echo print_contact($row['cust_shipping']);
 				echo "	<br >\n";
 
 				//load number information				
@@ -248,10 +248,10 @@ if ($stop == 0)
 			echo "		</td>\n";
 	
 			echo "		<td>";
-			print_contact($mysql_db->real_escape_string($row['cust_billing']));
+			echo print_contact($mysql_db->real_escape_string($row['cust_billing']));
 			echo "</td>\n";
 			echo "		<td>";
-			print_contact($mysql_db->real_escape_string($row['cust_shipping']));
+			echo print_contact($mysql_db->real_escape_string($row['cust_shipping']));
 			echo "</td>\n";
 			echo "		<td>" . $mysql_db->real_escape_string($row['comments']) . "</td>\n";
 	
@@ -270,6 +270,15 @@ if ($stop == 0)
 	//bcmul, bcadd,
 	//
 }
+
+/*
+$query = "SHOW SESSION STATUS";
+$result = $mysql_db->query($query);
+while ($row = $result->fetch_array(MYSQLI_BOTH))
+{
+	echo $row[0] . " " . $row[1];
+	echo "<br >\n";
+}*/
 
 //this function is undefined
 //print_r(mysqli_get_client_stats());

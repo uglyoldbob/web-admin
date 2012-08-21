@@ -24,6 +24,20 @@ if (login_code(0) == 1)
 	$stop = 1;
 }
 echo "</div>\n";
+
+/*
+$to = "thomas.epperson@gmail.com";
+$subject = "test message";
+$body = "this is a test message";
+if (mail($to, $subject, $body))
+{
+	echo("<p>Message successfully sent!</p>");
+}
+else
+{
+	echo("<p>Message delivery failed...</p>");
+}*/
+
 if ($stop == 0)
 {
 	selectTimePeriod();
