@@ -72,7 +72,7 @@ if ($stop == 0)
 		else
 		{	//do this when creating a new job
 			echo "<a href=\"" . rootPageURL() . "/jobs.php\"> " . " Back to all jobs</a><br >\n<h3>Creating new job:</h3>\n";
-			job_form();
+			$jobs->new_job_form();
 		}
 	}
 	else	//if (($_POST["action"] == "")

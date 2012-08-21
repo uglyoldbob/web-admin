@@ -35,25 +35,6 @@ function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions
 	echo "</div>\n";
 }
 
-function job_form()
-{
-	echo "<div>\n";
-	echo '<form method="POST" action="jobs.php">' . "\n";
-	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
-	
-	
-	make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
-		"fillNames", "cust1_suggest", "cust1_list");
-	make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
-		"fillNames", "cust2_suggest", "cust2_list");
-	
-	echo '	<b>Comments: </b><br >' . "\n" . '<textarea name="comments" id="comments" rows=4 cols=75 ></textarea><br >' . "\n";
-	
-	echo "	<input type=\"submit\" value=\"Create this job\"/>\n";
-	echo '</form>' . "\n";
-	echo "</div>\n";
-}
-
 function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comments, $category)
 {
 	global $mysql_db;

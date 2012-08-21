@@ -42,6 +42,34 @@ class jobs
 		}
 	}
 	
+	public static function make_status_dropdown($prefix, $selected, $name)
+	{
+		global $mysql_db;
+		$output = '';
+		$query = "SELECT code, Description FROM status_codes;";
+		$result = $mysql_db->query($query);
+		$output .= $prefix . "<select name=" .  $name . ">\n" .
+			$prefix . "<option value=0";
+		if ($selected == 0)
+		{
+			$output .= " selected";
+		}
+		$output .= " >Don't update</option>\n";
+		
+		while ($row = $result->fetch_array(MYSQLI_BOTH))
+		{
+			$output .= $prefix . "	<option value=" .
+				$mysql_db->real_escape_string($row['code']);
+			if ($selected == $mysql_db->real_escape_string($row['code']))
+				$output .= " selected";
+			$output .= " >" . 
+				$mysql_db->real_escape_string($row['Description']) .
+				"</option>\n";
+		}
+		$output .= $prefix . "</select>\n";
+		return $output;
+	}
+	
 	public function create_job($data)
 	{
 		global $mysql_db;
@@ -61,8 +89,41 @@ class jobs
 			echo "Successfully inserted new job<br >\n";
 		}
 		
-		$job = $mysql_db->insert_id;
+		$this->job = $mysql_db->insert_id;
+		
+		if ($data['job_status'] != 0)
+		{
+			$query = "INSERT INTO job_status (jobid, new_status) VALUES (" .
+				$this->job . ", " .
+				$mysql_db->real_escape_string($data['job_status']) . ");";
+			if ($mysql_db->query($query) == TRUE)
+			{
+				echo "Successfully created initial job status<br >\n";
+			}
+		}
 	}
+	
+	public function new_job_form()
+	{
+		echo "<div>\n";
+		echo '<form method="POST" action="jobs.php">' . "\n";
+		echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
+	
+		make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
+			"fillNames", "cust1_suggest", "cust1_list");
+		make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
+			"fillNames", "cust2_suggest", "cust2_list");
+		
+		echo '	<b>Comments: </b><br >' . "\n" . '<textarea name="comments" id="comments" rows=4 cols=75 ></textarea><br >' . "\n";
+		
+		echo "	<b>Initial job status:</b> \n";
+		echo jobs::make_status_dropdown('	', 1, "job_status") . "<br >\n";
+		
+		echo "	<input type=\"submit\" value=\"Create this job\"/>\n";
+		echo '</form>' . "\n";
+		echo "</div>\n";
+	}
+
 	
 	public function modify_job($data)
 	{
@@ -98,12 +159,19 @@ class jobs
 				echo "Successfully updated new job<br >\n";
 			}
 		}
-		else
-		{
-			echo "The job was unchanged<br >\n";
-		}
 		
 		$this->job = $mysql_db->real_escape_string($data['id']);
+		
+		if ($data['job_status'] != 0)
+		{
+			$query = "INSERT INTO job_status (jobid, new_status) VALUES (" .
+				$this->job . ", " .
+				$mysql_db->real_escape_string($data['job_status']) . ");";
+			if ($mysql_db->query($query) == TRUE)
+			{
+				echo "Successfully updated job status<br >\n";
+			}
+		}
 	}
 	
 	public function table()
@@ -235,6 +303,22 @@ class jobs
 				$mysql_db->real_escape_string($row['comments']) .
 				'</textarea><br >' . "\n";
 			echo "	</div>\n";
+			
+			
+			$query = "SELECT * from job_status JOIN status_codes ON " .
+					 "job_status.new_status=status_codes.code WHERE " .
+					 "job_status.jobid=" . $this->job . " ORDER BY " .
+					 "job_status.datetime ASC;";
+			$statresult = $mysql_db->query($query);
+			echo "	<b>Job status history</b>:<br >\n";
+			while ($statrow = $statresult->fetch_array(MYSQLI_BOTH))
+			{
+				echo $statrow['datetime'] . ": " . $statrow['Description'] . 
+					", " . $statrow['what_happened'] . "<br >\n";  
+			}
+			
+			echo "	<b>Update job status:</b> \n";
+			echo jobs::make_status_dropdown('	', 0, "job_status") . "<br >\n";
 			
 			echo "	<input type=\"submit\" value=\"Apply Changes\"/>\n" .
 				 "</form>";
