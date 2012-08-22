@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 20, 2012 at 11:27 PM
+-- Generation Time: Aug 22, 2012 at 05:41 PM
 -- Server version: 5.5.24
 -- PHP Version: 5.3.10-1ubuntu3.2
 
@@ -48,10 +48,23 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `city` varchar(255) NOT NULL,
   `state` varchar(5) NOT NULL,
   `zipcode` varchar(5) NOT NULL,
-  `permission_contacts` int(10) unsigned NOT NULL,
-  `permission_payments` int(10) unsigned NOT NULL,
-  `permission_jobs` int(10) unsigned NOT NULL,
-  UNIQUE KEY `emp_id` (`emp_id`)
+  UNIQUE KEY `emp_id` (`emp_id`),
+  UNIQUE KEY `username` (`username`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contact_permission`
+--
+
+CREATE TABLE IF NOT EXISTS `contact_permission` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id1` int(11) DEFAULT NULL,
+  `id2` int(11) NOT NULL,
+  `permission` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id1` (`id1`,`id2`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -155,12 +168,13 @@ CREATE TABLE IF NOT EXISTS `jobs` (
 --
 
 CREATE TABLE IF NOT EXISTS `job_status` (
-  `id` int(11) NOT NULL,
-  `datetime` datetime NOT NULL,
-  `what_happened` varchar(255) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `jobid` int(11) NOT NULL,
+  `datetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `what_happened` varchar(255) DEFAULT NULL,
   `new_status` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 

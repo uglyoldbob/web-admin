@@ -35,15 +35,27 @@ class contacts
 	public function single()
 	{
 		global $mysql_db;
-		$query = "SELECT * FROM contacts WHERE emp_id = " . $this->contact;
+		$uid = $_SESSION['user']['emp_id'];
+		
+		$allow = check_permission("contact_permission", $uid, $this->contact, "%w%");
+		if ($allow[0][1] == "none")
+		{
+			$_POST["action"] = "";
+		}
+		
+		$query = "SELECT * FROM contacts, contact_permission WHERE " .
+				 "(((id2 = " . $uid . ") OR (id2 IS NULL)) AND " .
+				 "((id1 = emp_id) OR (id1 IS NULL)) AND " .
+				 "(emp_id = " . $this->contact . ") AND " .
+				 "(permission LIKE '%r%')) LIMIT 1;";
 		$results = $mysql_db->query($query);
 		if($row = $results->fetch_array(MYSQLI_BOTH))
 		{
-			if ($_POST["action"] != "edit")
+			if ($_POST["action"] == "")
 			{	//viewing profile
 				echo "<h3>Viewing Profile for: ";
 			}
-			else
+			else if ($_POST["action"] == "edit")
 			{	//editing information
 				echo "<h3>Editing Details for: ";
 			}
@@ -119,13 +131,15 @@ class contacts
 				echo "Soon to print inspections performed (if applicable)<br>\n";
 				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
 					$row['payment_eligible'], $row['ssn'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
-					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode']);
+					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],
+					$row['username']);
 			}
 			else
 			{	//editing information
 				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
 					$row['payment_eligible'], $row['ssn'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
-					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode']);
+					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],
+					$row['username']);
 			}
 			
 		}
@@ -136,15 +150,20 @@ class contacts
 	}
 	
 	public function make_form($id, $last_name, $first_name, $classify, $eligible, $ssn, $mobile, $home, $other,
-		$website, $email, $street, $city, $state, $zip)
+		$website, $email, $street, $city, $state, $zip, $username)
 	{	//TODO: implement drop down box with a yes/no
+		$uid = $_SESSION['user']['emp_id'];
+		$allow = check_permission("contact_permission", $uid, $id, "%w%");
 		echo "<b> If a customer wants to be contacted about a job, contact information must be entered here</b><br >\n";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 		{
-			echo "	<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
-				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
-				 "		<input type=\"submit\" value=\"Edit\"/>\n" .
-				 "	</form>\n";
+			if ($allow[0][1] != "none")
+			{
+				echo "	<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
+					 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
+					 "		<input type=\"submit\" value=\"Edit\"/>\n" .
+					 "	</form>\n";
+			}
 			
 			echo "<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"edit\"><br>\n";
@@ -180,7 +199,7 @@ class contacts
 		echo "			<td>Last Name</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"last_name\" value=\"" . $last_name . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -190,7 +209,17 @@ class contacts
 		echo "			<td>First Name</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"first_name\" value=\"" . $first_name . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
+			echo " disabled";
+		echo " >";
+		echo "</td>\n";
+		echo "		</tr>\n";
+		
+		echo "		<tr>\n";
+		echo "			<td>Username</td>\n";
+		echo "			<td>";
+		echo "<input type=\"text\" name=\"username\" value=\"" . $username . "\" size=\"70\"";
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -200,7 +229,7 @@ class contacts
 		echo "			<td>Classification</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"classify\" value=\"" . $classify . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -210,7 +239,7 @@ class contacts
 		echo "			<td>Eligible for payment</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"eligible\" value=\"" . $eligible . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -220,7 +249,7 @@ class contacts
 		echo "			<td>SSN</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"ssn\" value=\"" . $ssn . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -230,7 +259,7 @@ class contacts
 		echo "			<td>Phone(mobile)</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"mobile\" value=\"" . $mobile . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -240,7 +269,7 @@ class contacts
 		echo "			<td>Phone(home)</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"home\" value=\"" . $home . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -250,7 +279,7 @@ class contacts
 		echo "			<td>Phone(other)</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"other\" value=\"" . $other . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -260,7 +289,7 @@ class contacts
 		echo "			<td>Website</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"website\" value=\"" . $website . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -270,7 +299,7 @@ class contacts
 		echo "			<td>E-mail address</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"email\" value=\"" . $email . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -280,7 +309,7 @@ class contacts
 		echo "			<td>Street Address</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"street\" value=\"" . $street . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -290,7 +319,7 @@ class contacts
 		echo "			<td>City</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"city\" value=\"" . $city . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -300,7 +329,7 @@ class contacts
 		echo "			<td>State</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"state\" value=\"" . $state . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
@@ -310,20 +339,23 @@ class contacts
 		echo "			<td>Zipcode</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"zip\" value=\"" . $zip . "\" size=\"70\"";
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
 		echo "	</table>\n";
 	
-		if (($_POST["action"] == "view") || ($_POST["action"] == ""))
+		if ($_POST["action"] == "")
 		{
-			echo "</form>\n" . 
-				 "<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
-				 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
-				 "	<input type=\"submit\" value=\"Edit\"/>\n" .
-				 "</form>\n";
+			if ($allow[0][1] != "none")
+			{
+				echo "</form>\n" . 
+					 "<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
+					 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
+					 "	<input type=\"submit\" value=\"Edit\"/>\n" .
+					 "</form>\n";
+			}
 		}
 		else
 		{
@@ -348,6 +380,7 @@ class contacts
 			$id_num = 0;
 		$last_name = $mysql_db->real_escape_string($withdata["last_name"]);
 		$first_name = $mysql_db->real_escape_string($withdata["first_name"]);
+		$username = $mysql_db->real_escape_string($withdata["username"]);
 		$classification = $mysql_db->real_escape_string($withdata["classify"]);
 		$eligibility = $withdata["eligible"];
 		if (is_numeric($eligibility) == FALSE)
@@ -362,12 +395,21 @@ class contacts
 		$city = $mysql_db->real_escape_string($withdata["city"]);
 		$state = $mysql_db->real_escape_string($withdata["state"]);
 		$zip = $mysql_db->real_escape_string($withdata["zip"]);
-	
+
+		$uid = $_SESSION['user']['emp_id'];
+		$allowed_to_perform = 0;
 		if ($id_num != 0)
 		{
+			$allow = check_permission("contact_permission", $uid, $id_num, "%w%");
+			if ($allow[0][1] != "none")
+			{
+				$allowed_to_perform = 1;
+			}
+			
 			$query = "UPDATE `contacts` SET " .
 					"`last_name` = '" . $last_name .
 					"', `first_name` = '" . $first_name .
+					"', `username` = '" . $username .
 					"', `classification` = '" . $classification .
 					"', `payment_eligible` = " . $eligibility .
 					", `ssn` = '" . $ssn .
@@ -384,12 +426,14 @@ class contacts
 		}
 		else
 		{
+			$allowed_to_perform = 1;
 			$query = "INSERT INTO `contacts` " .
-					 "(last_name, first_name, classification, payment_eligible, " .
+					 "(last_name, first_name, username, classification, payment_eligible, " .
 					 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
 					 "VALUES (" .
 					 "'" . $last_name .  "'," .
 					 "'" . $first_name .  "'," .
+					 "'" . $username . "', " .
 					 "'" . $classification . "'," .
 					 "'" . $eligibility .  "'," .
 					 "'" . $ssn .  "'," .
@@ -404,21 +448,43 @@ class contacts
 					 "'" . $zip . "'" .
 					 ");";
 		}
-		if (!$mysql_db->query($query))
+		if ($allowed_to_perform == 1)
 		{
-			echo "Error: " . $mysql_db->error() . "<br >\n";
-			//die('Error: ' . $mysql_db->error());
+			if (!$mysql_db->query($query))
+			{
+				echo "Error: " . $mysql_db->error . "<br >\n";
+				//die('Error: ' . $mysql_db->error;
+			}
+			else
+			{
+				if ($id_num == 0)
+				{ 
+					$new_id = $mysql_db->insert_id;
+					mod_permission("contact_permission", $uid, $new_id, "+", 'r');
+					mod_permission("contact_permission", $uid, $new_id, "+", 'w');
+					mod_permission("contact_permission", $new_id, $new_id, "+", 'r');
+					mod_permission("contact_permission", $new_id, $new_id, "+", 'w');
+				}
+				echo "Contact information updated successfully.<br >\n";
+			}
 		}
 		else
 		{
-			echo "Contact information updated successfully.<br >\n";
+			echo "<b>You can't do that</b><br >\n";
 		}
 	}
 	
 	public function table()
 	{
 		global $mysql_db;
-		$query = "SELECT * FROM contacts ORDER BY last_name ASC LIMIT " . ($this->start_page*30) . ", " . ($this->start_page*30+30);
+		
+		$uid = $_SESSION['user']['emp_id'];
+		$query = "SELECT * FROM contacts, contact_permission WHERE " .
+				 "(((id2 = " . $uid . ") OR (id2 IS NULL)) AND " . 
+				 "((id1 = emp_id) OR (id1 IS NULL)) AND ".
+				 "(permission LIKE '%r%'))" .
+				 " ORDER BY last_name ASC LIMIT " . 
+				 ($this->start_page*30) . ", " . ($this->start_page*30+30);
 		$contact_results = $mysql_db->query($query);
 	
 		echo "<table border=\"1\">\n";
@@ -438,9 +504,31 @@ class contacts
 	
 			echo "		<td>" . "<a href=\"". rootPageURL() . 
 				 "/contacts.php?contact=" . $row['emp_id'] . 
-				 "\">View</a></td>\n";
+				 "\">View</a>";
+
+			$uid = $_SESSION['user']['emp_id'];
+			$allow = check_permission("contact_permission", $uid, $row['emp_id'], "%p%");
+			if (check_specific_permission($allow, "global") == "yes")
+			{
+				if (is_null($row['password']))
+				{
+					echo "\n		<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+						 "			<input type=\"hidden\" name=\"action\" value=\"cpass\">\n" .
+						 "			<input type=\"hidden\" name=\"id\" value=\"" . $row['emp_id'] . "\">\n" .
+						 "			<input type=\"submit\" value=\"Init Password\"/>\n" .
+						 "		</form>";
+				}
+				else
+				{
+					echo "\n		<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+						 "			<input type=\"hidden\" name=\"action\" value=\"epass\">\n" .
+						 "			<input type=\"hidden\" name=\"id\" value=\"" . $row['emp_id'] . "\">\n" .
+						 "			<input type=\"submit\" value=\"Edit Password\"/>\n" .
+						 "		</form>";
+				}
+			}
 	
-			echo "		<td>";
+			echo "</td>\n		<td>";
 	
 			if ($row['website'] != "")
 			{
@@ -489,7 +577,264 @@ class contacts
 			 "				<input type=\"submit\" value=\"New contact\"/>\n" .
 			 "			</form>";
 	}
-}
+	
+	public static function init_user_pword($uid, $newpass)
+	{
+		//TODO: store the number used for key stretching
+		//TODO: check the number actually used for key stretching against
+			//the configured number upon successful password entry
+			//regenerate the password if the numbers are different
+		
+		global $mysql_db, $config;
+		
+		$userid = $_SESSION['user']['emp_id'];
+		$allow = check_permission("contact_permission", $userid, $uid, "%p%");
+		if ($allow[0][1] == "none")
+		{
+			echo "<b>You can't do that</b><br >\n";
+			return;
+		}
+		
+		$query = "SELECT fail_pass_change, username, password, " .
+				 "salt FROM contacts WHERE emp_id = '" . 
+				 $uid . "' LIMIT 1;";
+		
+		$results = $mysql_db->query($query);
+		if ($results)
+		{
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_pass_change'] >= $config['max_fail_pass_changes'])
+			{
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+			else if (is_null($row['password']))
+			{	//ok a password does not exist
+				$salt = generate_salt();
+		
+				$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+				if ($mysql_db->query($query) == TRUE)
+				{
+					echo "User salt stored successfully<br >\n";
+					$hash_pass = hash_password($newpass, $salt);
+					$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+					if ($mysql_db->query($query) == TRUE)
+					{
+						echo "User password stored successfully<br >\n";
+					}
+					else
+					{
+						echo "Failed to save user password<br >\n";
+					}
+				}
+				else
+				{
+					echo "Failed to save user salt<br >\n";
+				}
+			}
+			else
+			{	//password fail match
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				$query = "UPDATE contacts SET fail_pass_change=fail_pass_change+1 WHERE emp_id = " . $uid . ";";
+				$mysql_db->query($query);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+		}
+		else
+		{	//contact not found
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			echo	"<h3>Invalid username or password</h3><br >\n";	
+		}
+		$results->close();
+	}
+	
+	public static function mod_user_pword($uid, $newpass)
+	{
+		//TODO: store the number used for key stretching
+		//TODO: check the number actually used for key stretching against
+			//the configured number upon successful password entry
+			//regenerate the password if the numbers are different
+		
+		global $mysql_db, $config;
+		
+		$userid = $_SESSION['user']['emp_id'];
+		$allow = check_permission("contact_permission", $userid, $uid, "%p%");
+		if ($allow[0][1] == "none")
+		{
+			echo "<b>You can't do that</b><br >\n";
+			return;
+		}
+		
+		$query = "SELECT fail_pass_change, username, password, " .
+				 "salt FROM contacts WHERE emp_id = '" . 
+				 $uid . "' LIMIT 1;";
+		
+		$results = $mysql_db->query($query);
+		if ($results)
+		{
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_pass_change'] >= $config['max_fail_pass_changes'])
+			{
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+			else
+			{
+				$salt = generate_salt();
+		
+				$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+				if ($mysql_db->query($query) == TRUE)
+				{
+					echo "User salt stored successfully<br >\n";
+					$hash_pass = hash_password($newpass, $salt);
+					$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+					if ($mysql_db->query($query) == TRUE)
+					{
+						echo "User password stored successfully<br >\n";
+					}
+					else
+					{
+						echo "Failed to save user password<br >\n";
+					}
+				}
+				else
+				{
+					echo "Failed to save user salt<br >\n";
+				}
+			}
+		}
+		else
+		{	//contact not found
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			echo	"<h3>Invalid username or password</h3><br >\n";	
+		}
+		$results->close();
+	}
 
+	public static function store_user_pword($uid, $oldpass, $newpass)
+	{
+		//TODO: store the number used for key stretching
+		//TODO: check the number actually used for key stretching against
+			//the configured number upon successful password entry
+			//regenerate the password if the numbers are different
+		
+		global $mysql_db, $config;
+		
+		$userid = $_SESSION['user']['emp_id'];
+		$allow = check_permission("contact_permission", $userid, $uid, "%p%");
+		if ($allow[0][1] == "none")
+		{
+			echo "<b>You can't do that</b><br >\n";
+			return;
+		}
+		
+		$query = "SELECT fail_pass_change, username, password, " .
+				 "salt FROM contacts WHERE emp_id = '" . 
+				 $uid . "' LIMIT 1;";
+		
+		$results = $mysql_db->query($query);
+		if ($results)
+		{
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_pass_change'] >= $config['max_fail_pass_changes'])
+			{
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+			else if ($row['password'] == hash_password($oldpass, $row['salt']))
+			{	//ok the old password matches
+				$salt = generate_salt();
+		
+				$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+				if ($mysql_db->query($query) == TRUE)
+				{
+					echo "User salt stored successfully<br >\n";
+					$hash_pass = hash_password($newpass, $salt);
+					$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+					if ($mysql_db->query($query) == TRUE)
+					{
+						echo "User password stored successfully<br >\n";
+					}
+					else
+					{
+						echo "Failed to save user password<br >\n";
+					}
+				}
+				else
+				{
+					echo "Failed to save user salt<br >\n";
+				}
+			}
+			else
+			{	//password fail match
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				$query = "UPDATE contacts SET fail_pass_change=fail_pass_change+1 WHERE emp_id = " . $uid . ";";
+				$mysql_db->query($query);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+		}
+		else
+		{	//contact not found
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			echo	"<h3>Invalid username or password</h3><br >\n";	
+		}
+		$results->close();
+	}
+
+	public function create_password($val)
+	{	//creates a form to submit in order to create a password
+		$userid = $_SESSION['user']['emp_id'];
+		$allow = check_permission("contact_permission", $userid, $val, "%p%");
+		if (check_specific_permission($allow, "global") == "no")
+		{
+			echo "<b>You can't do that</b><br >\n";
+			return;
+		}
+		else
+		{
+			echo "<h3>Creating password for : " . print_contact($val) .
+				"</h3>\n";
+			echo "<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+				 "	<input type=\"hidden\" name=\"action\" value=\"apass\"><br>\n" .
+				 "	<input type=\"hidden\" name=\"id\" value=\"" . $val . "\"><br>\n" .
+				 "	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
+				 "	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
+				 "	<input type=\"submit\" value=\"Create the password\">\n" .
+				 "</form>\n";
+		}
+	}
+	
+	public function edit_password($val)
+	{	//creates a form to submit in order to change a password
+		$userid = $_SESSION['user']['emp_id'];
+		$allow = check_permission("contact_permission", $userid, $val, "%p%");
+		if (check_specific_permission($allow, "global") == "no")
+		{
+			echo "<b>You can't do that</b><br >\n";
+			return;
+		}
+		else
+		{
+			echo "<h3>Changing password for : " . print_contact($val) .
+				"</h3>\n";
+
+			echo "<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+				 "	<input type=\"hidden\" name=\"action\" value=\"apass\"><br>\n" .
+				 "	<input type=\"hidden\" name=\"id\" value=\"" . $val . "\"><br>\n" .
+				 "	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .
+				 "	New password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
+				 "	<input type=\"submit\" value=\"Change the password\">\n" .
+				 "</form>\n";
+		}
+	}
+}
 
 ?>

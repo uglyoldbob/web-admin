@@ -94,6 +94,108 @@ function openDatabase()
 	//mysqli_set_charset()
 }
 
+function check_permission($table, $idfrom, $idto, $mask)
+{	//returns "master", "public", "global", "normal", "none"
+	global $mysql_db;
+	$output = array();
+	$query = "SELECT * FROM `" . $table . "` WHERE " .
+		"((id1 IS NULL) OR (id1 = " . $idto . ")) AND " .
+		"((id2 IS NULL) OR (id2 = " . $idfrom . ")) " .
+		"AND (permission LIKE '" . $mask . "');";
+	$result = $mysql_db->query($query);
+	if ($row = $result->fetch_array(MYSQLI_BOTH))
+	{
+		do
+		{
+			if (!is_null($row['id1']) && !is_null($row['id2']))
+			{
+				array_push($output, array($row['id'], "normal"));
+			}
+			else if (is_null($row['id1']) && !is_null($row['id2']))
+			{
+				array_push($output, array($row['id'], "global"));
+			}
+			else if (!is_null($row['id1']) && is_null($row['id2']))
+			{
+				array_push($output, array($row['id'], "public"));
+			}
+			else if (is_null($row['id1']) && is_null($row['id2']))
+			{
+				array_push($output, array($row['id'], "master"));
+			}
+		} while ($row = $result->fetch_array(MYSQLI_BOTH));
+	}
+	else
+	{
+		array_push($output, array($row['id'], "none"));
+	}
+	$result->close();
+	
+	return $output;
+}
+
+function check_specific_permission($results, $permission)
+{	//check for the presence of a certain type of permission
+	//use on the results of check_permission
+	foreach ($results as $permcheck)
+	{
+		if ($permcheck[1] == $permission)
+			return "yes";
+	}
+	return "no";
+}
+
+function mod_permission($table, $idfrom, $idto, $op, $perm)
+{	//used to add or remove a single attribute from a permission table
+	global $mysql_db;
+	
+	//should detect null values
+	if ((is_numeric($idto) == FALSE) || (is_numeric($idfrom) == FALSE))
+	{
+		echo "<b>You can't do that</b><br >\n";
+		return;
+	}
+	
+	$permcheckarray = check_permission($table, $idfrom, $idto, '%' . $perm . '%');
+
+	//because there could be multiple elements 	
+	foreach ($permcheckarray as $permcheck)
+	{
+		if ($permcheck[1] == "normal")
+		{	//regular permission exists
+			if ($op == "-")
+			{	//remove the permission that exists
+				$query = "UPDATE `" . $table . "` SET permission = " .
+					"REPLACE(permission, '" . $perm . "', '') WHERE (id = " .
+					$permcheck[0] . ") AND (id1 = " . $idto . ");";
+				$mysql_db->query($query);
+				//TODO: remove rows that do not add permissions
+			}
+		}
+		else if ($permcheck[1] == "none")
+		{	//no permission exists
+			if ($op == "+")
+			{	//try to add to an existing normal permission
+				$query = "UPDATE `" . $table . "` SET permission = " .
+					"CONCAT(permission, '" . $perm . "') WHERE (id = " .
+					$idfrom . ") AND (id1 = " . $idto . ");";
+				if($result = $mysql_db->query($query))
+				{
+					if ($mysql_db->affected_rows == 0)
+					{	//add a new normal permission entry
+						$query = "INSERT INTO `" . $table . "` (id1, id2, permission)" .
+							" VALUES ('" . $idto . "', '" . $idfrom . "', '" . $perm .
+							"');";
+						$mysql_db->query($query);
+					}
+				}
+			}
+		}
+	}
+
+	return $output;
+}
+
 function login_code($quiet)
 {	//prints and executes code for the login script
 	//return value of 1 means don't do anything else
@@ -147,7 +249,7 @@ function login_code($quiet)
 		if ($newpass == $passmatch)
 		{
 			$uid = $_SESSION['user']['emp_id'];
-			store_user_pword($uid, $oldpass, $newpass);
+			contacts::store_user_pword($uid, $oldpass, $newpass);
 		}
 		else
 		{
@@ -245,71 +347,6 @@ function login_code($quiet)
 		$retv = 1;
 	}
 	return $retv;
-}
-
-function store_user_pword($uid, $oldpass, $newpass)
-{
-	//TODO: store the number used for key stretching
-	//TODO: check the number actually used for key stretching against
-		//the configured number upon successful password entry
-		//regenerate the password if the numbers are different
-	
-	global $mysql_db, $config;
-	
-	$query = "SELECT fail_pass_change, username, password, " .
-			 "salt FROM contacts WHERE emp_id = '" . 
-			 $uid . "' LIMIT 1;";
-	
-	$results = $mysql_db->query($query);
-	if ($results)
-	{
-		$row = $results->fetch_array(MYSQLI_BOTH);
-		if ($row['fail_pass_change'] >= $config['max_fail_pass_changes'])
-		{
-			unset($_SESSION['username']);
-			unset($_SESSION['password']);
-			echo	"<h3>Invalid username or password</h3><br >\n";
-		}
-		else if ($row['password'] == hash_password($oldpass, $row['salt']))
-		{	//ok the old password matches
-			$salt = generate_salt();
-	
-			$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
-			if ($mysql_db->query($query) == TRUE)
-			{
-				echo "User salt stored successfully<br >\n";
-				$hash_pass = hash_password($newpass, $salt);
-				$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
-				if ($mysql_db->query($query) == TRUE)
-				{
-					echo "User password stored successfully<br >\n";
-				}
-				else
-				{
-					echo "Failed to save user password<br >\n";
-				}
-			}
-			else
-			{
-				echo "Failed to save user salt<br >\n";
-			}
-		}
-		else
-		{	//password fail match
-			unset($_SESSION['username']);
-			unset($_SESSION['password']);
-			$query = "UPDATE contacts SET fail_pass_change=fail_pass_change+1 WHERE emp_id = " . $uid . ";";
-			$mysql_db->query($query);
-			echo	"<h3>Invalid username or password</h3><br >\n";
-		}
-	}
-	else
-	{	//contact not found
-		unset($_SESSION['username']);
-		unset($_SESSION['password']);
-		echo	"<h3>Invalid username or password</h3><br >\n";	
-	}
-	$results->close();
 }
 
 function selectTimePeriod()

@@ -44,18 +44,9 @@ if ($stop == 0)
 	
 	if (isset($_SESSION['username']))
 	{
-		if ($_SESSION['user']['permission_payments'] != 0)
-		{
-			echo '<a href="' . rootPageURL() . '/payments.php">Look at all payments</a>' . "<br >\n";
-		}
-		if ($_SESSION['user']['permission_contacts'] != 0)
-		{
-			echo '<a href="' . rootPageURL() . '/contacts.php">Browse all contacts</a>' . "<br >\n";
-		}
-		if ($_SESSION['user']['permission_jobs'] != 0)
-		{
-			echo '<a href="' . rootPageURL() . '/inspections.php">View all inspections</a>' . "<br >\n";
-		}
+		echo '<a href="' . rootPageURL() . '/payments.php">Look at all payments</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/contacts.php">Browse all contacts</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/inspections.php">View all inspections</a>' . "<br >\n";
 		echo '<a href="' . rootPageURL() . '/properties.php">View where inspections have been done</a>' . "<br >\n";
 		echo '<a href="' . rootPageURL() . '/jobs.php">View job list</a>' . "<br >\n";
 	}
