@@ -49,6 +49,8 @@ if ($stop == 0)
 		echo '<a href="' . rootPageURL() . '/inspections.php">View all inspections</a>' . "<br >\n";
 		echo '<a href="' . rootPageURL() . '/properties.php">View where inspections have been done</a>' . "<br >\n";
 		echo '<a href="' . rootPageURL() . '/jobs.php">View job list</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/locations.php">Browse locations</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL() . '/search.php">Search locations</a>' . "<br >\n";
 	}
 }
 

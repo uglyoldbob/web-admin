@@ -116,7 +116,7 @@ function print_inspections($contact, $start_page)
 		$query = $query . " ORDER BY id DESC LIMIT " . ($start_page*30) . ", " . ($start_page*30+30);
 	}
 			
-	$payment_results = $mysql_db->_query($query);
+	$payment_results = $mysql_db->query($query);
 	
 	echo "<table border=\"1\">\n";
 	echo "	<tr>\n";
