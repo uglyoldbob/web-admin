@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 22, 2012 at 05:41 PM
--- Server version: 5.5.24
--- PHP Version: 5.3.10-1ubuntu3.2
+-- Generation Time: Mar 06, 2013 at 11:08 PM
+-- Server version: 5.5.28
+-- PHP Version: 5.3.10-1ubuntu3.4
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS `contacts` (
   `username` varchar(32) NOT NULL,
   `password` char(64) DEFAULT NULL,
   `salt` char(64) NOT NULL,
+  `stretching` int(11) NOT NULL,
   `fail_logins` int(11) NOT NULL DEFAULT '0',
   `fail_pass_change` int(11) NOT NULL DEFAULT '0',
   `classification` varchar(25) NOT NULL DEFAULT 'Employee',
