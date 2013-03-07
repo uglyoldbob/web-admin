@@ -4,6 +4,7 @@ if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	die ('<h2>Direct File Access Prohibited</h2>');
 
 include("passwords.php");
+include("include/contacts.php");
 
 $config = parse_ini_file("/etc/web-admin/config.ini");
 
@@ -272,20 +273,39 @@ function login_code($quiet)
 			
 			if ($_POST["action"] == "login")
 			{
-				$_SESSION['password'] = hash_password($_SESSION['password'], $row['salt']);
+				//check to see if the password matches and the stretching does not match
+				$temp = hash_password($_SESSION['password'], $row['salt'], $row['stretching']);
+				if ( ($row['password'] == $temp) && ($row['stretching'] != $config['key_stretching_value']) )
+				{	//password is good, key stretching needs to be fixed
+					contacts::mod_user_pword($row['emp_id'], $_SESSION['password']);
+					$fquery = "SELECT * From contacts WHERE username='" . $_SESSION['username'] . "'LIMIT 1;";
+					$fresults = $mysql_db->query($fquery);
+					if ($fresults)
+					{
+						$row = $fresults->fetch_array(MYSQLI_BOTH);
+					}
+					else
+					{	//this should never happen
+						die("Failed to reformat password");
+					}
+					$temp = hash_password($_SESSION['password'], $row['salt'], $config['key_stretching_value']);
+					$row['password'] = $temp;
+				}
+
+				$_SESSION['password'] = $temp;
 			}
 			if ($row['password'] == $_SESSION['password'])
 			{
 				$_SESSION['user'] = $row;
+				if ($_POST["action"] == "login")
+				{
+					$query = "UPDATE contacts SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+					$mysql_db->query($query);
+					$query = "UPDATE contacts SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+					$mysql_db->query($query);
+				}
 				if ($quiet == 0)
 				{
-					if ($_POST["action"] == "login")
-					{
-						$query = "UPDATE contacts SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
-						$mysql_db->query($query);
-						$query = "UPDATE contacts SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
-						$mysql_db->query($query);
-					}
 					echo "<h3>Welcome ";
 					echo print_contact($_SESSION['user']['emp_id']);
 					echo "</h3><br >\n";

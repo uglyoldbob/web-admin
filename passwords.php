@@ -132,10 +132,11 @@ function generate_salt()
 	return $salt;
 }
 
-function hash_password($pword, $salt)
+function hash_password($pword, $salt, $count)
 {
 	global $config;
-	$count = $config['key_stretching_value'];
+#number of counts is specifed by the caller
+#	$count = $config['key_stretching_value'];
 	$result = pbkdf2("sha256", $pword, $salt, $count, 32);
 	return $result;
 }

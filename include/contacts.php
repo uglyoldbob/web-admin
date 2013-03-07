@@ -1,5 +1,7 @@
 <?php
 
+#TODO : add capability to delete password of a user
+
 class contacts
 {
 	protected $contact_list;	//holds the list of contact information
@@ -580,17 +582,12 @@ class contacts
 	
 	public static function init_user_pword($uid, $newpass)
 	{
-		//TODO: store the number used for key stretching
-		//TODO: check the number actually used for key stretching against
-			//the configured number upon successful password entry
-			//regenerate the password if the numbers are different
-		
 		global $mysql_db, $config;
 		
 		$userid = $_SESSION['user']['emp_id'];
 		$allow = check_permission("contact_permission", $userid, $uid, "%p%");
 		if ($allow[0][1] == "none")
-		{
+		{	//must have permission to initialize a users password
 			echo "<b>You can't do that</b><br >\n";
 			return;
 		}
@@ -611,21 +608,33 @@ class contacts
 			}
 			else if (is_null($row['password']))
 			{	//ok a password does not exist
+				//make a new salt
 				$salt = generate_salt();
 		
 				$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
 				if ($mysql_db->query($query) == TRUE)
 				{
 					echo "User salt stored successfully<br >\n";
-					$hash_pass = hash_password($newpass, $salt);
-					$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+					//value in config file used when creating or storing passwords
+					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
+					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
+						". WHERE emp_id = " . $uid . "; ";
 					if ($mysql_db->query($query) == TRUE)
 					{
-						echo "User password stored successfully<br >\n";
+						echo "User stretching stored successfully<br >\n";
+						$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+						if ($mysql_db->query($query) == TRUE)
+						{
+							echo "User password stored successfully<br >\n";
+						}
+						else
+						{
+							echo "Failed to save user password<br >\n";
+						}
 					}
 					else
 					{
-						echo "Failed to save user password<br >\n";
+						echo "Failed to save user stretching<br >\n";
 					}
 				}
 				else
@@ -653,17 +662,12 @@ class contacts
 	
 	public static function mod_user_pword($uid, $newpass)
 	{
-		//TODO: store the number used for key stretching
-		//TODO: check the number actually used for key stretching against
-			//the configured number upon successful password entry
-			//regenerate the password if the numbers are different
-		
 		global $mysql_db, $config;
 		
 		$userid = $_SESSION['user']['emp_id'];
 		$allow = check_permission("contact_permission", $userid, $uid, "%p%");
 		if ($allow[0][1] == "none")
-		{
+		{	//must have permission to change a users password
 			echo "<b>You can't do that</b><br >\n";
 			return;
 		}
@@ -690,15 +694,25 @@ class contacts
 				if ($mysql_db->query($query) == TRUE)
 				{
 					echo "User salt stored successfully<br >\n";
-					$hash_pass = hash_password($newpass, $salt);
-					$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
+					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
+						"' WHERE emp_id = " . $uid . "; ";
 					if ($mysql_db->query($query) == TRUE)
 					{
-						echo "User password stored successfully<br >\n";
+						echo "User stretching stored successfully<br >\n";
+						$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+						if ($mysql_db->query($query) == TRUE)
+						{
+							echo "User password stored successfully<br >\n";
+						}
+						else
+						{
+							echo "Failed to save user password<br >\n";
+						}
 					}
 					else
 					{
-						echo "Failed to save user password<br >\n";
+						echo "Failed to save user stretching<br >\n";
 					}
 				}
 				else
@@ -718,11 +732,6 @@ class contacts
 
 	public static function store_user_pword($uid, $oldpass, $newpass)
 	{
-		//TODO: store the number used for key stretching
-		//TODO: check the number actually used for key stretching against
-			//the configured number upon successful password entry
-			//regenerate the password if the numbers are different
-		
 		global $mysql_db, $config;
 		
 		$userid = $_SESSION['user']['emp_id'];
@@ -734,7 +743,7 @@ class contacts
 		}
 		
 		$query = "SELECT fail_pass_change, username, password, " .
-				 "salt FROM contacts WHERE emp_id = '" . 
+				 "salt, stretching FROM contacts WHERE emp_id = '" . 
 				 $uid . "' LIMIT 1;";
 		
 		$results = $mysql_db->query($query);
@@ -747,7 +756,7 @@ class contacts
 				unset($_SESSION['password']);
 				echo	"<h3>Invalid username or password</h3><br >\n";
 			}
-			else if ($row['password'] == hash_password($oldpass, $row['salt']))
+			else if ($row['password'] == hash_password($oldpass, $row['salt'], $row['stretching']))
 			{	//ok the old password matches
 				$salt = generate_salt();
 		
@@ -755,15 +764,25 @@ class contacts
 				if ($mysql_db->query($query) == TRUE)
 				{
 					echo "User salt stored successfully<br >\n";
-					$hash_pass = hash_password($newpass, $salt);
-					$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
+					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
+						". WHERE emp_id = " . $uid . "; ";
 					if ($mysql_db->query($query) == TRUE)
 					{
-						echo "User password stored successfully<br >\n";
+						echo "User stretching stored successfully<br >\n";
+						$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+						if ($mysql_db->query($query) == TRUE)
+						{
+							echo "User password stored successfully<br >\n";
+						}
+						else
+						{
+							echo "Failed to save user password<br >\n";
+						}
 					}
 					else
 					{
-						echo "Failed to save user password<br >\n";
+						echo "Failed to save user stretching<br >\n";
 					}
 				}
 				else
