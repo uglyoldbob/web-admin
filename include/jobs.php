@@ -274,7 +274,7 @@ class jobs
 				$select_radio = 6;
 
 			echo "	<input type=\"checkbox\" name=\"mod_phone1\" ";
-			echo "onchange=\"cb_hide_show(this, $('#mod_phone1'));\" />Change this phone number<br >\n";
+			echo "onclick=\"cb_hide_show(this, $('#mod_phone1'));\" />Change this phone number<br >\n";
 			echo "	<div id=\"mod_phone1\" style=\"display: none;\">\n";
 			for ($i = 0; $i < 6; $i++)
 			{
@@ -297,7 +297,7 @@ class jobs
 			
 			echo "	<b>Comments:</b> " . $row['comments'] . "\n";
 			echo "	<input type=\"checkbox\" name=\"mod_comments1\" ";
-			echo "onchange=\"cb_hide_show(this, $('#mod_comments'));\" />Change the comments<br >\n";
+			echo "onclick=\"cb_hide_show(this, $('#mod_comments'));\" />Change the comments<br >\n";
 			echo "	<div id=\"mod_comments\" style=\"display: none;\">\n";
 			echo '	<textarea name="comments" id="comments" rows=4 cols=75 >' .
 				$mysql_db->real_escape_string($row['comments']) .

@@ -1,9 +1,9 @@
 <?php
-session_start();	//start php session
+include("global.php");
+start_my_session();	//start php session
 header('Content-type: text/html; charset=utf-8');
 
-include("global.php");
-
+global $mysql_db;
 openDatabase();
 
 $location = $_GET["id"];
@@ -11,7 +11,6 @@ if (is_numeric($location) == FALSE)
 	$location = 0;
 
 $query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
-global $mysql_db;
 $results = $mysql_db->query($query);
 if ($row = $results->fetch_array(MYSQLI_BOTH))
 {

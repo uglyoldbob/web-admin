@@ -1,8 +1,7 @@
 <?php
-session_start();	//start php session
-header('Content-type: text/html; charset=utf-8');
-
 include("global.php");
+start_my_session();	//start php session
+header('Content-type: text/html; charset=utf-8');
 
 openDatabase();
 
@@ -32,7 +31,7 @@ if ($stop == 0)
 
 	if ($_POST['action'] == "search")
 	{
-		$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['id'] . " AND name LIKE '%" . 
+		$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND name LIKE '%" . 
 			$mysql_db->real_escape_string($_POST['search']) . "%' or description LIKE '%" .
 					$mysql_db->real_escape_string($_POST['search']) . "%' or unit LIKE '%" .
 					$mysql_db->real_escape_string($_POST['search']) . "%';";
@@ -49,9 +48,9 @@ if ($stop == 0)
 				echo " (" . $row['description'] . ")";
 			}
 			echo " at ";
-			echo '<a href="' . rootPageURL() . 'locations.php?id=' . 
-				get_location($row['id'], $database) . "\">";
-			print_location($row['location'], $database);
+			echo '<a href="' . rootPageURL() . '/locations.php?id=' . 
+				get_location($row['id']) . "\">";
+			print_location($row['location']);
 			echo '</a>';
 			echo "<br >\n";
 		}

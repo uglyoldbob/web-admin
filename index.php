@@ -1,9 +1,9 @@
 <?php
-session_start();	//start php session
+include("global.php");
+start_my_session();	//start php session
 header('Content-type: text/html; charset=utf-8');
 
-include("global.php");
-
+global $mysql_db;
 openDatabase();
 
 ?>

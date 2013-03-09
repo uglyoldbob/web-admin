@@ -1,4 +1,5 @@
 <?php
+
 include("global.php");
 start_my_session();
 header('Content-type: text/html; charset=utf-8');
@@ -10,6 +11,8 @@ if (!(array_key_exists("contact", $_GET)))
 	$_GET["contact"] = "0";
 }
 $contact = $_GET["contact"];
+
+global $mysql_db;
 openDatabase();
 
 if (is_numeric($contact) == FALSE)
@@ -89,7 +92,6 @@ if ($stop == 0)
 	selectTimePeriod();
 	
 	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
-	
 	if ($_POST["action"] == "apply")
 	{	//apply the stuff
 		$error = 0;
@@ -143,7 +145,6 @@ if ($stop == 0)
 					"'" . $date_earned . "', '" . $comments .
 					"', '" . $categori . "', '" . $date_paid .
 					"');";
-				
 				if ($mysql_db->query($query) != TRUE)
 				{
 					echo "Error: " . $mysql_db->error() . "<br >\n";

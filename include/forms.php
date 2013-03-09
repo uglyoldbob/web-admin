@@ -42,14 +42,14 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '<form method="POST" action="payments.php">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	if ($id != 0)
-		echo '<b>Payment ID: </b>Id number: <input type="text" value="' . $id . '"name=pay_id disabled>' . "<br >\n";
+		echo '<b>Payment ID: </b>Id number: <input type="text" value="' . $id . '" name="pay_id" readonly>' . "<br >\n";
 	echo '	<b>Payment by: </b>';
 	
 	make_autocomplete('<b>Contact Name:</b> ', $payer_id, "name_payer",
-		"name_payer", "fillNames", "payer_suggest", "payer_list");
+		"id_payer", "fillNames", "payer_suggest", "payer_list");
 	echo '	<b>Payment to: </b>' . "\n";
 	make_autocomplete('<b>Contact Name:</b> ', $payee_id, "name_payee",
-		"name_payee", "fillNames", "payee_suggest", "payee_list");
+		"id_payee", "fillNames", "payee_suggest", "payee_list");
 	
 	echo '	<b>Amount of Payment: </b>Dollar amount: $<input type="text" value="' . $amount . '" name="amount_paid" id="amount_paid" ><br >' . "\n";
 	echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input type="text" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";

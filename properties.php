@@ -16,6 +16,7 @@ $details = $_GET["details"];
 if (is_numeric($details) == FALSE)
 	$details = 0;
 
+global $mysql_db;
 openDatabase();
 ?>
 
@@ -131,15 +132,12 @@ openDatabase();
 
 $stop = 0;
 echo '<div>' . "\n";
-if (login_code() == 1)
-{
-	$stop = 1;
-}
-if (login_button(0) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }
 echo "</div>\n";
+
 if ($stop == 0)
 {
 	selectTimePeriod();
