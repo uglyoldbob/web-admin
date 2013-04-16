@@ -384,6 +384,10 @@ function selectTimePeriod()
 	{
 		$_SESSION['period'] = "2012";
 	}
+	else if ($_POST['timeperiod'] == "2013")
+	{
+		$_SESSION['period'] = "2013";
+	}
 	else if ($_POST['timeperiod'] == "all")
 	{
 		$_SESSION['period'] = "all";
@@ -407,6 +411,10 @@ function selectTimePeriod()
 	if ($_SESSION['period'] == "2012")
 		echo "selected ";
 	echo	"value=\"2012\">2012 Tax Year</option>\n";
+	echo "		<option ";
+	if ($_SESSION['period'] == "2013")
+		echo "selected ";
+	echo	"value=\"2013\">2013 Tax Year</option>\n";
 	echo	"	</select>\n";
 	echo "	<input type=\"submit\" value=\"Go\">\n" .
 		"</form>\n" .
@@ -424,6 +432,11 @@ function getPeriodComparison($fieldname)
 	{
 		return " $fieldname  > '2011-12-31'" .
 			" AND $fieldname < '2013-01-01'";
+	}
+	else if ($_SESSION['period'] == "2013")
+	{
+		return " $fieldname  > '2012-12-31'" .
+			" AND $fieldname < '2014-01-01'";
 	}
 	else
 	{

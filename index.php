@@ -38,6 +38,19 @@ else
 	echo("<p>Message delivery failed...</p>");
 }*/
 
+
+/* uploading file example
+for testing only
+?>
+<form action="upload_file.php" method="post"
+enctype="multipart/form-data">
+<label for="file">Filename:</label>
+<input type="file" name="file" id="file"><br>
+<input type="submit" name="submit" value="Submit">
+</form>
+<?php
+*/
+
 if ($stop == 0)
 {
 	selectTimePeriod();

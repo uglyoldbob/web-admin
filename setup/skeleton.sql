@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `equipment` (
   `description` varchar(255) NOT NULL,
   `last_known` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=576 ;
 
 -- --------------------------------------------------------
 
@@ -117,10 +117,12 @@ CREATE TABLE IF NOT EXISTS `equipment` (
 
 CREATE TABLE IF NOT EXISTS `images` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `image_type` varchar(25) NOT NULL,
-  `image` blob NOT NULL,
-  `image_size` varchar(25) NOT NULL,
-  PRIMARY KEY (`id`)
+  `uploader` int(11) NOT NULL,
+  `size` int(11) NOT NULL,
+  `file_vga` varchar(255) NOT NULL,
+  `file_thumb` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `filename` (`file_vga`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
@@ -267,6 +269,17 @@ CREATE TABLE IF NOT EXISTS `status_codes` (
   `Description` varchar(255) NOT NULL,
   UNIQUE KEY `code` (`code`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `version`
+--
+
+CREATE TABLE IF NOT EXISTS `version` (
+  `id` varchar(255) NOT NULL,
+  `num` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
