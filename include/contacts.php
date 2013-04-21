@@ -766,7 +766,7 @@ class contacts
 					echo "User salt stored successfully<br >\n";
 					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
 					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
-						". WHERE emp_id = " . $uid . "; ";
+						"' WHERE emp_id = " . $uid . "; ";
 					if ($mysql_db->query($query) == TRUE)
 					{
 						echo "User stretching stored successfully<br >\n";
