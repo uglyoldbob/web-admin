@@ -1,0 +1,4 @@
+RewriteEngine on
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+)\.jpg$  image.php?id=$1 [L,NC,QSA]

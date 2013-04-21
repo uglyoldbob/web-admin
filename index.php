@@ -39,9 +39,9 @@ else
 }*/
 
 
-/* uploading file example
-for testing only
-?>
+// uploading file example
+//for testing only
+/*?>
 <form action="upload_file.php" method="post"
 enctype="multipart/form-data">
 <label for="file">Filename:</label>
