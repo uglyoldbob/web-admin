@@ -53,8 +53,9 @@ enctype="multipart/form-data">
 
 if ($stop == 0)
 {
-	do_top_menu(0);
-	echo "Something goes here?<br>\n";
+	do_top_menu(5);
+	echo "User control panel<br>\n";
+	selectTimePeriod();
 }
 
 closeDatabase();

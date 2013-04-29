@@ -24,7 +24,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Inspection Location List</title>
-<link rel="stylesheet" type="text/css" href="css/global.css" />
+<?php do_css() ?>
 </head>
 
 <script type="text/javascript" src="jquery-1.2.1.pack.js"></script>
@@ -131,12 +131,10 @@ openDatabase();
 <?php
 
 $stop = 0;
-echo '<div>' . "\n";
 if (login_code(0) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 
 if ($stop == 0)
 {

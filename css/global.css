@@ -3,3 +3,58 @@ body
 background-color:#f0a4ce;
 }
 
+.clear { clear:both; }
+
+ul.topmenu
+{
+	width:100%;
+	float: left;
+	margin: 0 0 1em 0;
+	padding: 0;
+	list-style: none;
+	background-color: #f2f2f2;
+	border-bottom: 1px solid #ccc;
+	border-top: 1px solid #ccc;
+}
+
+ul.topmenu li
+{
+	float: left;
+}
+
+ul.topmenu li a
+{
+	display: block;
+	padding: 0.5em 1em;
+	text-decoration: none;
+	font-weight: bold;
+	color: #069;
+	border-right: 1px solid #ccc;
+}
+
+ul.topmenu li a.selected
+{
+	color: #096;
+}
+
+ul.topmenu li a:hover
+{
+	color: #c00;
+	background-color: #fff;
+}
+
+div.loc_grid_elem
+{
+	display: inline;
+	float: left;
+	width:175px;
+	height:175px;
+}
+
+.loc_grid_elem a img
+{
+	border: none;
+	display: block;
+	width: 90%:
+	height: 90%;
+}

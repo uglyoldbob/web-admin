@@ -23,6 +23,11 @@ include('SimpleImage.php');
 #upload_image($_FILES['file'], 0, "pict", $id);
 #echo "The image id is " . $id . "<br >\n";
 
+function no_image()
+{
+	return '<div style="width:128px;height:96px;border:1px solid #000;">No Image</div>';
+}
+
 function check_for_upload_permission($uploader)
 {	#does this person have permission to upload a(nother) file?
 	#they could be at their limit for the number of files allowed

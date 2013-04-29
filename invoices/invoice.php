@@ -5,12 +5,10 @@ start_my_session();
 openDatabase();
 
 $stop = 0;
-echo '<div>' . "\n";
 if (login_code(1) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 
 if ($stop == 0)
 {

@@ -2,12 +2,14 @@
 <html>
 <head>
 <title>Thermal Specialists Management System</title>
-<link rel="stylesheet" type="text/css" href="css/global.css" />
+<?php 
+include("global.php");
+do_css() 
+?>
 </head>
 <body>
 
 <?php
-include("global.php");
 include("include/upload_file.php");
 start_my_session();	//start php session
 header('Content-type: text/html; charset=utf-8');
@@ -20,12 +22,10 @@ if (is_numeric($location) == FALSE)
 	$location = 0;
 
 $stop = 0;
-echo '<div>' . "\n";
-if (login_code(0) == 1)
+if (login_code(1) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 
 $query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
 $results = $mysql_db->query($query);
@@ -270,7 +270,7 @@ function do_equ($apply)
 
 if ($stop == 0)
 {
-	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
+	do_top_menu(4);
 
 	if ($_POST["action"] == "del_loc")
 	{
@@ -514,7 +514,12 @@ if ($stop == 0)
 					if ($row['img_id'])
 					{
 						echo '<img src="' . rootPageURL() . '/uploads/image.php?id=' . 
-							$row['img_id'] . ".jpg\"> <br >\n";
+							$row['img_id'] . ".jpg\" alt=\"No image\"> <br >\n";
+					}
+					else
+					{
+						echo no_image() . " <br >\n";
+
 					}
 					//TODO: add capability of changing, removing, adding a photo for the location
 				}
@@ -560,24 +565,36 @@ if ($stop == 0)
 			{
 				if ($locations_exist == 0)
 				{
-					echo "<h3>Locations : </h3><br >\n";
+					echo "<div class=\"loc_grid\">\n";
+					echo "	<h3>Locations : </h3><br >\n";
 					$locations_exist = 1;
 				}
 
-				echo '<a href="' . rootPageURL() . '/locations.php?id=' . $row['id'] . '">';
+				echo "	<div class=\"loc_grid_elem\">\n";
+				echo '		<a href="' . rootPageURL() . '/locations.php?id=' . $row['id'] . "\"><br>\n";
 	
 				if ($row['img_id'])
 				{
-					echo '<img src="' . rootPageURL() .
-						'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\"> <br >\n";
+					echo '		<img src="' . rootPageURL() .
+						'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">";
+				}
+				else
+				{
+					echo no_image();
 				}
 				echo $row['description'] . ' (' . $row['location'] . ')</a>' . "<br >\n";
+				echo "	</div>\n";
 			}
 		}
 		
 		if ($locations_exist == 0)
 		{
 			echo "<h3>There are no locations here</h3><br >\n";
+		}
+		else
+		{
+			echo "</div>\n";
+			echo "<div class=\"clear\"></div>\n";
 		}
 		
 		echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
@@ -631,12 +648,14 @@ if ($stop == 0)
 			if ($row['img_id'])
 			{
 				echo '<img src="' . rootPageURL() .
-						'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\">\n";
+						'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">\n";
 				echo "		";
 			}
 			else
 			{
-				echo "&nbsp;";
+				echo no_image() . "\n";
+				echo "		";
+
 			}
 			echo "</td>\n";
 

@@ -61,13 +61,16 @@ class contacts
 			{	//editing information
 				echo "<h3>Editing Details for: ";
 			}
+			else if ($_POST["action"] == "view")
+			{
+				echo "<h3>Viewing Profile for: ";
+				$_POST["action"] = "";
+			}
 
 			echo print_contact($this->contact);
 			echo "</h3>\n";
 			echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $this->contact . "\">View payments</a><br>\n";
 			echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $this->contact . "\">View inspections</a><br>\n";
-
-			echo "<a href=\"" . rootPageURL() . "/contacts.php\"> " . " Back to all contacts</a><br >\n\n";
 
 			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
@@ -84,7 +87,6 @@ class contacts
 
 			if ($_POST["action"] != "edit")
 			{	//viewing profile
-				echo print_contact($this->contact);
 				if ($row['website'] != "")
 				{
 					echo " : Visit their website by ";
@@ -154,6 +156,12 @@ class contacts
 	public function make_form($id, $last_name, $first_name, $classify, $eligible, $ssn, $mobile, $home, $other,
 		$website, $email, $street, $city, $state, $zip, $username)
 	{	//TODO: implement drop down box with a yes/no
+		if ($mobile == "")
+			$mobile = "&nbsp;";
+		if ($home == "")
+			$home = "&nbsp;";
+		if ($other == "")
+			$other = "&nbsp;";
 		$uid = $_SESSION['user']['emp_id'];
 		$allow = check_permission("contact_permission", $uid, $id, "%w%");
 		echo "<b> If a customer wants to be contacted about a job, contact information must be entered here</b><br >\n";
@@ -542,6 +550,10 @@ class contacts
 			}
 			echo "		<td>" . $row['first_name'] . "</td>\n";
 			echo "		<td>" . $row['classification'] . "</td>\n";
+			if ($row['phone_mobile'] == "")
+				$row['phone_mobile'] = "&nbsp;";
+			if ($row['phone_home'] == "")
+				$row['phone_home'] = "&nbsp;";
 			echo "		<td>" . $row['phone_mobile'] . "</td>\n";
 			echo "		<td>" . $row['phone_home'] . "</td>\n";
 	

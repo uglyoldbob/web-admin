@@ -32,8 +32,7 @@ if (is_numeric($start_page) == FALSE)
 <html>
 <head>
 <title>Thermal Specialists Payment Details</title>
-<link rel="stylesheet" type="text/css" href="css/global.css" />
-<link rel="stylesheet" type="text/css" href="css/payments.css" />
+<?php do_css() ?>
 </head>
 
 <body>
@@ -81,17 +80,13 @@ if (is_numeric($start_page) == FALSE)
 <?php
 
 $stop = 0;
-echo '<div>' . "\n";
-if (login_code(0) == 1)
+if (login_code(1) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 if ($stop == 0)
 {
-	selectTimePeriod();
-	
-	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
+	do_top_menu(1);
 	if ($_POST["action"] == "apply")
 	{	//apply the stuff
 		$error = 0;
@@ -185,9 +180,6 @@ if ($stop == 0)
 	
 	if ($_POST["action"] == "edit")
 	{
-		echo '<a href="' . rootPageURL() . 
-			'/payments.php">Return to all payments</a>' . "<br >\n";
-		
 		$pay_id = $_POST["id"];
 		if (is_numeric($pay_id) == FALSE)
 		{
@@ -256,14 +248,13 @@ if ($stop == 0)
 		}
 	}
 	
-	echo "<div>\n";
+	echo "<div style=\"display:block;\">\n";
 	
 	if ($contact != 0)
 	{
 		echo "<h3>Payment Details for: ";
 		echo print_contact($contact);
-		echo "</h3>\n<a href=\"" . rootPageURL() . "/payments.php\"> " . 
-			" Back to all payments</a><br >\n\n";
+		echo "</h3>\n";
 		
 		echo "<form action=\"" . rootPageURL() . "/contacts.php?contact=" . 
 			$contact . "\" method=\"post\">\n" .
@@ -305,7 +296,7 @@ if ($stop == 0)
 	
 	if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
 	{
-		echo "<table border=\"1\">\n";
+		echo "<table style=\"width: 100%\" border=\"1\" >\n";
 		echo "	<tr>\n";
 		echo "		<th>ID#</th>\n";
 		echo "		<th>Payment to</th>\n";
@@ -423,10 +414,10 @@ if ($stop == 0)
 			}
 			echo "$" . $row['amount_earned'] . "</td>\n";
 			
-			echo "		<td>" . $row['date_earned'] . "</td>\n";
-			echo "		<td>" . $row['date_paid'] . "</td>\n";
-			echo "		<td>" . $row['comments'] . "</td>\n";
-			echo "		<td>" . $row['category'] . "</td>\n";
+			echo "		<td>" . blank_check($row['date_earned']) . "</td>\n";
+			echo "		<td>" . blank_check($row['date_paid']) . "</td>\n";
+			echo "		<td>" . blank_check($row['comments']) . "</td>\n";
+			echo "		<td>" . blank_check($row['category']) . "</td>\n";
 			
 			if ($contact != 0)
 			{

@@ -8,6 +8,60 @@ include("include/contacts.php");
 
 $config = parse_ini_file("/etc/web-admin/config.ini");
 
+function blank_check($checkme)
+{
+	if ($checkme == "")
+		return "&nbsp;";
+	else
+		return $checkme;
+}
+
+function do_css()
+{
+	global $config;
+	if ($config['testing'] == 1)
+	{
+		echo "<style>\n";
+		echo file_get_contents("css/global.css");
+		echo "</style>\n";
+	}
+	else
+	{	#TODO : implement htaccess mod_rewrite rules for the css folder
+		echo '<link rel="stylesheet" type="text/css" href="css/global.css" />' . "\n";
+	}
+}
+
+function do_top_menu($indx)
+{
+	echo "<div>\n<ul class=\"topmenu\">\n";
+	echo "	<li><a ";
+	if ($indx == 0)
+		echo "class=selected ";
+	echo "href=\"" . rootPageURL() . "/index.php\">Home</a></li>\n";
+	echo "	<li><a ";
+	if ($indx == 1)
+		echo "class=selected ";
+	echo "href=\"" . rootPageURL() . "/payments.php\">Payments</a></li>\n";
+	echo "	<li><a ";
+	if ($indx == 2)
+		echo "class=selected ";
+	echo "href=\"" . rootPageURL() . "/contacts.php\">Contacts</a></li>\n";
+	echo "	<li><a ";
+	if ($indx == 3)
+		echo "class=selected ";
+	echo "href=\"" . rootPageURL() . "/jobs.php\">Jobs</a></li>\n";
+	echo "	<li><a ";
+	if ($indx == 4)
+		echo "class=selected ";
+	echo "href=\"" . rootPageURL() . "/locations.php\">Locations</a></li>\n";
+	echo "	<li><a ";
+	if ($indx == 5)
+		echo "class=selected ";	
+	echo "href=\"" . rootPageURL() . "/cp.php\">Control Panel</a></li>\n";
+	echo "</ul>\n</div>\n";
+	echo "<div class=\"clear\"></div>\n";
+}
+
 function curPageURL()
 {
 	$pageURL = 'http';
@@ -95,8 +149,12 @@ function openDatabase()
 	//mysqli_set_charset()
 }
 
+
+//r = read
+//w = write
+//p = modify password
 function check_permission($table, $idfrom, $idto, $mask)
-{	//returns "master", "public", "global", "normal", "none"
+{	//returns an array containing "master", "public", "global", "normal", "none"
 	global $mysql_db;
 	$output = array();
 	$query = "SELECT * FROM `" . $table . "` WHERE " .
@@ -197,11 +255,29 @@ function mod_permission($table, $idfrom, $idto, $op, $perm)
 	return $output;
 }
 
+function invalid_username_password()
+{
+	echo	"<h3>Invalid username or password</h3>\n" .
+		"<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
+		"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
+		"	<input type=\"submit\" value=\"Login\">\n" .
+		"</form>\n";
+}
+
 function login_code($quiet)
 {	//prints and executes code for the login script
 	//return value of 1 means don't do anything else
 		//the login script has closed the fence for some reason
 	global $mysql_db, $config;
+	#TODO : produce the div tags when quiet=1 and output is actually produced
+	if ($quiet == 0)
+	{
+		//this div includes login, logout, and change password widgets
+		echo "<div id=\"login_control\">\n";
+	}
 	$retv = 0;
 	if (!(array_key_exists("HTTPS", $_SERVER)))
 	{
@@ -213,6 +289,8 @@ function login_code($quiet)
 		echo "HTTPS is required<br >\n";
 		$retv = 1;
 	}
+
+	//If chain to determine what to do
 	if ($_POST["action"] == "login")
 	{	//retrieve submitted username and password, if applicable
 		$username = $mysql_db->real_escape_string($_POST["user"]);
@@ -233,8 +311,9 @@ function login_code($quiet)
 		$retv = 1;
 		if ($quiet == 0)
 		{
+			#TODO : create button to change mind on changing password
 			echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-					"	<input type=\"hidden\" name=\"action\" value=\"apply_pass\"><br>\n" .
+					"	<input type=\"hidden\" name=\"action\" value=\"apply_pass\">\n" .
 					"	Old password: <input type=\"password\" name=\"pass1\" ><br>\n" .
 					"	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .
 					"	New password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
@@ -258,6 +337,7 @@ function login_code($quiet)
 		}
 	}
 
+	#logic for logging in and normal activity
 	if (isset($_SESSION['username']))
 	{
 		$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
@@ -265,6 +345,7 @@ function login_code($quiet)
 		if ($results)
 		{
 			$row = $results->fetch_array(MYSQLI_BOTH);
+			#TODO : more testing of the failed login logic
 			if ($row['fail_logins'] >= $config['max_fail_logins'])
 			{	//TODO: set time period for waiting to login
 				unset($_SESSION['username']);
@@ -274,6 +355,9 @@ function login_code($quiet)
 			if ($_POST["action"] == "login")
 			{
 				//check to see if the password matches and the stretching does not match
+				//this piece allows the stretching value to be changed at any given time
+				//the only drawback is the password is hashed twice when the user logs in
+				//in order to change the stretching value
 				$temp = hash_password($_SESSION['password'], $row['salt'], $row['stretching']);
 				if ( ($row['password'] == $temp) && ($row['stretching'] != $config['key_stretching_value']) )
 				{	//password is good, key stretching needs to be fixed
@@ -295,7 +379,8 @@ function login_code($quiet)
 				$_SESSION['password'] = $temp;
 			}
 			if ($row['password'] == $_SESSION['password'])
-			{
+			{	#successful login
+				#TODO : limit the number of valid sessions for users? create a valid session table?
 				$_SESSION['user'] = $row;
 				if ($_POST["action"] == "login")
 				{
@@ -308,7 +393,7 @@ function login_code($quiet)
 				{
 					echo "<h3>Welcome ";
 					echo print_contact($_SESSION['user']['emp_id']);
-					echo "</h3><br >\n";
+					echo "</h3>\n";
 					echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 						 "	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
 						 "	<input type=\"submit\" value=\"Logout\">\n" .
@@ -318,7 +403,7 @@ function login_code($quiet)
 						echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 								"	<input type=\"hidden\" name=\"action\" value=\"change_pass\">\n" .
 								"	<input type=\"submit\" value=\"Change my password\">\n" .
-								"</form><br >\n";
+								"</form>\n";
 					}
 				}
 			}
@@ -328,14 +413,7 @@ function login_code($quiet)
 				$mysql_db->query($query);
 				unset($_SESSION['username']);
 				unset($_SESSION['password']);
-				echo	"<h3>Invalid username or password</h3><br >\n" .
-						"<b>Please login<br >\n" .
-						"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-						"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
-						"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-						"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-						"	<input type=\"submit\" value=\"Login\">\n" .
-						"</form>\n";
+				invalid_username_password();
 				$retv = 1;
 			}
 			$results->close();
@@ -344,14 +422,7 @@ function login_code($quiet)
 		{	//contact not found
 			unset($_SESSION['username']);
 			unset($_SESSION['password']);
-			echo	"<h3>Invalid username or password</h3><br >\n" .
-					"<b>Please login<br >\n" .
-					"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-					"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
-					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-					"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Login\">\n" .
-					"</form>\n";
+			invalid_username_password();
 			$retv = 1;	
 		}
 	}
@@ -359,21 +430,27 @@ function login_code($quiet)
 	{
 		echo 	"<b>Please login<br >\n" .
 				"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-				"	<input type=\"hidden\" name=\"action\" value=\"login\"><br>\n" .
+				"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
 				"	<input type=\"submit\" value=\"Login\">\n" .
 				"</form>\n";
 		$retv = 1;
 	}
+
+	if ($quiet == 0)
+	{
+		echo "</div>\n";
+	}	
+
 	return $retv;
 }
 
 function selectTimePeriod()
 {	//used to select which (time period)'s information will be viewed
-	if (!(array_key_exists("timeperiod", $_POST)))
+	if (!(array_key_exists("period", $_SESSION)))
 	{
-		$_POST['timeperiod'] = "all";
+		$_SESSION['period'] = "all";
 	}
 	
 	if ($_POST['timeperiod'] == "2011")
@@ -393,7 +470,7 @@ function selectTimePeriod()
 		$_SESSION['period'] = "all";
 	}
 
-	echo "<div>\n" .
+	echo "<div id=\"tax_year_select\">\n" .
 		 "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 		 "	<select name=timeperiod>\n";
 	

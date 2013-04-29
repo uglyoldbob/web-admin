@@ -21,23 +21,22 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Contact Listing</title>
-<link rel="stylesheet" type="text/css" href="css/global.css" />
+<?php do_css() ?>
 </head>
 <body>
 
 <?php
+
+#TODO : add photos for contacts
+
 $stop = 0;
-echo "<div>\n";
-if (login_code(0) == 1)
+if (login_code(1) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 if ($stop == 0)
 {
-	selectTimePeriod();
-	
-	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
+	do_top_menu(2);	
 	
 	//update contact information
 	if ($_POST["action"] == "update")
@@ -94,7 +93,7 @@ if ($stop == 0)
 	}
 	else if ($_POST["action"] == "create")
 	{
-		echo "<h3>Creating new contact:</h3>\n<a href=\"" . rootPageURL() . "/contacts.php\"> " . " Back to all contacts</a><br >\n\n";
+		echo "<h3>Creating new contact:</h3>\n<br >\n";
 		$contacts->make_form(0, '', '', '',
 			'', '', '', '', '',
 			'', '', '', '', '', '', '');
