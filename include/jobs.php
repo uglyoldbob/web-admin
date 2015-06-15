@@ -243,8 +243,6 @@ class jobs
 		$result = $mysql_db->query($query);
 		if($row = $result->fetch_array(MYSQLI_BOTH))
 		{
-			echo "<a href=\"" . rootPageURL() . "/jobs.php\"> " . " Back to all jobs</a><br >\n";
-			
 			echo "<form action=\"" . rootPageURL() . "/jobs.php\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"modjob\">\n" .
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $this->job . "\">\n";

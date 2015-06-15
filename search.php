@@ -10,19 +10,17 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Management System: Search</title>
-<link rel="stylesheet" type="text/css" href="css/global.css" />
+<?php do_css() ?>
 </head>
 <body>
 
 <?php
 
 $stop = 0;
-echo '<div>' . "\n";
 if (login_code(0) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 
 global $mysql_db;
 if ($stop == 0)

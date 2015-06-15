@@ -19,7 +19,7 @@ openDatabase();
 <html>
 <head>
 <title>Thermal Specialists Jobs List</title>
-<link rel="stylesheet" type="text/css" href="css/global.css" />
+<?php do_css() ?>
 </head>
 
 <body>
@@ -29,19 +29,19 @@ openDatabase();
 
 <?php
 
+#TODO : create a job_status_codes table
+#TODO : use the job_status_codes table for statuses of jobs
+
+
 //make sure the user is logged in properly
 $stop = 0;
-echo '<div>' . "\n";
-if (login_code(0) == 1)
+if (login_code(1) == 1)
 {
 	$stop = 1;
 }
-echo "</div>\n";
 if ($stop == 0)
 {
-	selectTimePeriod();
-	
-	echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
+	do_top_menu(3);
 	
 	if ($_POST["action"] == "apply")
 	{	//apply job data
@@ -71,7 +71,7 @@ if ($stop == 0)
 		}
 		else
 		{	//do this when creating a new job
-			echo "<a href=\"" . rootPageURL() . "/jobs.php\"> " . " Back to all jobs</a><br >\n<h3>Creating new job:</h3>\n";
+			echo "<h3>Creating new job:</h3>\n";
 			$jobs->new_job_form();
 		}
 	}

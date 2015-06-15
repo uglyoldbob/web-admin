@@ -38,9 +38,9 @@ if ($permission == false)
 	echo "<!DOCTYPE HTML SYSTEM>\n" . 
 		 "<html>\n" . 
 		 "<head>\n" .
-		 "<title>Thermal Specialists</title>\n" .
-		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/global.css\" />\n" .
-		 "</head>\n" .
+		 "<title>Thermal Specialists</title>\n";
+	do_css();
+	echo	 "</head>\n" .
 		 "<body>\n" .
 		 "<h3>The image cannot be retrieved.</h3>\n<br >\n" .
 		 $error .
@@ -76,9 +76,9 @@ else
 	echo "<!DOCTYPE HTML SYSTEM>" . 
 		 "<html>" . 
 		 "<head>" .
-		 "<title>Thermal Specialists</title>" .
-		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/global.css\" />\n" .
-		 "</head>" .
+		 "<title>Thermal Specialists</title>";
+	do_css();
+	echo	 "</head>" .
 		 "<body>" .
 		 "<h3>The image cannot be retrieved.</h3>" .
 		 "</body>" .
