@@ -3,18 +3,18 @@ include("../global.php");
 
 start_my_session();
 login_code();
-openDatabase();
-login_button(1);
+$database = openDatabase();
+quiet_login($database);
 
-$filename = $mysql_db->real_escape_string($_GET['id']);
+$filename = mysql_real_escape_string($_GET['id']);
 $filesize = 5;
 
 //verify permissions first
 
 $query = "SELECT * FROM inspections WHERE report='" . $filename . ".pdf'";
-$results = $mysql_db->query($query);
+$results = mysql_query($query, $database);
 $permission = false;
-if ($row = @$results->fetch_array(MYSQLI_BOTH))
+if ($row = @mysql_fetch_array($results))
 {
 	if (checkPermission($database, 2))
 	{	//no need to check for the inspector (we are good)
@@ -22,7 +22,7 @@ if ($row = @$results->fetch_array(MYSQLI_BOTH))
 	}
 	else
 	{
-		if ($row['inspector'] == $_SESSION['user']['emp_id'])
+		if ($row['inspector'] == $_SESSION['id'])
 		{	//good
 			$permission = true;
 		}
@@ -44,7 +44,6 @@ if ($permission == false)
 		 "<html>\n" . 
 		 "<head>\n" .
 		 "<title>Thermal Specialists Payment Details</title>\n" .
-		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/global.css\" />\n" .
 		 "</head>\n" .
 		 "<body>\n" .
 		 "<h3>The report cannot be retrieved.</h3>\n<br >\n" .
@@ -91,7 +90,6 @@ else
 		 "<html>" . 
 		 "<head>" .
 		 "<title>Thermal Specialists Payment Details</title>" .
-		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"../css/global.css\" />\n" .
 		 "</head>" .
 		 "<body>" .
 		 "<h3>The report cannot be retrieved.</h3>" .
@@ -100,5 +98,4 @@ else
 	exit();
 }
 
-closeDatabase();
 ?>

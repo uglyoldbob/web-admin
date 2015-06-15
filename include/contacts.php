@@ -72,13 +72,13 @@ class contacts
 			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
-				 "		<input type=\"hidden\" name=\"payee\" value=\"" . $row['emp_id'] . "\">\n" .
+				 "		<input type=\"hidden\" name=\"payer\" value=\"" . $row['emp_id'] . "\">\n" .
 				 "		<input type=\"submit\" value=\"This contact made a payment\"/>\n" .
 				 "	</form>\n";
 			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
-				 "		<input type=\"hidden\" name=\"payer\" value=\"" . $row['emp_id'] . "\">\n" .
+				 "		<input type=\"hidden\" name=\"payee\" value=\"" . $row['emp_id'] . "\">\n" .
 				 "		<input type=\"submit\" value=\"This contact was paid\"/>\n" .
 				 "	</form>\n";
 
@@ -580,6 +580,20 @@ class contacts
 			 "			</form>";
 	}
 	
+	
+	public static function give_me_pword($newpass)
+	{
+		global $config;
+		
+		//make a new salt
+		$salt = generate_salt();
+		//value in config file used when creating or storing passwords
+		$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
+		echo $hash_pass . "<br >\n";
+		echo $salt . "<br >\n";
+		echo $config['key_stretching_value'] . "<br >\n";
+	}
+	
 	public static function init_user_pword($uid, $newpass)
 	{
 		global $mysql_db, $config;
@@ -635,6 +649,7 @@ class contacts
 					else
 					{
 						echo "Failed to save user stretching<br >\n";
+						echo $query . " 1 <br >\n";
 					}
 				}
 				else
@@ -697,6 +712,7 @@ class contacts
 					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
 					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
 						"' WHERE emp_id = " . $uid . "; ";
+					echo "The query is " . $query . "<br >\n";
 					if ($mysql_db->query($query) == TRUE)
 					{
 						echo "User stretching stored successfully<br >\n";
@@ -713,6 +729,7 @@ class contacts
 					else
 					{
 						echo "Failed to save user stretching<br >\n";
+						echo $query . " 2 <br >\n";
 					}
 				}
 				else
@@ -766,7 +783,8 @@ class contacts
 					echo "User salt stored successfully<br >\n";
 					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
 					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
-						". WHERE emp_id = " . $uid . "; ";
+						"' WHERE emp_id = " . $uid . "; ";
+					echo "The query is " . $query . "<br >\n";
 					if ($mysql_db->query($query) == TRUE)
 					{
 						echo "User stretching stored successfully<br >\n";

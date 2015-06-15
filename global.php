@@ -371,10 +371,10 @@ function login_code($quiet)
 
 function selectTimePeriod()
 {	//used to select which (time period)'s information will be viewed
-	if (!(array_key_exists("timeperiod", $_POST)))
-	{
-		$_POST['timeperiod'] = "all";
-	}
+//	if (!(array_key_exists("timeperiod", $_POST)))
+//	{
+//		$_POST['timeperiod'] = "all";
+//	}
 	
 	if ($_POST['timeperiod'] == "2011")
 	{
@@ -387,6 +387,10 @@ function selectTimePeriod()
 	else if ($_POST['timeperiod'] == "2013")
 	{
 		$_SESSION['period'] = "2013";
+	}
+	else if ($_POST['timeperiod'] == "2014")
+	{
+		$_SESSION['period'] = "2014";
 	}
 	else if ($_POST['timeperiod'] == "all")
 	{
@@ -415,6 +419,10 @@ function selectTimePeriod()
 	if ($_SESSION['period'] == "2013")
 		echo "selected ";
 	echo	"value=\"2013\">2013 Tax Year</option>\n";
+	echo "		<option ";
+	if ($_SESSION['period'] == "2014")
+		echo "selected ";
+	echo	"value=\"2014\">2014 Tax Year</option>\n";
 	echo	"	</select>\n";
 	echo "	<input type=\"submit\" value=\"Go\">\n" .
 		"</form>\n" .
@@ -437,6 +445,11 @@ function getPeriodComparison($fieldname)
 	{
 		return " $fieldname  > '2012-12-31'" .
 			" AND $fieldname < '2014-01-01'";
+	}
+	else if ($_SESSION['period'] == "2014")
+	{
+		return " $fieldname  > '2013-12-31'" .
+			" AND $fieldname < '2015-01-01'";
 	}
 	else
 	{

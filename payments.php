@@ -234,8 +234,8 @@ if ($stop == 0)
 			if($row = $payment_results->fetch_array(MYSQLI_BOTH))
 			{	//function payment_form($id, $payee_id, $payer_id, 
 				//$amount, $earned, $paid, $comments, $category)
-				payment_form($row['payment_id'], $row['paid_by'],
-					$row['pay_to'], $row['amount_earned'],
+				payment_form($row['payment_id'], $row['pay_to'],
+					$row['paid_by'], $row['amount_earned'],
 					$row['date_earned'], $row['date_paid'], 
 					$row['comments'], $row['category']);
 			}
