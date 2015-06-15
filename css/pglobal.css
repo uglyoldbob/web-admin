@@ -1,9 +1,8 @@
-body
-{
-background-color:#f0a4ce;
-}
 
 .clear { clear:both; }
+
+/* hide things that make no sense when printed */
+/* such as buttons and links */
 
 ul.topmenu
 {

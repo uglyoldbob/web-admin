@@ -487,6 +487,7 @@ class contacts
 	public function table()
 	{
 		global $mysql_db;
+		global $config;
 		
 		$uid = $_SESSION['user']['emp_id'];
 		$query = "SELECT * FROM contacts, contact_permission WHERE " .
@@ -500,12 +501,9 @@ class contacts
 		echo "<table border=\"1\">\n";
 		echo "	<tr>\n";
 		echo "		<th>Options</th>\n";
-		echo "		<th>Last name</th>\n";
-		echo "		<th>First name</th>\n";
+		echo "		<th>Name</th>\n";
 		echo "		<th>Classification</th>\n";
-		echo "		<th>Phone(mobile)</th>\n";
-		echo "		<th>Phone(home)</th>\n";
-		echo "		<th>Can be paid?</th>\n";
+		echo "		<th>Phone</th>\n";
 		echo "	</tr>\n";
 	
 		while($row = $contact_results->fetch_array(MYSQLI_BOTH))
@@ -539,31 +537,36 @@ class contacts
 			}
 	
 			echo "</td>\n		<td>";
-	
+
+			if ($config['last_name_first'] == 1)
+			{	
+				$name_to_print = $row['last_name'] . ', ' . $row['first_name'];
+			}
+			else
+			{
+				$name_to_print = $row['first_name'] . ' ' . $row['last_name'];
+
+			}
 			if ($row['website'] != "")
 			{
-				echo " <a href=\"" . $row['website'] . "\" target=\"_blank\">" . $row['last_name'] . "</a> </td>\n";
+				echo " <a href=\"" . $row['website'] . "\" target=\"_blank\">" . $name_to_print . "</a> </td>\n";
 			}
 			else
 			{
-				echo $row['last_name'] . "</td>\n";
+				echo $name_to_print . "</td>\n";
 			}
-			echo "		<td>" . $row['first_name'] . "</td>\n";
 			echo "		<td>" . $row['classification'] . "</td>\n";
-			if ($row['phone_mobile'] == "")
-				$row['phone_mobile'] = "&nbsp;";
-			if ($row['phone_home'] == "")
-				$row['phone_home'] = "&nbsp;";
-			echo "		<td>" . $row['phone_mobile'] . "</td>\n";
-			echo "		<td>" . $row['phone_home'] . "</td>\n";
-	
-			if ($row['payment_eligible'] == 0)
+			if ($row['phone_mobile'] != "") 
 			{
-				echo "		<td>No</td>\n";
+				echo "		<td>" . $row['phone_mobile'] . "</td>\n";
+			}
+			else if ($row['phone_home'] != "")
+			{
+				echo "		<td>" . $row['phone_home'] . "</td>\n";
 			}
 			else
 			{
-				echo "		<td>Yes</td>\n";
+				echo "		<td>&nbsp;</td>\n";
 			}
 	
 			echo "	</tr>\n";

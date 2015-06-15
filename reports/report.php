@@ -34,7 +34,7 @@ if ($row = @mysql_fetch_array($results))
 }
 else
 {
-	$error = "Invalid inspection report.";
+	$error = "Invalid image.";
 }
 
 if ($permission == false)
@@ -44,7 +44,8 @@ if ($permission == false)
 		 "<html>\n" . 
 		 "<head>\n" .
 		 "<title>Thermal Specialists Payment Details</title>\n" .
-		 "</head>\n" .
+	do_css();
+	echo	 "</head>\n" .
 		 "<body>\n" .
 		 "<h3>The report cannot be retrieved.</h3>\n<br >\n" .
 		 $error .
@@ -62,16 +63,14 @@ else
 		$file_info = pathinfo($file_path);
 		$file_extension = strtolower($file_info["extension"]);
  
-		if($file_extension!='pdf')
+		if($file_extension!='jpg')
 		{
 			header('Content-type: text/html; charset=utf-8');
 			die('LOGGED! bad extension');
 		}
 
 		ob_start();
-		header('Content-type: application/pdf');
-		header('Content-Disposition: attachment; filename="report.pdf"');
-		header("Content-length: $file_size");
+		header('Content-type: image/jpeg');
 		ob_end_flush();
 		
 		while(!feof($fp)) 
@@ -89,10 +88,11 @@ else
 	echo "<!DOCTYPE HTML SYSTEM>" . 
 		 "<html>" . 
 		 "<head>" .
-		 "<title>Thermal Specialists Payment Details</title>" .
-		 "</head>" .
+		 "<title>Thermal Specialists</title>";
+	do_css();
+	echo	 "</head>" .
 		 "<body>" .
-		 "<h3>The report cannot be retrieved.</h3>" .
+		 "<h3>The image cannot be retrieved.</h3>" .
 		 "</body>" .
 		 "</html>";
 	exit();

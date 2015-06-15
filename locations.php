@@ -27,24 +27,27 @@ if (login_code(1) == 1)
 	$stop = 1;
 }
 
-$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
-$results = $mysql_db->query($query);
-if ($row = $results->fetch_array(MYSQLI_BOTH))
+if ($stop == 0)
 {
-	if (($location == 0) || ($row['id'] == $location))
+	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
+	$results = $mysql_db->query($query);
+	if ($row = $results->fetch_array(MYSQLI_BOTH))
 	{
-		$root_number = $row['id'];
-		$location = $root_number;
-		$root_location = 1;
+		if (($location == 0) || ($row['id'] == $location))
+		{
+			$root_number = $row['id'];
+			$location = $root_number;
+			$root_location = 1;
+		}
+		else
+		{
+			$root_location = 0;
+		}
 	}
 	else
 	{
 		$root_location = 0;
 	}
-}
-else
-{
-	$root_location = 0;
 }
 	
 function do_loc($apply)

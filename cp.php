@@ -20,10 +20,6 @@ openDatabase();
 <?php
 
 $stop = 0;
-if (login_code(1) == 1)
-{
-	$stop = 1;
-}
 
 /*
 $to = "thomas.epperson@gmail.com";
@@ -50,11 +46,16 @@ enctype="multipart/form-data">
 </form>
 <?php
 */
+$stop = 0;
 
 if ($stop == 0)
 {
 	do_top_menu(5);
-	echo "User control panel<br>\n";
+	if (login_code(0) == 1)
+	{
+		$stop = 1;
+	}
+	echo "Time based filtering:\n";
 	selectTimePeriod();
 }
 

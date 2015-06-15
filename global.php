@@ -16,19 +16,51 @@ function blank_check($checkme)
 		return $checkme;
 }
 
+function do_css_one_file($name, $extras)
+{
+	echo '<link rel="stylesheet" type="text/css" href="' . $name . '" ' . 
+		' type="text/css" ' .
+		$extras .
+		'/>' . "\n";
+}
+
 function do_css()
 {
 	global $config;
+	$pfile = "global";
 	if ($config['testing'] == 1)
 	{
-		echo "<style>\n";
-		echo file_get_contents("css/global.css");
-		echo "</style>\n";
+		$file = 'css/' . $pfile . rand() . ".css";
 	}
 	else
-	{	#TODO : implement htaccess mod_rewrite rules for the css folder
-		echo '<link rel="stylesheet" type="text/css" href="css/global.css" />' . "\n";
+	{
+		$file = 'css/' . $pfile . '1' . '.css';
 	}
+	do_css_one_file($file, "media=\"screen\"");
+
+	$pfile = "pglobal";
+	if ($config['testing'] == 1)
+	{
+		$file = 'css/' . $pfile . rand() . ".css";
+	}
+	else
+	{
+		$file = 'css/' . $pfile . '1' . '.css';
+	}
+	do_css_one_file($file, "media=\"print\"");
+
+
+	$pfile = "mglobal";
+	if ($config['testing'] == 1)
+	{
+		$file = 'css/' . $pfile . rand() . ".css";
+	}
+	else
+	{
+		$file = 'css/' . $pfile . '1' . '.css';
+	}
+	do_css_one_file($file, "media=\"only screen and (max-device-width: 800px)\"");
+
 }
 
 function do_top_menu($indx)

@@ -1,9 +1,7 @@
 body
 {
-background-color:#f0a4ce;
+	font-size: 2em;
 }
-
-.clear { clear:both; }
 
 ul.topmenu
 {
@@ -25,22 +23,16 @@ ul.topmenu li
 ul.topmenu li a
 {
 	display: block;
-	padding: 0.5em 1em;
+	padding: 1.5em 2em;
 	text-decoration: none;
 	font-weight: bold;
 	color: #069;
-	border-right: 1px solid #ccc;
+	border: 1px solid #ccc;
 }
 
 ul.topmenu li a.selected
 {
 	color: #096;
-}
-
-ul.topmenu li a:hover
-{
-	color: #c00;
-	background-color: #fff;
 }
 
 div.loc_grid_elem
@@ -49,7 +41,7 @@ div.loc_grid_elem
 	float: left;
 	width:150px;
 	height:150px;
-	margin: 2%;
+	margin: 5%;
 }
 
 .loc_grid_elem a img
