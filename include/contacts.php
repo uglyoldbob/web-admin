@@ -609,6 +609,63 @@ class contacts
 		echo $config['key_stretching_value'] . "<br >\n";
 	}
 	
+	public static function setup_user_pword($uid, $newpass)
+	{
+		global $mysql_db, $config;
+		
+		$query = "SELECT fail_pass_change, username, password, " .
+				 "salt FROM contacts WHERE emp_id = '" . 
+				 $uid . "' LIMIT 1;";
+		
+		$results = $mysql_db->query($query);
+		if ($results)
+		{
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_pass_change'] >= $config['max_fail_pass_changes'])
+			{
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+			}
+			else if (is_null($row['password']))
+			{	//ok a password does not exist
+				//make a new salt
+				$salt = generate_salt();
+		
+				$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+				if ($mysql_db->query($query) == TRUE)
+				{
+					//echo "User salt stored successfully<br >\n";
+					//value in config file used when creating or storing passwords
+					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
+					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
+						"' WHERE emp_id = " . $uid . "; ";
+					if ($mysql_db->query($query) == TRUE)
+					{
+						//echo "User stretching stored successfully<br >\n";
+						$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+						if ($mysql_db->query($query) == TRUE)
+						{
+							//echo "User password stored successfully<br >\n";
+						}
+						else
+						{
+							echo "Failed to save user password<br >\n";
+						}
+					}
+					else
+					{
+						echo "Failed to save user stretching<br >\n";
+						echo $query . " 1 <br >\n";
+					}
+				}
+				else
+				{
+					echo "Failed to save user salt<br >\n";
+				}
+			}
+		}
+	}
+	
 	public static function init_user_pword($uid, $newpass)
 	{
 		global $mysql_db, $config;
@@ -643,18 +700,18 @@ class contacts
 				$query = "UPDATE contacts SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
 				if ($mysql_db->query($query) == TRUE)
 				{
-					echo "User salt stored successfully<br >\n";
+					//echo "User salt stored successfully<br >\n";
 					//value in config file used when creating or storing passwords
 					$hash_pass = hash_password($newpass, $salt, $config['key_stretching_value']);
 					$query = "UPDATE contacts SET `stretching` = '" . $config['key_stretching_value'] .
-						". WHERE emp_id = " . $uid . "; ";
+						"' WHERE emp_id = " . $uid . "; ";
 					if ($mysql_db->query($query) == TRUE)
 					{
-						echo "User stretching stored successfully<br >\n";
+						//echo "User stretching stored successfully<br >\n";
 						$query = "UPDATE contacts SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
 						if ($mysql_db->query($query) == TRUE)
 						{
-							echo "User password stored successfully<br >\n";
+							//echo "User password stored successfully<br >\n";
 						}
 						else
 						{
@@ -838,6 +895,47 @@ class contacts
 			echo	"<h3>Invalid username or password</h3><br >\n";	
 		}
 		$results->close();
+	}
+	
+	public static function create_contact($username, $email)
+	{
+		global $mysql_db, $config;
+		$query = "INSERT INTO `contacts` (username, email)" .
+							" VALUES ('" . $username . "', '" . $email . "');";
+		$results = $mysql_db->query($query);
+	}
+	
+	public static function get_id_num($username)
+	{
+		global $mysql_db, $config;
+		//check to see that the username does not exist first
+		$query = "SELECT * FROM contacts WHERE username='" . $username . "' LIMIT 1;";
+		$results = $mysql_db->query($query);
+		if ($results)
+		{
+			if ($results->num_rows != 0)
+			{
+				$row = $results->fetch_array(MYSQLI_BOTH);
+				return $row['emp_id'];	//username exists
+			}
+		}
+		return 0;	//username does not exist
+	}
+	
+	public static function does_user_exist($username)
+	{
+		global $mysql_db, $config;
+		//check to see that the username does not exist first
+		$query = "SELECT * FROM contacts WHERE username='" . $username . "' LIMIT 1;";
+		$results = $mysql_db->query($query);
+		if ($results)
+		{
+			if ($results->num_rows != 0)
+			{
+				return 1;	//username exists
+			}
+		}
+		return 0;	//username does not exist
 	}
 
 	public function create_password($val)

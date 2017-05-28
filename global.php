@@ -6,7 +6,7 @@ if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 include("passwords.php");
 include("include/contacts.php");
 
-$config = parse_ini_file("/etc/web-admin/config.ini");
+$config = parse_ini_file("../../config.ini");
 
 function blank_check($checkme)
 {
@@ -150,7 +150,7 @@ function start_my_session()
 		{	/* Prompt for password */
 			unset($_SESSION['username']);
 			unset($_SESSION['password']);
-			exit;
+			//exit;
 		}
 	}
 	else
@@ -299,6 +299,29 @@ function invalid_username_password()
 		"</form>\n";
 }
 
+function attempt_registration($attempt_username, $attempt_email, $attempt_pw)
+{
+	global $mysql_db, $config;
+	//validate the email address?
+	if (!filter_var($attempt_email, FILTER_VALIDATE_EMAIL))
+	{
+		echo "Invalid email address!<br>\n";
+		$_POST["action"] = "register";
+		return 0;	//invalid email
+	}
+	if (contacts::does_user_exist($attempt_username))
+	{
+		return 0;
+	}
+	
+	//ok, create the user
+	contacts::create_contact($attempt_username, $attempt_email);
+	$temp_uid = contacts::get_id_num($attempt_username);
+	contacts::setup_user_pword($temp_uid, $attempt_pw);
+	
+	return 1;
+}
+
 function login_code($quiet)
 {	//prints and executes code for the login script
 	//return value of 1 means don't do anything else
@@ -322,8 +345,81 @@ function login_code($quiet)
 		$retv = 1;
 	}
 
+	if (($_POST["action"] == "create_user") && ($config['allow_user_create']=1))
+	{
+		if (isset($_POST["user"]))
+		{
+			$attempt_username = $mysql_db->real_escape_string($_POST["user"]);
+			
+			if (isset($_POST["email"]))
+			{
+				$attempt_email = $mysql_db->real_escape_string($_POST["email"]);
+				if (isset($_POST["pass2"]))
+				{
+					$attempt_pass1 = $mysql_db->real_escape_string($_POST["pass2"]);
+					if (isset($_POST["pass3"]))
+					{
+						$attempt_pass2 = $mysql_db->real_escape_string($_POST["pass3"]);						
+						if ($attempt_pass1 != $attempt_pass2)
+						{
+							echo "Passwords do not match!<br>\n";
+							$_POST["action"] = "register";
+						}
+						else
+						{
+							if (($attempt_pass1 != '') && 
+								($attempt_username != '') &&
+								($attempt_email != ''))
+							{
+								if (attempt_registration($attempt_username, $attempt_email, $attempt_pass1)==0)
+								{
+									echo "Failed to register<br>\n";
+								}
+								else
+								{
+									echo "Registered successfully<br>\n";
+								}
+							}
+							else
+							{
+								$_POST["action"] = "register";
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	//If chain to determine what to do
-	if ($_POST["action"] == "login")
+	if (($_POST["action"] == "register") && ($config['allow_user_create']=1))
+	{
+		if (isset($_POST["user"]))
+		{
+			$previous_username = $mysql_db->real_escape_string($_POST["user"]);
+		}
+		else
+		{
+			$previous_username = "";
+		}
+		if (isset($_POST["email"]))
+		{
+			$previous_email = $mysql_db->real_escape_string($_POST["email"]);
+		}
+		else
+		{
+			$previous_email = "";
+		}
+		echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+					"	<input type=\"hidden\" name=\"action\" value=\"create_user\">\n" .
+					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
+					"	Email: <input type=\"text\" name=\"email\" ><br>\n" .
+					"	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
+					"	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
+					"	<input type=\"submit\" value=\"Register\">\n" .
+					"</form>\n";
+	}
+	else if ($_POST["action"] == "login")
 	{	//retrieve submitted username and password, if applicable
 		$username = $mysql_db->real_escape_string($_POST["user"]);
 		$passworder = $mysql_db->real_escape_string($_POST["password"]);
@@ -467,6 +563,13 @@ function login_code($quiet)
 				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
 				"	<input type=\"submit\" value=\"Login\">\n" .
 				"</form>\n";
+		if ($config['allow_user_create']=1)
+		{
+			echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
+					"	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+					"	<input type=\"submit\" value=\"Register\">\n" .
+					"</form>\n";
+		}
 		$retv = 1;
 	}
 
