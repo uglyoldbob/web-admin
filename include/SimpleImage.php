@@ -30,7 +30,14 @@ class SimpleImage {
       $image_info = getimagesize($filename);
       $this->image_type = $image_info[2];
       $exif = exif_read_data($filename);
-      $this->orientation = $exif['Orientation'];
+	  if (isset($exif['Orientation']))
+	  {
+		$this->orientation = $exif['Orientation'];
+	  }
+	  else
+	  {
+		  $this->orientation = 0;
+	  }
       if( $this->image_type == IMAGETYPE_JPEG ) {
  
          $this->image = imagecreatefromjpeg($filename);

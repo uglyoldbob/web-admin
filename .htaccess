@@ -2,5 +2,3 @@
 RewriteEngine on
 RewriteCond %{HTTP_HOST} ^thermalspecialist\.com
 RewriteRule ^(.*)$ https://www.thermalspecialist.com/$1 [R=permanent,L] 
-
-

@@ -6,7 +6,7 @@ if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 include("passwords.php");
 include("include/contacts.php");
 
-$config = parse_ini_file("../../config.ini");
+$config = parse_ini_file("C:/web/config.ini");
 
 function blank_check($checkme)
 {
@@ -150,6 +150,7 @@ function start_my_session()
 		{	/* Prompt for password */
 			unset($_SESSION['username']);
 			unset($_SESSION['password']);
+			unset($_SESSION['HTTP_USER_AGENT']);
 			//exit;
 		}
 	}
@@ -476,6 +477,7 @@ function login_code($quiet)
 			#TODO : more testing of the failed login logic
 			if ($row['fail_logins'] >= $config['max_fail_logins'])
 			{	//TODO: set time period for waiting to login
+				echo "Failed login too many times error<br>\n";
 				unset($_SESSION['username']);
 				unset($_SESSION['password']);
 			}

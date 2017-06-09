@@ -4,6 +4,7 @@
 <title>Thermal Specialists Management System</title>
 <?php 
 include("global.php");
+include("include/location.php");
 do_css() 
 ?>
 </head>
@@ -17,7 +18,10 @@ header('Content-type: text/html; charset=utf-8');
 global $mysql_db;
 openDatabase();
 
-$location = $_GET["id"];
+if (isset($_GET["id"]))
+	$location = $_GET["id"];
+else
+	$location = 0;
 if (is_numeric($location) == FALSE)
 	$location = 0;
 

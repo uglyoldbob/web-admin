@@ -3,6 +3,7 @@ include("../global.php");
 include("../include/upload_file.php");
 
 start_my_session();
+global $mysql_db;
 openDatabase();
 
 $stop = 0;
