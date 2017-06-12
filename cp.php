@@ -6,6 +6,8 @@ header('Content-type: text/html; charset=utf-8');
 global $mysql_db;
 openDatabase();
 
+require("include/jobs.php");
+
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -15,7 +17,8 @@ openDatabase();
 </head>
 <body>
 
-	
+<script type="text/javascript" src="jquery-1.2.1.pack.js"></script>
+<script type="text/javascript" src="jscript.js"></script>
 
 <?php
 
@@ -57,6 +60,9 @@ if ($stop == 0)
 	}
 	echo "Time based filtering:\n";
 	selectTimePeriod();
+	
+	echo "<b>Possible job status</b><br>\n";
+	jobs::table_of_job_status();
 }
 
 closeDatabase();

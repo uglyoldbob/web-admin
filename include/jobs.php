@@ -42,6 +42,36 @@ class jobs
 		}
 	}
 	
+	public static function table_of_job_status()
+	{
+		global $mysql_db;
+		if ($_POST["action"] == "create_job_status")
+		{
+			$query = "INSERT INTO status_codes (" .
+				"`Description`) VALUES ('" .
+				$mysql_db->real_escape_string($_POST["new_job_status"]) . "');";
+			$mysql_db->query($query);
+		}
+		$query = "SELECT code, Description FROM status_codes;";
+		$result = $mysql_db->query($query);
+		
+		while ($row = $result->fetch_array(MYSQLI_BOTH))
+		{
+			echo $mysql_db->real_escape_string($row['code']);
+			echo ", " . $mysql_db->real_escape_string($row['Description']) . "<br>\n";
+		}
+		
+		echo "   <form method=\"POST\">\n";
+		echo "	<input type=\"hidden\" name=\"action\" value=\"create_job_status\">\n";
+		echo "	<input type=\"checkbox\" name=\"create_job_status\" ";
+		echo "onclick=\"cb_hide_show(this, $('#add_job_status'));\" />Add a job status<br >\n";
+		echo "	<div id=\"add_job_status\" style=\"display: none;\">\n";
+		echo '	<textarea name="new_job_status" id="add_job_status" rows=4 cols=75 > </textarea><br >' . "\n";
+		echo "	<input type=\"submit\" value=\"Create\">";
+		echo "	</div>\n";
+		echo "   </form>\n";
+	}
+	
 	public static function make_status_dropdown($prefix, $selected, $name)
 	{
 		global $mysql_db;
@@ -66,7 +96,7 @@ class jobs
 				$mysql_db->real_escape_string($row['Description']) .
 				"</option>\n";
 		}
-		$output .= $prefix . "</select>\n";
+		$output .= $prefix . "</select>\n";		
 		return $output;
 	}
 	
@@ -81,12 +111,17 @@ class jobs
 			$cust2 = 0;
 		$comments = $mysql_db->real_escape_string($data["comments"]);
 		$query = "INSERT INTO jobs (" .
-			"`id` ," . "`cust_billing` , " . "`cust_shipping` , " .
-			"`comments` " . ") VALUES (" .
-			"NULL , '" . $cust1 . "', '" . $cust2 . "', '" . $comments . "');";
+			"`job_name` ," .	"`id` ," . "`cust_billing` , " . "`cust_shipping` , " .
+			"`comments` " . ") VALUES ('" .
+			$mysql_db->real_escape_string($data["jobname"]) .
+			"', NULL , '" . $cust1 . "', '" . $cust2 . "', '" . $comments . "');";
 		if ($mysql_db->query($query) == TRUE)
 		{
 			echo "Successfully inserted new job<br >\n";
+		}
+		else
+		{
+			echo $query . "<br>\n";
 		}
 		
 		$this->job = $mysql_db->insert_id;
@@ -109,6 +144,8 @@ class jobs
 		echo '<form method="POST" action="jobs.php">' . "\n";
 		echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	
+		echo '	<b>Job name: </b><input type="text" autocomplete="off" value="" name="jobname" id="jobname">' . "\n";
+		
 		make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
 			"fillNames", "cust1_suggest", "cust1_list");
 		make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
@@ -131,24 +168,30 @@ class jobs
 		$query = "UPDATE jobs SET ";
 		$needs_comma = 0;
 		$do_anything = 0;
-		if ($data['mod_phone1'] == "on")
+		if (isset($data['mod_phone1']))
 		{
-			$do_anything = 1;
-			if ($needs_comma == 0)
-				$needs_comma = 1;
-			else
-				$query .= ", ";
-			$query .= "phone_notify_id=" . $mysql_db->real_escape_string($data['phone1']);
+			if ($data['mod_phone1'] == "on")
+			{
+				$do_anything = 1;
+				if ($needs_comma == 0)
+					$needs_comma = 1;
+				else
+					$query .= ", ";
+				$query .= "phone_notify_id=" . $mysql_db->real_escape_string($data['phone1']);
+			}
 		}
 		
-		if ($data['mod_comments1'] == "on")
+		if (isset($data['mod_comments1']))
 		{
-			$do_anything = 1;
-			if ($needs_comma == 0)
-				$needs_comma = 1;
-			else
-				$query .= ", ";
-			$query .= "comments=\"" . $mysql_db->real_escape_string($data['comments']) . "\"";
+			if ($data['mod_comments1'] == "on")
+			{
+				$do_anything = 1;
+				if ($needs_comma == 0)
+					$needs_comma = 1;
+				else
+					$query .= ", ";
+				$query .= "comments=\"" . $mysql_db->real_escape_string($data['comments']) . "\"";
+			}
 		}
 		
 		$query .= " WHERE id=" . $mysql_db->real_escape_string($data['id']) . ";";
@@ -164,9 +207,10 @@ class jobs
 		
 		if ($data['job_status'] != 0)
 		{
-			$query = "INSERT INTO job_status (jobid, new_status) VALUES (" .
+			$query = "INSERT INTO job_status (jobid, new_status, what_happened) VALUES (" .
 				$this->job . ", " .
-				$mysql_db->real_escape_string($data['job_status']) . ");";
+				$mysql_db->real_escape_string($data['job_status']) . ", '" .
+				$mysql_db->real_escape_string($data['what_happened']) . "');";
 			if ($mysql_db->query($query) == TRUE)
 			{
 				echo "Successfully updated job status<br >\n";
@@ -202,6 +246,7 @@ class jobs
 		echo "<table border=\"1\">\n";
 		echo "	<tr>\n";
 		echo "		<th>Options</th>\n";
+		echo "		<th>Job name</th>\n";
 		echo "		<th>Billing</th>\n";
 		echo "		<th>Shipping</th>\n";
 		echo "		<th>Comments</th>\n";
@@ -215,6 +260,10 @@ class jobs
 						
 			echo "			<a href=\"". rootPageURL() . "/jobs.php?job=" . $row['id'] . "\">View</a>\n";
 			echo "		</td>\n";
+			
+			echo "		<td>";
+			echo $mysql_db->real_escape_string($row['job_name']);
+			echo "</td>\n";
 	
 			echo "		<td>";
 			echo print_contact($mysql_db->real_escape_string($row['cust_billing']));
@@ -317,7 +366,7 @@ class jobs
 			
 			echo "	<b>Update job status:</b> \n";
 			echo jobs::make_status_dropdown('	', 0, "job_status") . "<br >\n";
-			
+			echo "  <textarea name=\"what_happened\" id=\"what_happened\" rows=4 cols=75 ></textarea><br >'\n";			
 			echo "	<input type=\"submit\" value=\"Apply Changes\"/>\n" .
 				 "</form>";
 		}

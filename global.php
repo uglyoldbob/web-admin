@@ -19,7 +19,6 @@ function blank_check($checkme)
 function do_css_one_file($name, $extras)
 {
 	echo '<link rel="stylesheet" type="text/css" href="' . $name . '" ' . 
-		' type="text/css" ' .
 		$extras .
 		'/>' . "\n";
 }
@@ -594,6 +593,10 @@ function selectTimePeriod()
 		$_SESSION['period'] = "all";
 	}
 	
+	if (!(isset($_POST['timeperiod'])))
+	{
+		$_POST['timeperiod'] = "all";
+	}
 	if ($_POST['timeperiod'] == "2011")
 	{
 		$_SESSION['period'] = "2011";

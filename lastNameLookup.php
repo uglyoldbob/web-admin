@@ -1,6 +1,6 @@
 ﻿<?php
 
-	$config = parse_ini_file("/etc/web-admin/config.ini");
+	$config = parse_ini_file("C:/web/config.ini");
 
 	// PHP5 Implementation - uses MySQLi.
 	// mysqli('localhost', 'yourUsername', 'yourPassword', 'yourDatabase');
