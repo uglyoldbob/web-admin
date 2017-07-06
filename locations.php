@@ -1,9 +1,12 @@
+<?php 
+$config = parse_ini_file("config.ini");
+include("global.php");
+?>
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Thermal Specialists Management System</title>
+<title>Locations: <?php sitename()?></title>
 <?php 
-include("global.php");
 include("include/location.php");
 do_css() 
 ?>
@@ -149,7 +152,7 @@ function do_loc($apply)
 		echo "</table><br>\n";
 		echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
 		echo "	<input type=\"hidden\" name=\"action\" value=\"do_loc\"><br>\n";
-		echo "	<input type='submit' value='Add these locations' >\n";
+		echo "	<input class=\"buttons\" type='submit' value='Add these locations' >\n";
 		echo "</form>\n";
 
 		echo '<a href="' . rootPageURL() . '/locations.php?id=' . $location . '">Nevermind, don\'t add locations</a>' . "<br >\n";
@@ -268,7 +271,7 @@ function do_equ($apply)
 		echo "</table><br>\n";
 		echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
 		echo "	<input type=\"hidden\" name=\"action\" value=\"do_equ\"><br>\n";
-		echo "	<input type='submit' value='Add this equipment' >\n";
+		echo "	<input class=\"buttons\" type='submit' value='Add this equipment' >\n";
 		echo "</form>\n";
 		
 		echo '<a href="' . rootPageURL() . '/locations.php?id=' . $location . '">Nevermind, don\'t add equipment</a>' . "<br >\n";
@@ -443,7 +446,7 @@ if ($stop == 0)
 			echo "	</select>\n";
 			echo "	<input type=\"hidden\" name=\"action\" value=\"move_equ\"><br>\n";
 			echo "  <input type=\"hidden\" name=\"amount\" value=" . $j . "><br >\n";
-			echo "	<input type='submit' value='GO' >\n";
+			echo "	<input class=\"buttons\" type='submit' value='GO' >\n";
 			echo "</form>\n";
 		}
 	}
@@ -482,7 +485,7 @@ if ($stop == 0)
 		echo "  <input type=\"hidden\" name=\"amount\" value=" . $j . "><br >\n";
 		if ($j > 0)
 		{
-			echo "	<input type='submit' value='YES' >\n";
+			echo "	<input class=\"buttons\" type='submit' value='YES' >\n";
 		}
 		echo "</form>\n";
 		if ($j == 0)
@@ -491,7 +494,7 @@ if ($stop == 0)
 		}
 		
 		echo "<form method='post'>\n";
-		echo "	<input type='submit' value='NO' >\n";
+		echo "	<input class=\"buttons\" type='submit' value='NO' >\n";
 		echo "</form>\n";
 	}
 
@@ -555,7 +558,7 @@ if ($stop == 0)
 		{
 			echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 				"	<input type=\"hidden\" name=\"action\" value=\"del_loc\"><br>\n" .
-				"	<input type=\"submit\" value=\"Delete this location (" .
+				"	<input class=\"buttons\" type=\"submit\" value=\"Delete this location (" .
 					$loc_name . ")\">\n" .
 				"</form>";
 		}
@@ -604,16 +607,17 @@ if ($stop == 0)
 			echo "<div class=\"clear\"></div>\n";
 		}
 		
+        echo "<br>\n<br>\n<br>\n";
 		echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 			"	<input type=\"hidden\" name=\"action\" value=\"add_loc\"><br>\n";
 		//TODO : Seperate adding locations (no photo upload) and adding a location (photo upload)		
 		if ($root_location == 0)
 		{
-			echo "	<input type=\"submit\" value=\"Add locations to " . $loc_name . "\">\n";
+			echo "	<input class=\"buttons\" type=\"submit\" value=\"Add locations to " . $loc_name . "\">\n";
 		}
 		else
 		{
-			echo "	<input type=\"submit\" value=\"Add locations\">\n";
+			echo "	<input class=\"buttons\" type=\"submit\" value=\"Add locations\">\n";
 		}
 		echo "</form>";
 		
@@ -697,11 +701,11 @@ if ($stop == 0)
 		//TODO : seperate adding multiple pieces of equipment (no photo uploading capabilities and single equipment add (photo upload)
 		if ($root_location == 0)
 		{
-			echo "	<input type=\"submit\" value=\"Add equipment to " . $loc_name . "\">\n";
+			echo "	<input class=\"buttons\" type=\"submit\" value=\"Add equipment to " . $loc_name . "\">\n";
 		}
 		else
 		{
-			echo "	<input type=\"submit\" value=\"Add equipment\">\n";
+			echo "	<input class=\"buttons\" type=\"submit\" value=\"Add equipment\">\n";
 		}
 		
 		echo "</form>";

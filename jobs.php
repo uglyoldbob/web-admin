@@ -1,4 +1,5 @@
 <?php
+$config = parse_ini_file("config.ini");
 include("global.php");
 start_my_session();
 header('Content-type: text/html; charset=utf-8');
@@ -18,7 +19,7 @@ openDatabase();
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Thermal Specialists Jobs List</title>
+<title>Jobs List: <?php sitename()?></title>
 <?php do_css() ?>
 </head>
 
@@ -60,7 +61,7 @@ if ($stop == 0)
 		echo "<form action=\"" . rootPageURL() . "/jobs.php\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 			 "	<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
-			 "	<input type=\"submit\" value=\"Create new job\"/>\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Create new job\"/>\n" .
 			 "</form>";
 	}
 	if (($_POST["action"] == "edit") || ($jobs->job != 0))

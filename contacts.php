@@ -1,5 +1,5 @@
 <?php
-
+$config = parse_ini_file("config.ini");
 include("global.php");
 
 start_my_session();
@@ -20,7 +20,7 @@ openDatabase();
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Thermal Specialists Contact Listing</title>
+<title>Contact Listing: <?php sitename()?></title>
 <?php do_css() ?>
 </head>
 <body>

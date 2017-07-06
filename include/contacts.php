@@ -76,13 +76,13 @@ class contacts
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 				 "		<input type=\"hidden\" name=\"payer\" value=\"" . $row['emp_id'] . "\">\n" .
-				 "		<input type=\"submit\" value=\"This contact made a payment\"/>\n" .
+				 "		<input class=\"buttons\" type=\"submit\" value=\"This contact made a payment\"/>\n" .
 				 "	</form>\n";
 			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 				 "		<input type=\"hidden\" name=\"payee\" value=\"" . $row['emp_id'] . "\">\n" .
-				 "		<input type=\"submit\" value=\"This contact was paid\"/>\n" .
+				 "		<input class=\"buttons\" type=\"submit\" value=\"This contact was paid\"/>\n" .
 				 "	</form>\n";
 
 			if ($_POST["action"] != "edit")
@@ -134,14 +134,14 @@ class contacts
 				echo "Soon to print payment information<br>\n";
 				echo "Soon to print inspections performed (if applicable)<br>\n";
 				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
-					$row['payment_eligible'], $row['ssn'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
+					$row['payment_eligible'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
 					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],
 					$row['username']);
 			}
 			else
 			{	//editing information
 				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
-					$row['payment_eligible'], $row['ssn'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
+					$row['payment_eligible'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
 					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],
 					$row['username']);
 			}
@@ -153,7 +153,7 @@ class contacts
 		}
 	}
 	
-	public function make_form($id, $last_name, $first_name, $classify, $eligible, $ssn, $mobile, $home, $other,
+	public function make_form($id, $last_name, $first_name, $classify, $eligible, $mobile, $home, $other,
 		$website, $email, $street, $city, $state, $zip, $username)
 	{	//TODO: implement drop down box with a yes/no
 		if ($mobile == "")
@@ -171,7 +171,7 @@ class contacts
 			{
 				echo "	<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
 					 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
-					 "		<input type=\"submit\" value=\"Edit\"/>\n" .
+					 "		<input class=\"buttons\" type=\"submit\" value=\"Edit\"/>\n" .
 					 "	</form>\n";
 			}
 			
@@ -187,11 +187,11 @@ class contacts
 			echo "	<table border=\"1\" width=\"50%\">\n";
 			if ($id != 0)
 			{
-				echo "	<input type=\"submit\" value=\"Update\"/>\n";
+				echo "	<input class=\"buttons\" type=\"submit\" value=\"Update\"/>\n";
 			}
 			else
 			{
-				echo "	<input type=\"submit\" value=\"Insert\"/>\n";
+				echo "	<input class=\"buttons\" type=\"submit\" value=\"Insert\"/>\n";
 			}
 		}
 			
@@ -249,16 +249,6 @@ class contacts
 		echo "			<td>Eligible for payment</td>\n";
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"eligible\" value=\"" . $eligible . "\" size=\"70\"";
-		if ($_POST["action"] == "")
-			echo " disabled";
-		echo " >";
-		echo "</td>\n";
-		echo "		</tr>\n";
-					
-		echo "		<tr>\n";
-		echo "			<td>SSN</td>\n";
-		echo "			<td>";
-		echo "<input type=\"text\" name=\"ssn\" value=\"" . $ssn . "\" size=\"70\"";
 		if ($_POST["action"] == "")
 			echo " disabled";
 		echo " >";
@@ -363,7 +353,7 @@ class contacts
 				echo "</form>\n" . 
 					 "<form action=\"contacts.php?contact=" . $id . "\" method=\"post\">\n" .
 					 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
-					 "	<input type=\"submit\" value=\"Edit\"/>\n" .
+					 "	<input class=\"buttons\" type=\"submit\" value=\"Edit\"/>\n" .
 					 "</form>\n";
 			}
 		}
@@ -371,12 +361,12 @@ class contacts
 		{
 			if ($id != 0)
 			{
-				echo "	<input type=\"submit\" value=\"Update\"/>\n" .
+				echo "	<input class=\"buttons\" type=\"submit\" value=\"Update\"/>\n" .
 					 "</form>\n";
 			}
 			else
 			{
-				echo "	<input type=\"submit\" value=\"Insert\"/>\n" .
+				echo "	<input class=\"buttons\" type=\"submit\" value=\"Insert\"/>\n" .
 					 "</form>\n";
 			}
 		}
@@ -395,7 +385,6 @@ class contacts
 		$eligibility = $withdata["eligible"];
 		if (is_numeric($eligibility) == FALSE)
 			$eligibility = 0;
-		$ssn = $mysql_db->real_escape_string($withdata["ssn"]);
 		$mobile = $mysql_db->real_escape_string($withdata["mobile"]);
 		$home = $mysql_db->real_escape_string($withdata["home"]);
 		$other = $mysql_db->real_escape_string($withdata["other"]);
@@ -422,7 +411,6 @@ class contacts
 					"', `username` = '" . $username .
 					"', `classification` = '" . $classification .
 					"', `payment_eligible` = " . $eligibility .
-					", `ssn` = '" . $ssn .
 					"', `phone_mobile` = '" . $mobile .
 					"', `phone_home` = '" . $home .
 					"', `phone_other` = '" . $other .
@@ -439,14 +427,13 @@ class contacts
 			$allowed_to_perform = 1;
 			$query = "INSERT INTO `contacts` " .
 					 "(last_name, first_name, username, classification, payment_eligible, " .
-					 "ssn, phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
+					 "phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
 					 "VALUES (" .
 					 "'" . $last_name .  "'," .
 					 "'" . $first_name .  "'," .
 					 "'" . $username . "', " .
 					 "'" . $classification . "'," .
 					 "'" . $eligibility .  "'," .
-					 "'" . $ssn .  "'," .
 					 "'" . $mobile . "'," .
 					 "'" . $home .  "'," .
 					 "'" . $other .  "'," .
@@ -523,7 +510,7 @@ class contacts
 					echo "\n		<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
 						 "			<input type=\"hidden\" name=\"action\" value=\"cpass\">\n" .
 						 "			<input type=\"hidden\" name=\"id\" value=\"" . $row['emp_id'] . "\">\n" .
-						 "			<input type=\"submit\" value=\"Init Password\"/>\n" .
+						 "			<input class=\"buttons\" type=\"submit\" value=\"Init Password\"/>\n" .
 						 "		</form>";
 				}
 				else
@@ -531,7 +518,7 @@ class contacts
 					echo "\n		<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
 						 "			<input type=\"hidden\" name=\"action\" value=\"epass\">\n" .
 						 "			<input type=\"hidden\" name=\"id\" value=\"" . $row['emp_id'] . "\">\n" .
-						 "			<input type=\"submit\" value=\"Edit Password\"/>\n" .
+						 "			<input class=\"buttons\" type=\"submit\" value=\"Edit Password\"/>\n" .
 						 "		</form>";
 				}
 			}
@@ -591,7 +578,7 @@ class contacts
 		echo "			<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
 			 "				<input type=\"hidden\" name=\"action\" value=\"create\">\n" .
 			 "				<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
-			 "				<input type=\"submit\" value=\"New contact\"/>\n" .
+			 "				<input class=\"buttons\" type=\"submit\" value=\"New contact\"/>\n" .
 			 "			</form>";
 	}
 	
@@ -956,7 +943,7 @@ class contacts
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $val . "\"><br>\n" .
 				 "	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
 				 "	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
-				 "	<input type=\"submit\" value=\"Create the password\">\n" .
+				 "	<input class=\"buttons\" type=\"submit\" value=\"Create the password\">\n" .
 				 "</form>\n";
 		}
 	}
@@ -980,7 +967,7 @@ class contacts
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $val . "\"><br>\n" .
 				 "	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .
 				 "	New password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
-				 "	<input type=\"submit\" value=\"Change the password\">\n" .
+				 "	<input class=\"buttons\" type=\"submit\" value=\"Change the password\">\n" .
 				 "</form>\n";
 		}
 	}

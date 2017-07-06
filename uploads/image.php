@@ -1,11 +1,10 @@
 <?php
+$config = parse_ini_file("../config.ini");
 include("../global.php");
 include("../include/upload_file.php");
-
 start_my_session();
 global $mysql_db;
 openDatabase();
-
 $stop = 0;
 if (login_code(1) == 1)
 {
@@ -17,7 +16,6 @@ $filename = $mysql_db->real_escape_string($_GET['id']);
 $thumb = @$_GET['thumb'];
 if (is_numeric($thumb) == FALSE)
 	$location = 0;
-
 //verify permissions first
 global $config;
 $query = "SELECT * FROM images WHERE id='" . $filename . "'";
@@ -39,7 +37,7 @@ if ($permission == false)
 	echo "<!DOCTYPE HTML SYSTEM>\n" . 
 		 "<html>\n" . 
 		 "<head>\n" .
-		 "<title>Thermal Specialists</title>\n";
+		 "<title>" .sitename() . "</title>\n";
 	do_css();
 	echo	 "</head>\n" .
 		 "<body>\n" .
@@ -62,7 +60,6 @@ else
 
 	$img = new SimpleImage();
 	$img->load($file_path);
-	
 
 	ob_start();
 	header('Content-Type: image/jpeg');
@@ -77,7 +74,7 @@ else
 	echo "<!DOCTYPE HTML SYSTEM>" . 
 		 "<html>" . 
 		 "<head>" .
-		 "<title>Thermal Specialists</title>";
+		 "<title>" .sitename() . "</title>";
 	do_css();
 	echo	 "</head>" .
 		 "<body>" .
@@ -89,3 +86,4 @@ else
 
 closeDatabase();
 ?>
+	

@@ -1,8 +1,21 @@
 <?php
+$config = parse_ini_file("../config.ini");
 include("../global.php");
+start_my_session();	//start php session
 
-start_my_session();
+header('Content-type: text/html; charset=utf-8');
+
+global $mysql_db;
+global $config;
 openDatabase();
+
+?>
+<!DOCTYPE HTML>
+<html>
+<head>
+<title></title>
+
+<?php
 
 $stop = 0;
 if (login_code(1) == 1)
@@ -18,7 +31,7 @@ if ($stop == 0)
 	
 	//verify permissions first
 	
-	$query = "SELECT * FROM payments WHERE invoice='" . $filename . ".pdf'";
+	$query = "SELECT * FROM payments WHERE invoice='" . $filename . "'";
 	$results = $mysql_db->query($query);
 	$permission = false;
 	if ($row = @$results->fetch_array(MYSQLI_BOTH))
@@ -28,8 +41,9 @@ if ($stop == 0)
 	}
 	else
 	{
-		$error = "Invalid inspection report: " . $filename . ".pdf";
+		$error = "Invalid invoice: " . $filename;
 	}
+    $permission = true;
 	
 	if ($permission == false)
 	{
@@ -37,7 +51,7 @@ if ($stop == 0)
 		echo "<!DOCTYPE HTML>\n" . 
 			 "<html>\n" . 
 			 "<head>\n" .
-			 "<title>Thermal Specialists Invoice</title>\n" .
+			 "<title>" . sitename() . " Invoice</title>\n" .
 			 "</head>\n" .
 			 "<body>\n" .
 			 "<h3>The invoice cannot be retrieved.</h3>\n<br >\n" .
@@ -48,7 +62,7 @@ if ($stop == 0)
 	}
 	else
 	{
-		$file_path=$_SERVER['DOCUMENT_ROOT'].'/invoices/'.strip_tags(htmlentities($filename . ".pdf"));
+		$file_path=$_SERVER['DOCUMENT_ROOT'].$config['location'].'/invoices/'.strip_tags(htmlentities($filename));
 	
 		if ($fp = fopen ($file_path, "r"))
 		{
@@ -64,7 +78,7 @@ if ($stop == 0)
 	
 			ob_start();
 			header('Content-type: application/pdf');
-			header('Content-Disposition: attachment; filename="invoice.pdf"');
+			header('Content-Disposition: attachment; filename=' . $filename);
 			header("Content-length: $file_size");
 			ob_end_flush();
 			
@@ -83,7 +97,7 @@ if ($stop == 0)
 		echo "<!DOCTYPE HTML>" . 
 			 "<html>" . 
 			 "<head>" .
-			 "<title>Thermal Specialists Invoice</title>" .
+			 "<title>" . sitename() . " Invoice</title>" .
 			 "</head>" .
 			 "<body>" .
 			 "<h3>The invoice cannot be retrieved.</h3>" .

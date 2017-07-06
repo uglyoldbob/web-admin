@@ -1,5 +1,5 @@
 <?php
-
+$config = parse_ini_file("config.ini");
 include("global.php");
 start_my_session();
 header('Content-type: text/html; charset=utf-8');
@@ -10,7 +10,10 @@ if (!(array_key_exists("contact", $_GET)))
 {
 	$_GET["contact"] = "0";
 }
-$contact = $_GET["contact"];
+else
+{
+	$contact = $_GET["contact"];
+}
 
 global $mysql_db;
 openDatabase();
@@ -31,12 +34,13 @@ if (is_numeric($start_page) == FALSE)
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Thermal Specialists Payment Details</title>
+<title>Payment Details: <?php sitename()?></title>
 <?php do_css() ?>
 </head>
 
 <body>
 
+<script type="text/javascript" src="jscript.js"></script>
 <script type="text/javascript" src="jquery-1.2.1.pack.js"></script>
 <script type="text/javascript">
 	function lookupLastName(textId, callId, suggestionBox, suggestionList, formName, formId, formSuggest) 
@@ -91,7 +95,8 @@ if ($stop == 0)
 	{	//apply the stuff
 		$error = 0;
 		
-		$pay_id = $_POST["pay_id"];
+		if (isset($_POST["pay_id"]))
+			$pay_id = $_POST["pay_id"];
 		if (is_numeric($pay_id) == FALSE)
 		{
 			$pay_id = 0;
@@ -114,13 +119,13 @@ if ($stop == 0)
 		{
 			$amount_paid = 0;
 	//		$error = 1;
-		}
-		
+		}		
 		
 		$date_earned = $mysql_db->real_escape_string($_POST["date_earned"]);
 		$date_paid = $mysql_db->real_escape_string($_POST["date_paid"]);
 		$comments = $mysql_db->real_escape_string($_POST["comments"]);
-		$categori = $mysql_db->real_escape_string($_POST["categori"]); 
+		if (isset($_POST["categori"]))
+			$categori = $mysql_db->real_escape_string($_POST["categori"]); 
 			//mis-spelling allows listing of all categories after
 			//a payment is created or updated
 		if ($error == 1)
@@ -164,6 +169,29 @@ if ($stop == 0)
 					exit(1);
 					//die('Error: ' . $mysql_db->error());
 				}
+				if (isset($_POST["upload_invoice"]))
+				{
+					$imageFileType = pathinfo($_FILES["new_invoice"]["name"],PATHINFO_EXTENSION);
+					$target_file = "invoices/" . $pay_id . "." . $imageFileType;
+					echo "An upload was selected: " . $target_file . "<br>\n";
+					echo $_FILES["new_invoice"]["name"] . "<br>\n";
+					echo $imageFileType . "<br>\n";
+					if (move_uploaded_file($_FILES["new_invoice"]["tmp_name"], $target_file)) {
+					}
+					else
+					{
+						echo "Error uploading invoice<br>\n";
+					}
+					$query = 'UPDATE `payments` SET `invoice` = ' . $target_file .
+						' WHERE `payment_id` = ' . $pay_id . ';';
+                    if ($mysql_db->query($query) != TRUE)
+    			    {
+				    	echo "Error: " . $mysql_db->error() . "<br >\n";
+				    	exit(1);
+				    	//die('Error: ' . $mysql_db->error());
+				    }
+				}
+
 				echo "Payment entry updated.<br >\n";
 			}
 		}	
@@ -186,9 +214,13 @@ if ($stop == 0)
 			$pay_id = 0;
 			$error = 1;
 		}
-		if (($id_num == 0) && ($pay_id != 0))
+		if (isset($pay_id))
 		{
 			$id_num = $pay_id;
+		}
+		else
+		{
+			$id_num = 0;
 		}
 		
 		if ($id_num != 0)
@@ -207,12 +239,18 @@ if ($stop == 0)
 		
 		if ($id_num == 0)
 		{
-			$payee = $_POST["payee"];
+			if (isset($_POST["payee"]))
+				$payee = $_POST["payee"];
+			else
+				$payee = "";
 			if (is_numeric($payee) == FALSE)
 			{
 				$payee = 0;
 			}
-			$payer = $_POST["payer"];
+			if (isset($_POST["payer"]))
+				$payer = $_POST["payer"];
+			else
+				$payer = "";
 			if (is_numeric($payer) == FALSE)
 			{
 				$payer = 0;
@@ -236,7 +274,7 @@ if ($stop == 0)
 				echo "Error retrieving payment details.<br >\n";
 				echo '<form method="POST" action="' . rootPageURL() .
 					'/payments.php" >' . "\n";
-				echo '	<input type="submit" value="Cancel"/>' . "\n";
+				echo '	<input class="buttons" type="submit" value="Cancel"/>' . "\n";
 				echo '</form>' . "\n";
 			}
 		}
@@ -260,7 +298,7 @@ if ($stop == 0)
 			$contact . "\" method=\"post\">\n" .
 			"	<input type=\"hidden\" name=\"action\"" . 
 			" value=\"view\">\n" .
-			"	<input type=\"submit\" value=\"View  ";
+			"	<input class=\"buttons\" type=\"submit\" value=\"View  ";
 		echo print_contact($contact);
 		echo "'s Information\"/>\n" . "</form>\n";
 	
@@ -283,7 +321,7 @@ if ($stop == 0)
 				' value="' . $contact . "\">\n" .
 				'	<input type="hidden" name="category"' .
 				' value="' . $row['category'] . '">' . "\n" .
-				'	<input type="submit" value=' . 
+				'	<input class="buttons" type="submit" value=' . 
 				'"View Category: ' . $row['category']  . " " .
 				get_category_sum($contact, $row['category']) .
 				'"/>' . "\n</form>\n";
@@ -292,6 +330,10 @@ if ($stop == 0)
 		$balance = 0;
 		$due_balance = 0;
 		$category = $mysql_db->real_escape_string($_GET["category"]);
+	}
+	else
+	{
+		$category = "";
 	}
 	
 	if (($_POST["action"] == "") || ($_POST["action"] == "apply"))
@@ -360,14 +402,14 @@ if ($stop == 0)
 		{
 			echo "	<tr>\n";
 			
-			echo "		<td>";// . $row['payment_id'];
+			echo "		<td>" . $row['payment_id'] . " ";
 			echo "	<form action=\"" . rootPageURL() . 
 				"/payments.php\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"action\" value=\"edit\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"id\" value=\"" . $row['payment_id'] . "\">\n" .
-				"		<input type=\"submit\" value=" . 
+				"		<input class=\"buttons\" type=\"submit\" value=" . 
 				"\"Edit\"/>\n" .
 				"	</form>\n";
 			echo "</td>\n";
@@ -452,7 +494,7 @@ if ($stop == 0)
 			else
 			{
 				echo "		<td>" . '<a href="' . rootPageURL() .
-					'/invoices/' . $row['invoice'] . 
+					'/' . $row['invoice'] . 
 					'" target="_blank">Download</a></td>' . "\n";
 			}
 			echo "	</tr>\n";
@@ -509,7 +551,7 @@ if ($stop == 0)
 				"\"action\" value=\"edit\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"id\" value=\"0\">\n" .
-				"		<input type=\"submit\" value=" .
+				"		<input class=\"buttons\" type=\"submit\" value=" .
 				"\"Insert new payment\"/>\n" .
 				"	</form>\n";	
 		}
@@ -526,3 +568,4 @@ closeDatabase();
 
 </body>
 </html>
+	

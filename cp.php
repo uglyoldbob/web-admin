@@ -1,4 +1,5 @@
 <?php
+$config = parse_ini_file("config.ini");
 include("global.php");
 start_my_session();	//start php session
 header('Content-type: text/html; charset=utf-8');
@@ -7,12 +8,13 @@ global $mysql_db;
 openDatabase();
 
 require("include/jobs.php");
+require("include/finance.php");
 
 ?>
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Thermal Specialists Management System</title>
+<title>Control Panel: <?php sitename()?></title>
 <?php do_css() ?>
 </head>
 <body>
@@ -50,19 +52,34 @@ enctype="multipart/form-data">
 <?php
 */
 $stop = 0;
+if (login_code(0) == 1)
+{
+	$stop = 1;
+}
 
 if ($stop == 0)
 {
 	do_top_menu(5);
-	if (login_code(0) == 1)
-	{
-		$stop = 1;
-	}
+	
 	echo "Time based filtering:\n";
 	selectTimePeriod();
 	
 	echo "<b>Possible job status</b><br>\n";
 	jobs::table_of_job_status();
+
+	echo "<b>Possible transaction categories</b><br>\n";
+	finance::table_of_transaction_categories();
+
+	echo "	<input class=\"buttons\" type=\"checkbox\" name=\"debug_session\" ";
+	echo "onclick=\"cb_hide_show(this, $('#debug_session_data'));\" />Show session data<br >\n";
+	echo "	<div id=\"debug_session_data\" style=\"display: none;\">\n";
+	print_r($_SESSION);
+	echo "<br>\n";
+	print_r($_POST);
+	echo "<br>\n";
+	print_r($_GET);
+	echo "<br>\n";
+	echo "	</div>\n";
 }
 
 closeDatabase();
@@ -71,3 +88,4 @@ closeDatabase();
 
 </body>
 </html>
+				

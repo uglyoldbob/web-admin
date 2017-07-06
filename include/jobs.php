@@ -67,7 +67,7 @@ class jobs
 		echo "onclick=\"cb_hide_show(this, $('#add_job_status'));\" />Add a job status<br >\n";
 		echo "	<div id=\"add_job_status\" style=\"display: none;\">\n";
 		echo '	<textarea name="new_job_status" id="add_job_status" rows=4 cols=75 > </textarea><br >' . "\n";
-		echo "	<input type=\"submit\" value=\"Create\">";
+		echo "	<input class=\"buttons\" type=\"submit\" value=\"Create\">";
 		echo "	</div>\n";
 		echo "   </form>\n";
 	}
@@ -156,7 +156,7 @@ class jobs
 		echo "	<b>Initial job status:</b> \n";
 		echo jobs::make_status_dropdown('	', 1, "job_status") . "<br >\n";
 		
-		echo "	<input type=\"submit\" value=\"Create this job\"/>\n";
+		echo "	<input class=\"buttons\" type=\"submit\" value=\"Create this job\"/>\n";
 		echo '</form>' . "\n";
 		echo "</div>\n";
 	}
@@ -191,6 +191,16 @@ class jobs
 				else
 					$query .= ", ";
 				$query .= "comments=\"" . $mysql_db->real_escape_string($data['comments']) . "\"";
+			}
+		}
+
+		if (isset($data['add_payment']))
+		{
+			if ($data['add_payment'] == "on")
+			{
+				$expense_query = "INSERT INTO job_expenses (job_id, payment_id) VALUES (" .
+					$mysql_db->real_escape_string($data['id']) . ", " . $mysql_db->real_escape_string($data['payment_id']) . ");";
+				$mysql_db->query($expense_query);
 			}
 		}
 		
@@ -320,14 +330,14 @@ class jobs
 			if (is_numeric($select_radio) == FALSE)
 				$select_radio = 6;
 
-			echo "	<input type=\"checkbox\" name=\"mod_phone1\" ";
+			echo "	<input class=\"buttons\" type=\"checkbox\" name=\"mod_phone1\" ";
 			echo "onclick=\"cb_hide_show(this, $('#mod_phone1'));\" />Change this phone number<br >\n";
 			echo "	<div id=\"mod_phone1\" style=\"display: none;\">\n";
 			for ($i = 0; $i < 6; $i++)
 			{
 				if ($phone_results[$i]['number'] != null)
 				{
-					echo "	<input type=\"radio\" name=\"phone1\" " .
+					echo "	<input class=\"buttons\" type=\"radio\" name=\"phone1\" " .
 						 "value=\"" . $i . "\" ";
 					if ($select_radio == $i)
 						echo "checked ";
@@ -335,7 +345,7 @@ class jobs
 						 ": " . $phone_results[$i]['number'] . "<br >\n";
 				}
 			}
-			echo "	<input type=\"radio\" name=\"phone1\" " .
+			echo "	<input class=\"buttons\" type=\"radio\" name=\"phone1\" " .
 				 "value=\"6\" ";
 			if ($select_radio == 6)
 				echo "checked ";
@@ -343,7 +353,7 @@ class jobs
 			echo "	</div>\n";
 			
 			echo "	<b>Comments:</b> " . $row['comments'] . "\n";
-			echo "	<input type=\"checkbox\" name=\"mod_comments1\" ";
+			echo "	<input class=\"buttons\" type=\"checkbox\" name=\"mod_comments1\" ";
 			echo "onclick=\"cb_hide_show(this, $('#mod_comments'));\" />Change the comments<br >\n";
 			echo "	<div id=\"mod_comments\" style=\"display: none;\">\n";
 			echo '	<textarea name="comments" id="comments" rows=4 cols=75 >' .
@@ -363,11 +373,127 @@ class jobs
 				echo $statrow['datetime'] . ": " . $statrow['Description'] . 
 					", " . $statrow['what_happened'] . "<br >\n";  
 			}
+
+			$query = "SELECT payments.*, job_expenses.expense FROM payments INNER JOIN job_expenses ON payments.payment_id=job_expenses.payment_id WHERE job_expenses.job_id=" . $this->job;
+			$expense_found = 0;
+			$expense_result = $mysql_db->query($query);
+			echo "	<b>Job expense history</b>:<br >\n";
+			echo "<table style=\"width: 100%\" border=\"1\" >\n";
+			echo "	<tr>\n";
+			echo "		<th>ID#</th>\n";
+			echo "		<th>Payment to</th>\n";
+			echo "		<th>Paid by</th>\n";
+			echo "		<th>Amount paid</th>\n";
+			echo "		<th>Date earned</th>\n";
+			echo "		<th>Date paid</th>\n";
+			echo "		<th>Comments</th>\n";
+			echo "		<th>Category</th>\n";
+			echo "		<th>Invoice</th>\n";
+			echo "	</tr>\n";
+			while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
+			{
+				$expense_found = 1;
+				echo "	<tr>\n";				
+				echo "		<td>" . $expenserow['payment_id'] . " ";
+				echo "	<form action=\"" . rootPageURL() . 
+					"/payments.php\" method=\"post\">\n" .
+					"		<input type=\"hidden\" name=" . 
+					"\"action\" value=\"edit\">\n" .
+					"		<input type=\"hidden\" name=" . 
+					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
+					"		<input class=\"buttons\" type=\"submit\" value=" . 
+					"\"Edit\"/>\n" .
+					"	</form>\n";
+				echo "</td>\n";
+				
+				echo "		<td>";
+				echo "<a href=\"" . rootPageURL() . 
+					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
+				echo print_contact($expenserow['pay_to']);
+				echo "</a>";
+				echo "</td>\n";
+				
+				echo "		<td>";
+				echo "<a href=\"" . rootPageURL() . 
+					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
+				echo print_contact($expenserow['paid_by']);
+				echo "</a>";
+				echo "</td>\n";
+				
+				echo "		<td>";
+				if ($contact != 0)
+				{
+					if ($expenserow['expense'] == 0)
+					{
+						echo "+";
+					}
+					else
+					{
+						echo "-";
+					}
+				}
+				echo "$" . $expenserow['amount_earned'] . "</td>\n";
+				//blank_check function on next 4 lines
+				echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
+				echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
+				echo "		<td>" . ($expenserow['comments']) . "</td>\n";
+				echo "		<td>" . ($expenserow['category']) . "</td>\n";
+				
+				if ($expenserow['date_paid'] != "0000-00-00")
+				{
+					if ($expenserow['expense'] == 0)
+					{
+						$assets += $expenserow['amount_earned'];
+					}
+					else
+					{
+						$liable += $expenserow['amount_earned'];
+					}
+				}
+				else
+				{
+					if ($expenserow['expense'] == 0)
+					{
+						$o_assets += $expenserow['amount_earned'];
+					}
+					else
+					{
+						$o_liable += $expenserow['amount_earned'];
+					}
+				}
+		
+				if ($expenserow['invoice'] == "")
+				{
+					echo "		<td>Not available</td>\n";
+				}
+				else
+				{
+					echo "		<td>" . '<a href="' . rootPageURL() .
+						'/' . $expenserow['invoice'] . 
+						'" target="_blank">Download</a></td>' . "\n";
+				}
+				echo "	</tr>\n";
+
+			}
+			if ($expense_found == 0)
+			{
+				echo "	<tr><td>No expenses found</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n";
+			}
+			echo "</table><br>\n";
+			echo "Outstanding expenses: " . $o_liable . "<br>\n";
+			echo "Outstanding income: " . $o_assets . "<br>\n";
+			echo "Expenses: " . $liable . "<br>\n";
+			echo "Income: " . $assets . "<br>\n";
+			echo "	<input class=\"buttons\" type=\"checkbox\" name=\"add_payment\" ";
+			echo "onclick=\"cb_hide_show(this, $('#add_payment'));\" />Add an expense<br >\n";
+			echo "	<div id=\"add_payment\" style=\"display: none;\">\n";
+			echo "	<input type=\"text\" name=\"payment_id\">\n";
+			echo "	</div>\n";
 			
 			echo "	<b>Update job status:</b> \n";
 			echo jobs::make_status_dropdown('	', 0, "job_status") . "<br >\n";
 			echo "  <textarea name=\"what_happened\" id=\"what_happened\" rows=4 cols=75 ></textarea><br >'\n";			
-			echo "	<input type=\"submit\" value=\"Apply Changes\"/>\n" .
+			echo "	<input class=\"buttons\" type=\"submit\" value=\"Apply Changes\"/>\n" .
 				 "</form>";
 		}
 		else

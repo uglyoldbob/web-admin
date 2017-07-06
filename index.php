@@ -1,4 +1,5 @@
 <?php
+$config = parse_ini_file("config.ini");
 include("global.php");
 start_my_session();	//start php session
 header('Content-type: text/html; charset=utf-8');
@@ -10,7 +11,7 @@ openDatabase();
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Thermal Specialists Management System</title>
+<title><?php sitename()?></title>
 <?php do_css() ?>
 </head>
 <body>

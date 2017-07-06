@@ -2,3 +2,12 @@
 RewriteEngine on
 RewriteCond %{HTTP_HOST} ^thermalspecialist\.com
 RewriteRule ^(.*)$ https://www.thermalspecialist.com/$1 [R=permanent,L] 
+
+# Protect the config file
+<Files config.ini>
+Order Allow,Deny
+Allow from localhost
+Deny from all
+</Files>
+
+php_value display_errors on

@@ -6,7 +6,11 @@ if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
 include("passwords.php");
 include("include/contacts.php");
 
-$config = parse_ini_file("C:/web/config.ini");
+function sitename()
+{
+	global $config;
+	echo $config["name"];
+}
 
 function blank_check($checkme)
 {
@@ -283,8 +287,6 @@ function mod_permission($table, $idfrom, $idto, $op, $perm)
 			}
 		}
 	}
-
-	return $output;
 }
 
 function invalid_username_password()
@@ -295,7 +297,7 @@ function invalid_username_password()
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 		"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-		"	<input type=\"submit\" value=\"Login\">\n" .
+		"	<input class=\"buttons\" type=\"submit\" value=\"Login\">\n" .
 		"</form>\n";
 }
 
@@ -416,7 +418,7 @@ function login_code($quiet)
 					"	Email: <input type=\"text\" name=\"email\" ><br>\n" .
 					"	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
 					"	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Register\">\n" .
+					"	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 					"</form>\n";
 	}
 	else if ($_POST["action"] == "login")
@@ -445,7 +447,7 @@ function login_code($quiet)
 					"	Old password: <input type=\"password\" name=\"pass1\" ><br>\n" .
 					"	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .
 					"	New password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
-					"	<input type=\"submit\" value=\"Change my password\">\n" .
+					"	<input class=\"buttons\" type=\"submit\" value=\"Change my password\">\n" .
 					"</form>\n";
 		}
 	}
@@ -525,13 +527,13 @@ function login_code($quiet)
 					echo "</h3>\n";
 					echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 						 "	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
-						 "	<input type=\"submit\" value=\"Logout\">\n" .
+						 "	<input class=\"buttons\" type=\"submit\" value=\"Logout\">\n" .
 						 "</form>\n";
 					if ($_POST["action"] != "change_pass")
 					{
 						echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 								"	<input type=\"hidden\" name=\"action\" value=\"change_pass\">\n" .
-								"	<input type=\"submit\" value=\"Change my password\">\n" .
+								"	<input class=\"buttons\" type=\"submit\" value=\"Change my password\">\n" .
 								"</form>\n";
 					}
 				}
@@ -562,13 +564,13 @@ function login_code($quiet)
 				"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
 				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-				"	<input type=\"submit\" value=\"Login\">\n" .
+				"	<input class=\"buttons\" type=\"submit\" value=\"Login\">\n" .
 				"</form>\n";
 		if ($config['allow_user_create']=1)
 		{
 			echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 					"	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
-					"	<input type=\"submit\" value=\"Register\">\n" .
+					"	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 					"</form>\n";
 		}
 		$retv = 1;
@@ -584,97 +586,51 @@ function login_code($quiet)
 
 function selectTimePeriod()
 {	//used to select which (time period)'s information will be viewed
-//	if (!(array_key_exists("timeperiod", $_POST)))
-//	{
-//		$_POST['timeperiod'] = "all";
-//	}
-	if (!(array_key_exists("period", $_SESSION)))
+	global $mysql_db;
+
+	if ((isset($_SESSION['period'])))
 	{
 		$_SESSION['period'] = "all";
 	}
 	
-	if (!(isset($_POST['timeperiod'])))
+	if (isset($_POST['timeperiod']))
 	{
-		$_POST['timeperiod'] = "all";
-	}
-	if ($_POST['timeperiod'] == "2011")
-	{
-		$_SESSION['period'] = "2011";
-	}
-	else if ($_POST['timeperiod'] == "2012")
-	{
-		$_SESSION['period'] = "2012";
-	}
-	else if ($_POST['timeperiod'] == "2013")
-	{
-		$_SESSION['period'] = "2013";
-	}
-	else if ($_POST['timeperiod'] == "2014")
-	{
-		$_SESSION['period'] = "2014";
-	}
-	else if ($_POST['timeperiod'] == "all")
-	{
-		$_SESSION['period'] = "all";
-	}
+        	$_SESSION['period'] = $_POST['timeperiod'];
+	}    
 
 	echo "<div id=\"tax_year_select\">\n" .
 		 "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 		 "	<select name=timeperiod>\n";
 	
-	echo "		<option ";
+	$query = "SELECT DISTINCT year(date_paid) FROM `payments` WHERE 1";
+	$result = $mysql_db->query($query);
+	echo "        <option ";
 	if ($_SESSION['period'] == "all")
-		echo "selected ";
-	echo	"value=\"all\">Everything</option>\n";
-	
-	echo "		<option ";
-	if ($_SESSION['period'] == "2011")
-		echo "selected ";
-	echo	"value=\"2011\">2011 Tax Year</option>\n";
-	
-	echo "		<option ";
-	if ($_SESSION['period'] == "2012")
-		echo "selected ";
-	echo	"value=\"2012\">2012 Tax Year</option>\n";
-	echo "		<option ";
-	if ($_SESSION['period'] == "2013")
-		echo "selected ";
-	echo	"value=\"2013\">2013 Tax Year</option>\n";
-	echo "		<option ";
-	if ($_SESSION['period'] == "2014")
-		echo "selected ";
-	echo	"value=\"2014\">2014 Tax Year</option>\n";
+    		echo "selected ";
+	echo	"value=\"all\">Everything</option>\n";    
+	while($row = $result->fetch_array(MYSQLI_BOTH))
+	{
+        echo "    	<option ";
+        if ($_SESSION['period'] == $row["year(date_paid)"])
+    	    echo "selected ";
+        echo "value=\"" . $row["year(date_paid)"] . "\">" . $row["year(date_paid)"] . " Tax Year</options>\n";
+	}
 	echo	"	</select>\n";
-	echo "	<input type=\"submit\" value=\"Go\">\n" .
+	echo "	<input class=\"buttons\" type=\"submit\" value=\"Go\">\n" .
 		"</form>\n" .
 		"</div>\n";
 }
 
 function getPeriodComparison($fieldname)
 {	//returns the proper portion of a mysql statement to filter for the time period selected
-	if ($_SESSION['period'] == "2011")
+	if ($_SESSION['period'] == "all")
 	{
-		return " $fieldname  > '2010-12-31'" .
-			" AND $fieldname  < '2012-01-01'";
+        return "";
 	}
-	else if ($_SESSION['period'] == "2012")
-	{
-		return " $fieldname  > '2011-12-31'" .
-			" AND $fieldname < '2013-01-01'";
-	}
-	else if ($_SESSION['period'] == "2013")
-	{
-		return " $fieldname  > '2012-12-31'" .
-			" AND $fieldname < '2014-01-01'";
-	}
-	else if ($_SESSION['period'] == "2014")
-	{
-		return " $fieldname  > '2013-12-31'" .
-			" AND $fieldname < '2015-01-01'";
-	}
-	else
-	{
-		return "";
+    else
+    {
+		return " $fieldname  >= '" . $_SESSION['period'] . "-01-01'" .
+			" AND $fieldname  <= '" . $_SESSION['period'] . "-12-31'";
 	}
 }
 
@@ -722,44 +678,7 @@ function print_contact($contact_id)
 	return $output;
 }
 
-function print_prop($prop_id, $database)
-{	//prints property information
-	global $mysql_db;
-	$query = "SELECT address, city, state, zip, description FROM properties WHERE id = " . $prop_id;
-	$output = '';
-	$contact_results = $mysql_db->query($query);
-	
-	if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
-	{
-		$output .= $row['address'];
-		if ($row['city'] != "")
-		{
-			$output .= ", " . $row['city'];
-		}
-		if ($row['state'] != "")
-		{
-			$output .= " " . $row['state'];
-		}
-		if ($row['zip'] != "")
-		{
-			$output .= " " . $row['zip'];
-		}
-		echo "<br >\n";
-		if ($row['description'] != "")
-		{
-			$output .= " " . $row['description'];
-		}
-		$contact_results->free();
-	}
-	else
-	{
-		$output .= "ERROR";
-	}
-	return $output;
-}
-
-
-function get_category_sum($contact, $category, $database)
+function get_category_sum($contact, $category)
 {
 	global $mysql_db;
 	$query = "SELECT date_paid, amount_earned, pay_to, paid_by FROM payments WHERE (paid_by = " . $contact .
