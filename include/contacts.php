@@ -70,7 +70,6 @@ class contacts
 			echo print_contact($this->contact);
 			echo "</h3>\n";
 			echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $this->contact . "\">View payments</a><br>\n";
-			echo "<a href=\"" . rootPageURL() . "/inspections.php?contact=" . $this->contact . "\">View inspections</a><br>\n";
 
 			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
@@ -132,7 +131,6 @@ class contacts
 				echo "eligible to be paid<br>\n";
 				
 				echo "Soon to print payment information<br>\n";
-				echo "Soon to print inspections performed (if applicable)<br>\n";
 				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
 					$row['payment_eligible'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
 					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],

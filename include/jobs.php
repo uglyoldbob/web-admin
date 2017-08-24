@@ -373,7 +373,13 @@ class jobs
 				echo $statrow['datetime'] . ": " . $statrow['Description'] . 
 					", " . $statrow['what_happened'] . "<br >\n";  
 			}
-
+			
+			echo "	<b>Update job status:</b> \n";
+			echo jobs::make_status_dropdown('	', 0, "job_status") . "<br >\n";
+			echo "  <textarea name=\"what_happened\" id=\"what_happened\" rows=4 cols=75 ></textarea><br >\n";			
+			echo "	<input class=\"buttons\" type=\"submit\" value=\"Apply Changes\"/>\n" .
+				 "</form>";
+			
 			$query = "SELECT payments.*, job_expenses.expense FROM payments INNER JOIN job_expenses ON payments.payment_id=job_expenses.payment_id WHERE job_expenses.job_id=" . $this->job;
 			$expense_found = 0;
 			$expense_result = $mysql_db->query($query);
@@ -390,6 +396,10 @@ class jobs
 			echo "		<th>Category</th>\n";
 			echo "		<th>Invoice</th>\n";
 			echo "	</tr>\n";
+			$assets = 0;
+			$liable = 0;
+			$o_assets = 0;
+			$o_liable = 0;
 			while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
 			{
 				$expense_found = 1;
@@ -403,6 +413,15 @@ class jobs
 					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
 					"\"Edit\"/>\n" .
+					"	</form>\n";
+				echo "	<form action=\"" . rootPageURL() . 
+					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
+					"		<input type=\"hidden\" name=" . 
+					"\"action\" value=\"remove_expense\">\n" .
+					"		<input type=\"hidden\" name=" . 
+					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
+					"		<input class=\"buttons\" type=\"submit\" value=" . 
+					"\"Remove\"/>\n" .
 					"	</form>\n";
 				echo "</td>\n";
 				
@@ -421,15 +440,18 @@ class jobs
 				echo "</td>\n";
 				
 				echo "		<td>";
-				if ($contact != 0)
+				if (isset($contact))
 				{
-					if ($expenserow['expense'] == 0)
+					if ($contact != 0)
 					{
-						echo "+";
-					}
-					else
-					{
-						echo "-";
+						if ($expenserow['expense'] == 0)
+						{
+							echo "+";
+						}
+						else
+						{
+							echo "-";
+						}
 					}
 				}
 				echo "$" . $expenserow['amount_earned'] . "</td>\n";
@@ -437,8 +459,7 @@ class jobs
 				echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
 				echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
 				echo "		<td>" . ($expenserow['comments']) . "</td>\n";
-				echo "		<td>" . ($expenserow['category']) . "</td>\n";
-				
+				echo "		<td>" . ($expenserow['category']) . "</td>\n";				
 				if ($expenserow['date_paid'] != "0000-00-00")
 				{
 					if ($expenserow['expense'] == 0)
@@ -484,17 +505,17 @@ class jobs
 			echo "Outstanding income: " . $o_assets . "<br>\n";
 			echo "Expenses: " . $liable . "<br>\n";
 			echo "Income: " . $assets . "<br>\n";
-			echo "	<input class=\"buttons\" type=\"checkbox\" name=\"add_payment\" ";
-			echo "onclick=\"cb_hide_show(this, $('#add_payment'));\" />Add an expense<br >\n";
-			echo "	<div id=\"add_payment\" style=\"display: none;\">\n";
-			echo "	<input type=\"text\" name=\"payment_id\">\n";
-			echo "	</div>\n";
 			
-			echo "	<b>Update job status:</b> \n";
-			echo jobs::make_status_dropdown('	', 0, "job_status") . "<br >\n";
-			echo "  <textarea name=\"what_happened\" id=\"what_happened\" rows=4 cols=75 ></textarea><br >'\n";			
-			echo "	<input class=\"buttons\" type=\"submit\" value=\"Apply Changes\"/>\n" .
-				 "</form>";
+			if (isset($_SESSION['payment_reference']))
+			{
+				echo "    <form action=\"" . rootPageURL() . 
+					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
+					"		<input type=\"hidden\" name=" . 
+					"\"action\" value=\"add_payment\">\n" .
+					"		<input class=\"buttons\" type=\"submit\" value=" . 
+					"\"Add selected payment\"/>\n" .
+					"	</form>\n";
+			}
 		}
 		else
 		{

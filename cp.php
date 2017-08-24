@@ -59,7 +59,7 @@ if (login_code(0) == 1)
 
 if ($stop == 0)
 {
-	do_top_menu(5);
+	do_top_menu(6);
 	
 	echo "Time based filtering:\n";
 	selectTimePeriod();

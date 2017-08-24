@@ -92,6 +92,10 @@ function do_top_menu($indx)
 	echo "	<li><a ";
 	if ($indx == 5)
 		echo "class=selected ";	
+	echo "href=\"" . rootPageURL() . "/maintenance.php\">Maintenance</a></li>\n";
+	echo "	<li><a ";
+	if ($indx == 6)
+		echo "class=selected ";	
 	echo "href=\"" . rootPageURL() . "/cp.php\">Control Panel</a></li>\n";
 	echo "</ul>\n</div>\n";
 	echo "<div class=\"clear\"></div>\n";
@@ -289,16 +293,22 @@ function mod_permission($table, $idfrom, $idto, $op, $perm)
 	}
 }
 
+function login_button()
+{
+	global $mysql_db;
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL() . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+}
+
 function invalid_username_password()
 {
-	echo	"<h3>Invalid username or password</h3>\n" .
-		"<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
-		"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-		"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-		"	<input class=\"buttons\" type=\"submit\" value=\"Login\">\n" .
-		"</form>\n";
+	echo	"<h3>Invalid username or password</h3>\n";
+	login_button();
 }
 
 function attempt_registration($attempt_username, $attempt_email, $attempt_pw)
@@ -349,9 +359,9 @@ function login_code($quiet)
 
 	if (($_POST["action"] == "create_user") && ($config['allow_user_create']=1))
 	{
-		if (isset($_POST["user"]))
+		if (isset($_POST["username"]))
 		{
-			$attempt_username = $mysql_db->real_escape_string($_POST["user"]);
+			$attempt_username = $mysql_db->real_escape_string($_POST["username"]);
 			
 			if (isset($_POST["email"]))
 			{
@@ -396,9 +406,9 @@ function login_code($quiet)
 	//If chain to determine what to do
 	if (($_POST["action"] == "register") && ($config['allow_user_create']=1))
 	{
-		if (isset($_POST["user"]))
+		if (isset($_POST["username"]))
 		{
-			$previous_username = $mysql_db->real_escape_string($_POST["user"]);
+			$previous_username = $mysql_db->real_escape_string($_POST["username"]);
 		}
 		else
 		{
@@ -414,7 +424,7 @@ function login_code($quiet)
 		}
 		echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 					"	<input type=\"hidden\" name=\"action\" value=\"create_user\">\n" .
-					"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
+					"	Username: <input type=\"text\" name=\"username\" ><br>\n" .
 					"	Email: <input type=\"text\" name=\"email\" ><br>\n" .
 					"	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
 					"	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
@@ -423,16 +433,14 @@ function login_code($quiet)
 	}
 	else if ($_POST["action"] == "login")
 	{	//retrieve submitted username and password, if applicable
-		$username = $mysql_db->real_escape_string($_POST["user"]);
+		$username = $mysql_db->real_escape_string($_POST["username"]);
 		$passworder = $mysql_db->real_escape_string($_POST["password"]);
 	
 		$_SESSION['username'] = $username;
-		$_SESSION['password'] = $passworder;
-			//password is briefly stored in plain text when the user logs in
-			//it is unset or replaced with the hash in the login_button function
 	}
 	else if ($_POST["action"] == "logout")
 	{
+		echo "Logout<br>\n";
 		unset($_SESSION['username']);
 		unset($_SESSION['password']);
 	}
@@ -489,10 +497,10 @@ function login_code($quiet)
 				//this piece allows the stretching value to be changed at any given time
 				//the only drawback is the password is hashed twice when the user logs in
 				//in order to change the stretching value
-				$temp = hash_password($_SESSION['password'], $row['salt'], $row['stretching']);
+				$temp = hash_password($passworder, $row['salt'], $row['stretching']);
 				if ( ($row['password'] == $temp) && ($row['stretching'] != $config['key_stretching_value']) )
 				{	//password is good, key stretching needs to be fixed
-					contacts::mod_user_pword($row['emp_id'], $_SESSION['password']);
+					contacts::mod_user_pword($row['emp_id'], $passworder);
 					$fquery = "SELECT * From contacts WHERE username='" . $_SESSION['username'] . "'LIMIT 1;";
 					$fresults = $mysql_db->query($fquery);
 					if ($fresults)
@@ -503,13 +511,13 @@ function login_code($quiet)
 					{	//this should never happen
 						die("Failed to reformat password");
 					}
-					$temp = hash_password($_SESSION['password'], $row['salt'], $config['key_stretching_value']);
+					$temp = hash_password($passworder, $row['salt'], $config['key_stretching_value']);
 					$row['password'] = $temp;
 				}
 
 				$_SESSION['password'] = $temp;
 			}
-			if ($row['password'] == $_SESSION['password'])
+			if (($row['password'] == $_SESSION['password']) && isset($_SESSION['password']) && ($_SESSION['password'] <> ""))
 			{	#successful login
 				#TODO : limit the number of valid sessions for users? create a valid session table?
 				$_SESSION['user'] = $row;
@@ -540,7 +548,7 @@ function login_code($quiet)
 			}
 			else
 			{	//password fail match
-				$query = "UPDATE contacts SET fail_logins=fail_logins+1 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+				$query = "UPDATE contacts SET fail_logins=fail_logins+1 WHERE username = " . $_SESSION['username'] . ";";
 				$mysql_db->query($query);
 				unset($_SESSION['username']);
 				unset($_SESSION['password']);
@@ -559,13 +567,7 @@ function login_code($quiet)
 	}
 	else
 	{
-		echo 	"<b>Please login<br >\n" .
-				"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-				"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
-				"	Username: <input type=\"text\" name=\"user\" ><br>\n" .
-				"	Password: <input type=\"password\" name=\"password\" ><br>\n" .
-				"	<input class=\"buttons\" type=\"submit\" value=\"Login\">\n" .
-				"</form>\n";
+		login_button();
 		if ($config['allow_user_create']=1)
 		{
 			echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
@@ -588,15 +590,14 @@ function selectTimePeriod()
 {	//used to select which (time period)'s information will be viewed
 	global $mysql_db;
 
-	if ((isset($_SESSION['period'])))
+	if (!(isset($_SESSION['period'])))
 	{
 		$_SESSION['period'] = "all";
 	}
-	
 	if (isset($_POST['timeperiod']))
 	{
         	$_SESSION['period'] = $_POST['timeperiod'];
-	}    
+	}
 
 	echo "<div id=\"tax_year_select\">\n" .
 		 "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
@@ -623,6 +624,10 @@ function selectTimePeriod()
 
 function getPeriodComparison($fieldname)
 {	//returns the proper portion of a mysql statement to filter for the time period selected
+	if (!(isset($_SESSION['period'])))
+	{
+		$_SESSION['period'] = "all";
+	}
 	if ($_SESSION['period'] == "all")
 	{
         return "";
@@ -830,5 +835,4 @@ function print_location($location)
 		}
 	}
 }
-
 ?>

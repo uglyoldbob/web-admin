@@ -7,7 +7,7 @@ function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions
 {
 	echo "<div>\n";
 	echo $disp . "\n";
-	echo '<input type="text" autocomplete="off" value="';
+	echo '<input class="fields" type="text" autocomplete="off" value="';
 	if ($fill_val != 0)
 	{
 		echo print_contact($fill_val);
@@ -42,7 +42,7 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '<form method="POST" action="payments.php" enctype="multipart/form-data">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	if ($id != 0)
-		echo '<b>Payment ID: </b>Id number: <input type="text" value="' . $id . '" name="pay_id" readonly>' . "<br >\n";
+		echo '<b>Payment ID: </b>Id number: <input class="fields" type="text" value="' . $id . '" name="pay_id" readonly>' . "<br >\n";
 	echo '	<b>Payment by: </b>';
 	
 	make_autocomplete('<b>Contact Name:</b> ', $payer_id, "name_payer",
@@ -51,11 +51,11 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	make_autocomplete('<b>Contact Name:</b> ', $payee_id, "name_payee",
 		"id_payee", "fillNames", "payee_suggest", "payee_list");
 	
-	echo '	<b>Amount of Payment: </b>Dollar amount: $<input type="text" value="' . $amount . '" name="amount_paid" id="amount_paid" ><br >' . "\n";
-	echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input type="text" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";
-	echo '	<b>Date Paid: </b>Date (YYYY-MM-DD): <input type="text" value="' . $paid . '" name="date_paid" id="date_paid" ><br >' . "\n";
-	echo '	<b>Comments: </b> <input type="text" value="' . $comments . '" name="comments" id="comments" size=127 ><br >' . "\n";
-	echo '	<b>Category: </b> <select name="categori">' . "<br>\n";
+	echo '	<b>Amount of Payment: </b>Dollar amount: $<input class="fields" type="text" value="' . $amount . '" name="amount_paid" id="amount_paid" ><br >' . "\n";
+	echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input class="fields" type="text" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";
+	echo '	<b>Date Paid: </b>Date (YYYY-MM-DD): <input class="fields" type="text" value="' . $paid . '" name="date_paid" id="date_paid" ><br >' . "\n";
+	echo '	<b>Comments: </b> <input class="fields" type="text" value="' . $comments . '" name="comments" id="comments" size=127 ><br >' . "\n";
+	echo '	<b>Category: </b> <select name="categori" class="fields">' . "<br>\n";
 
 	$query = "SELECT * FROM `transaction_categories` ORDER BY `name`";
 	$categories = $mysql_db->query($query);
@@ -63,13 +63,13 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	{
 		if ($category == $row['name'])
 		{
-		echo '		<option selected value="' . $row['name'] .
+		echo '		<option selected class="fields" value="' . $row['name'] .
 			'">' . $row['name'] . "</option>\n";
 		
 		}
 		else
 		{
-		echo '		<option value="' . $row['name'] .
+		echo '		<option class="fields" value="' . $row['name'] .
 			'">' . $row['name'] . "</option>\n";
 		}
 	}	
@@ -79,19 +79,19 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo "	<input class=\"buttons\" type=\"checkbox\" name=\"upload_invoice\" ";
 	echo "onclick=\"cb_hide_show(this, $('#upload_invoice'));\" />Upload an invoice<br >\n";
 	echo "	<div id=\"upload_invoice\" style=\"display: none;\">\n";
-	echo '	<input type="file" name="new_invoice">' . "\n";
+	echo '	<input class="fields" type="file" name="new_invoice">' . "\n";
 	echo "	</div>\n";
 	echo "<br>\n";
 
-	echo '	<input type="submit" value="Update"/>' . "\n";
+	echo '	<input class="buttons" type="submit" value="Update"/>' . "\n";
 	echo '</form>' . "\n";
 	echo '<form method="POST" action="payments.php">' . "\n";
 	echo '	<input type="hidden" name="action" value="edit">' . "\n";
 	echo '	<input type="hidden" name="id" value=' . $id . ">\n";
-	echo '	<input type="submit" value="Refresh">' . "\n";
+	echo '	<input class="buttons" type="submit" value="Refresh">' . "\n";
 	echo '</form>' . "\n";
 	echo '<form>' . "\n";
-	echo '	<input type="button" value="Cancel" onclick="history.go(-1)">' . "\n";
+	echo '	<input class="buttons" type="button" value="Cancel" onclick="history.go(-1)">' . "\n";
 	echo '</form>' . "\n";
 	echo "</div>\n";
 }

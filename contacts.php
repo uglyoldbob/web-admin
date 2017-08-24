@@ -30,7 +30,7 @@ openDatabase();
 #TODO : add photos for contacts
 
 $stop = 0;
-if (login_code(1) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }

@@ -36,7 +36,7 @@ openDatabase();
 
 //make sure the user is logged in properly
 $stop = 0;
-if (login_code(1) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }
@@ -53,6 +53,23 @@ if ($stop == 0)
 	{
 		$jobs->modify_job($_POST);
 		$_POST["action"] = "";	//transition to listing the newly created job
+	}
+	else if ($_POST["action"] == "add_payment")
+	{
+		if (isset($_SESSION['payment_reference']))
+		{
+			$expense_query = "INSERT INTO job_expenses (job_id, payment_id) VALUES (" .
+				$mysql_db->real_escape_string($_GET['job']) . ", " . $mysql_db->real_escape_string($_SESSION['payment_reference']) . ");";
+			$mysql_db->query($expense_query);
+		}
+		$_POST["action"] = "";	//transition to listing the newly modified job
+	}
+	else if ($_POST["action"] == "remove_expense")
+	{
+		$expense_query = "DELETE from job_expenses WHERE job_id=" .
+			$mysql_db->real_escape_string($_GET['job']) . " AND payment_id=" . $mysql_db->real_escape_string($_POST['id']) . " LIMIT 1;";
+		$mysql_db->query($expense_query);
+		$_POST["action"] = "";	//transition to listing the newly modified job
 	}
 	
 	if ($_POST["action"] != "edit")

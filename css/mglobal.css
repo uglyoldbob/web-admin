@@ -1,6 +1,10 @@
 body
 {
-	font-size: 2em;
+	font-size: 4vw;
+}
+
+input[type=checkbox] {
+  transform: scale(3.0);
 }
 
 ul.topmenu
@@ -23,7 +27,7 @@ ul.topmenu li
 ul.topmenu li a
 {
 	display: block;
-	padding: 1.5em 2em;
+	padding: .5em 1em;
 	text-decoration: none;
 	font-weight: bold;
 	color: #069;
@@ -55,6 +59,10 @@ div.loc_grid_elem
 .buttons
 {
 	padding: 0.2in 0.2in 0.2in 0.2in;
+ font-size: 4vw;
 }
-
-	
+.fields
+{
+	padding: 0.2in 0.2in 0.2in 0.2in;
+ font-size: 4vw;
+}

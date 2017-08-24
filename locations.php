@@ -29,7 +29,7 @@ if (is_numeric($location) == FALSE)
 	$location = 0;
 
 $stop = 0;
-if (login_code(1) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }
@@ -529,7 +529,6 @@ if ($stop == 0)
 					else
 					{
 						echo no_image() . " <br >\n";
-
 					}
 					//TODO: add capability of changing, removing, adding a photo for the location
 				}
@@ -655,7 +654,7 @@ if ($stop == 0)
 			echo "		</td>\n";
 			$i = $i + 1;
 
-			echo "		<td>";
+			echo "		<td><a href=maintenance.php?id=" . $row['id'] . ">\n";
 			if ($row['img_id'])
 			{
 				echo '<img src="' . rootPageURL() .
@@ -666,9 +665,8 @@ if ($stop == 0)
 			{
 				echo no_image() . "\n";
 				echo "		";
-
 			}
-			echo "</td>\n";
+            echo "</a></td>\n";
 
 
 

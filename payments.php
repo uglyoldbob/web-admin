@@ -10,10 +10,7 @@ if (!(array_key_exists("contact", $_GET)))
 {
 	$_GET["contact"] = "0";
 }
-else
-{
-	$contact = $_GET["contact"];
-}
+$contact = $_GET["contact"];
 
 global $mysql_db;
 openDatabase();
@@ -84,14 +81,14 @@ if (is_numeric($start_page) == FALSE)
 <?php
 
 $stop = 0;
-if (login_code(1) == 1)
+if (login_code(0) == 1)
 {
 	$stop = 1;
 }
 if ($stop == 0)
 {
 	do_top_menu(1);
-	if ($_POST["action"] == "apply")
+    if ($_POST["action"] == "apply")
 	{	//apply the stuff
 		$error = 0;
 		
@@ -147,9 +144,9 @@ if ($stop == 0)
 					"');";
 				if ($mysql_db->query($query) != TRUE)
 				{
-					echo "Error: " . $mysql_db->error() . "<br >\n";
+					echo "Error: " . $mysql_db->error . "<br >\n";
 					exit(1);
-					//die('Error: ' . $mysql_db->error());
+					//die('Error: ' . $mysql_db->error);
 				}
 				echo "Payment entry created.<br >\n";
 			}
@@ -182,13 +179,13 @@ if ($stop == 0)
 					{
 						echo "Error uploading invoice<br>\n";
 					}
-					$query = 'UPDATE `payments` SET `invoice` = ' . $target_file .
-						' WHERE `payment_id` = ' . $pay_id . ';';
+					$query = 'UPDATE `payments` SET `invoice` = \'' . $target_file .
+						'\' WHERE `payment_id` = \'' . $pay_id . '\';';
                     if ($mysql_db->query($query) != TRUE)
     			    {
-				    	echo "Error: " . $mysql_db->error() . "<br >\n";
+				    	echo "Error: " . $mysql_db->error . "<br >\n";
 				    	exit(1);
-				    	//die('Error: ' . $mysql_db->error());
+				    	//die('Error: ' . $mysql_db->error);
 				    }
 				}
 
@@ -205,6 +202,29 @@ if ($stop == 0)
 	//	echo $_POST["date_paid"] . "<br >\n";
 	//	echo $_POST["comments"] . "<br >\n";
 	}
+    
+    if ($_POST["action"] == "copy")
+    {
+        $_SESSION['payment_reference'] = $mysql_db->real_escape_string($_POST["id"]);
+        $_POST["action"] = "apply";
+    }
+    if ($_POST["action"] == "unselect")
+    {
+        unset($_SESSION['payment_reference']);
+        $_POST["action"] = "apply";
+    }
+    
+    if (isset($_SESSION['payment_reference']))
+    {
+        echo "Payment id " . $_SESSION['payment_reference'] . " is selected<br>\n";
+        echo "    <form action=\"" . rootPageURL() . 
+			"/payments.php\" method=\"post\">\n" .
+			"		<input type=\"hidden\" name=" . 
+			"\"action\" value=\"unselect\">\n" .
+			"		<input class=\"buttons\" type=\"submit\" value=" . 
+			"\"Unselect\"/>\n" .
+			"	</form>\n";
+    }
 	
 	if ($_POST["action"] == "edit")
 	{
@@ -406,6 +426,15 @@ if ($stop == 0)
 			echo "	<form action=\"" . rootPageURL() . 
 				"/payments.php\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
+				"\"action\" value=\"copy\">\n" .
+				"		<input type=\"hidden\" name=" . 
+				"\"id\" value=\"" . $row['payment_id'] . "\">\n" .
+				"		<input class=\"buttons\" type=\"submit\" value=" . 
+				"\"Copy\"/>\n" .
+				"	</form>\n";
+			echo "	<form action=\"" . rootPageURL() . 
+				"/payments.php\" method=\"post\">\n" .
+				"		<input type=\"hidden\" name=" . 
 				"\"action\" value=\"edit\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"id\" value=\"" . $row['payment_id'] . "\">\n" .
@@ -568,4 +597,4 @@ closeDatabase();
 
 </body>
 </html>
-	
+		
