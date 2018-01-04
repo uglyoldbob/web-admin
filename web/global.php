@@ -203,9 +203,9 @@ function openDatabase()
 		$config["database_name"], $config["database_port"]);
 	if ($mysql_db->connect_errno)
 	{
-		print_r($config);
 		echo "Failed to connect to MySQL: (" . $mysql_db->connect_errno . ") " .
 			$mysql_db->connect_error . "<br >\n";
+		print_r($config);
 		die("Database connection failed");
 	}
 	//TODO: implement calling this function
