@@ -22,3 +22,6 @@ before_script:
   - sudo cp -f build/travis-ci-apache.txt /etc/apache2/sites-available/000-default.conf
   - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/000-default.conf
   - sudo service apache2 restart
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
