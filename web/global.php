@@ -1,16 +1,21 @@
 <?php
-
-if (!isset($config))
-{
-	die ('<h2>Direct File Access Prohibited</h2>');
-}
-if ($config==FALSE)
-{
-	die ('<h2>Failed to load configuration</h2>');
-}
+test_config();
 
 include("passwords.php");
 include("include/contacts.php");
+
+function test_config()
+{
+	global $config;
+	if (!isset($config))
+	{
+		die ('<h2>Direct File Access Prohibited</h2>');
+	}
+	if ($config==FALSE)
+	{
+		die ('<h2>Failed to load configuration</h2>');
+	}
+}
 
 function sitename()
 {
