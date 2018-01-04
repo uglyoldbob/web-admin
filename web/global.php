@@ -1,8 +1,12 @@
 <?php
 
-if (!isset($config))
+if (!isset($config)
 {
 	die ('<h2>Direct File Access Prohibited</h2>');
+}
+if ($config==FALSE)
+{
+	die ('<h2>Failed to load configuration</h2>');
 }
 
 include("passwords.php");
@@ -198,7 +202,6 @@ function start_my_session()
 function openDatabase()
 {
 	global $mysql_db, $config;
-	print_r($config);
 	$mysql_db = new mysqli($config["database_server"], 
 		$config["database_username"], $config["database_password"], 
 		$config["database_name"], $config["database_port"]);
