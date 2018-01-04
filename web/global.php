@@ -1,7 +1,9 @@
 <?php
 
-if ('global.php' == basename($_SERVER['SCRIPT_FILENAME']))
+if (!isset($config))
+{
 	die ('<h2>Direct File Access Prohibited</h2>');
+}
 
 include("passwords.php");
 include("include/contacts.php");
