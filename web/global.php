@@ -1,6 +1,6 @@
 <?php
 
-if (!isset($config)
+if (!isset($config))
 {
 	die ('<h2>Direct File Access Prohibited</h2>');
 }
