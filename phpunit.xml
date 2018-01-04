@@ -1,5 +1,6 @@
  <phpunit
   stderr="true"
+  verbose="true"
  >
   <testsuites>
     <testsuite name="test_suite_one">
