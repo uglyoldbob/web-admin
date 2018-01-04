@@ -198,6 +198,7 @@ function start_my_session()
 function openDatabase()
 {
 	global $mysql_db, $config;
+	print_r($config);
 	$mysql_db = new mysqli($config["database_server"], 
 		$config["database_username"], $config["database_password"], 
 		$config["database_name"], $config["database_port"]);
@@ -205,7 +206,6 @@ function openDatabase()
 	{
 		echo "Failed to connect to MySQL: (" . $mysql_db->connect_errno . ") " .
 			$mysql_db->connect_error . "<br >\n";
-		print_r($config);
 		die("Database connection failed");
 	}
 	//TODO: implement calling this function
