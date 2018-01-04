@@ -1,4 +1,6 @@
- <phpunit>
+ <phpunit
+  stderr="true"
+ >
   <testsuites>
     <testsuite name="test_suite_one">
       <file>unit_tests/OneTest.php</file>
