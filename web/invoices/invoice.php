@@ -1,6 +1,6 @@
 <?php
 $config = parse_ini_file("../config.ini");
-include("../global.php");
+require_once("../global.php");
 require_once("../include/exceptions.php");
 start_my_session();	//start php session
 

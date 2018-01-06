@@ -1,5 +1,5 @@
 <?php
-require("global.php");
+require_once("global.php");
 require_once("include/exceptions.php");
 
 start_my_session();	//start php session
