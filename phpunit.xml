@@ -13,6 +13,9 @@
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
 	  <directory suffix=".php">./web</directory>
+	  <exclude>
+	  	<directory suffix=".php">./web/include/fpdf16/tutorial</directory>
+	  </exclude>
 	</whitelist>
   </filter>
 </phpunit>
