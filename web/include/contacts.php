@@ -447,8 +447,7 @@ class contacts
 		{
 			if (!$mysql_db->query($query))
 			{
-				echo "Error: " . $mysql_db->error . "<br >\n";
-				//die('Error: ' . $mysql_db->error;
+				throw new Exception("Error: " . $mysql_db->error . "<br >\n");
 			}
 			else
 			{

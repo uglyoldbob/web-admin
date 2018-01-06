@@ -1,8 +1,8 @@
 <?php
-
+require_once("exceptions.php");
 #this script must be included in another script to use properly
 if ('upload_file.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	die ('<h2>Direct File Access Prohibited</h2>');
+	throw new PermissionDeniedException();
 
 include('SimpleImage.php');
 
@@ -51,8 +51,7 @@ function create_image_entry($uploader)
 	$query = "INSERT INTO images (uploader) VALUES ('" . $uploader . "');";
 	if (!$mysql_db->query($query))
 	{
-		echo "Error: " . $mysql_db->error . "<br >\n";
-		die('Error: ' . $mysql_db->error);
+		throw new Exception("Error: " . $mysql_db->error . "<br >\n");
 	}
 	else
 	{
@@ -71,8 +70,7 @@ function finish_image_entry($img_id, $vga, $thumb)
 	echo "The query is <emph>" . $query . "</emph><br >\n";
 	if (!$mysql_db->query($query))
 	{
-		echo "Error: " . $mysql_db->error . "<br >\n";
-		die('Error: ' . $mysql_db->error);
+		throw new Exception("Error: " . $mysql_db->error . "<br >\n");
 	}
 	else
 	{	//no error
@@ -85,8 +83,7 @@ function remove_entry($img_id)
 	$query = "DELETE FROM images WHERE id='" . $img_id . "';";
 	if (!$mysql_db->query($query))
 	{
-		echo "Error: " . $mysql_db->error . "<br >\n";
-		die('Error: ' . $mysql_db->error);
+		throw new Exception("Error: " . $mysql_db->error . "<br >\n");
 	}
 	else
 	{	//no error

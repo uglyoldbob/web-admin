@@ -2,14 +2,15 @@
 $config = parse_ini_file("../config.ini");
 include("../global.php");
 include("../include/upload_file.php");
+require_once("../include/exceptions.php");
 start_my_session();
 global $mysql_db;
 openDatabase();
 $stop = 0;
 if (login_code(1) == 1)
 {
-        $stop = 1;
-	die('stuff');
+    $stop = 1;
+	throw new Exception('stuff');
 }
 
 $filename = $mysql_db->real_escape_string($_GET['id']);

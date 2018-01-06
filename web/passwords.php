@@ -1,7 +1,9 @@
 <?php
 
+require_once("include/exceptions.php");
+
 if ('passwords.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	die ('<h2>Direct File Access Prohibited</h2>');
+	throw new PermissionDeniedException();
 
 /*
  * Password hashing with PBKDF2.
@@ -85,9 +87,9 @@ function pbkdf2($algorithm, $password, $salt, $count, $key_length, $raw_output =
 {
     $algorithm = strtolower($algorithm);
     if(!in_array($algorithm, hash_algos(), true))
-        die('PBKDF2 ERROR: Invalid hash algorithm.');
+        throw new Exception('PBKDF2 ERROR: Invalid hash algorithm.');
     if($count <= 0 || $key_length <= 0)
-        die('PBKDF2 ERROR: Invalid parameters.');
+        throw new Exception('PBKDF2 ERROR: Invalid parameters.');
 
     $hash_length = strlen(hash($algorithm, "", true));
     $block_count = ceil($key_length / $hash_length);

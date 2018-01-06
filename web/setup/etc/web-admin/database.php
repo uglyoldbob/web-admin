@@ -13,7 +13,7 @@ function openDatabase()
         {
                 echo "Failed to connect to MySQL: (" . $mysq_db->connect_errno . ") " .
                         $mysq_db->connect_error . "<br >\n";
-                die("Database connection failed");
+                throw new Exception("Database connection failed");
         }
         //TODO: implement calling this function
         //mysqli_set_charset()

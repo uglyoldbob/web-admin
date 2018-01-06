@@ -1,7 +1,7 @@
 <?php
-
+require_once("exceptions.php");
 if ('forms.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	die ('<h2>Direct File Access Prohibited</h2>');
+	throw new PermissionDeniedException();
 
 function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions, $autolist)
 {

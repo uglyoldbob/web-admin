@@ -1,19 +1,19 @@
 <?php
-test_config();
 
 include("passwords.php");
 include("include/contacts.php");
+require_once("include/exceptions.php");
 
 function test_config()
 {
 	global $config;
 	if (!isset($config))
 	{
-		die ('<h2>Direct File Access Prohibited</h2>');
+		throw new PermissionDeniedException();
 	}
 	if ($config==FALSE)
 	{
-		die ('<h2>Failed to load configuration</h2>');
+		throw new ConfigurationMissingException();
 	}
 }
 
@@ -212,9 +212,7 @@ function openDatabase()
 		$config["database_name"], $config["database_port"]);
 	if ($mysql_db->connect_errno)
 	{
-		echo "Failed to connect to MySQL: (" . $mysql_db->connect_errno . ") " .
-			$mysql_db->connect_error . "<br >\n";
-		die("Database connection failed");
+		throw new DatabaseConnectionFailedException();
 	}
 	//TODO: implement calling this function
 	//mysqli_set_charset()
@@ -540,7 +538,7 @@ function login_code($quiet)
 					}
 					else
 					{	//this should never happen
-						die("Failed to reformat password");
+						throw new Exception("Failed to reformat password");
 					}
 					$temp = hash_password($passworder, $row['salt'], $config['key_stretching_value']);
 					$row['password'] = $temp;
@@ -836,7 +834,7 @@ function get_location($equ)
 	}
 	else
 	{
-		die ("Invalid item specified");
+		throw new Exception("Invalid item specified");
 	}
 }
 

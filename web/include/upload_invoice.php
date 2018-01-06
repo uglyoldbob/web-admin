@@ -1,8 +1,8 @@
 <?php
-
+require_once("exceptions.php");
 #this script must be included in another script to use properly
 if ('upload_file.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	die ('<h2>Direct File Access Prohibited</h2>');
+	throw new PermissionDeniedException();
 
 include('SimpleImage.php');
 

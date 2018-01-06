@@ -1,6 +1,7 @@
 <?php
 $config = parse_ini_file("../config.ini");
 include("../global.php");
+require_once("../include/exceptions.php");
 start_my_session();	//start php session
 
 header('Content-type: text/html; charset=utf-8');
@@ -58,7 +59,6 @@ if ($stop == 0)
 			 $error .
 			 "\n</body>\n" .
 			 "\n</html>";
-		exit();
 	}
 	else
 	{
@@ -73,7 +73,7 @@ if ($stop == 0)
 			if($file_extension!='pdf')
 			{
 				header('Content-type: text/html; charset=utf-8');
-				die('LOGGED! bad extension');
+				throw new Exception('LOGGED! bad extension');
 			}
 	
 			ob_start();
@@ -89,21 +89,20 @@ if ($stop == 0)
 			}
 	 
 			fclose($fp);
-	
-			exit;
-			exit();
 		}
-		header('Content-type: text/html; charset=utf-8');
-		echo "<!DOCTYPE HTML>" . 
-			 "<html>" . 
-			 "<head>" .
-			 "<title>" . sitename() . " Invoice</title>" .
-			 "</head>" .
-			 "<body>" .
-			 "<h3>The invoice cannot be retrieved.</h3>" .
-			 "</body>" .
-			 "</html>";
-		exit();
+		else
+		{
+			header('Content-type: text/html; charset=utf-8');
+			echo "<!DOCTYPE HTML>" . 
+				 "<html>" . 
+				 "<head>" .
+				 "<title>" . sitename() . " Invoice</title>" .
+				 "</head>" .
+				 "<body>" .
+				 "<h3>The invoice cannot be retrieved.</h3>" .
+				 "</body>" .
+				 "</html>";
+		}
 	}
 }
 
