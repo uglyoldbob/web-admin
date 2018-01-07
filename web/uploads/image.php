@@ -8,6 +8,8 @@ start_my_session();	//start php session
 try
 {
 	$config = parse_ini_file(dirname(__FILE__) . "/../config.ini");
+	test_config();
+
 	global $mysql_db;
 	openDatabase();
 	$stop = 0;
