@@ -155,45 +155,48 @@ function rootPageURL()
 	
 function start_my_session()
 {
-	session_start();
-	if (!isset($_SESSION['initiated']))
-	{
-		session_regenerate_id();
-		$_SESSION['initiated'] = true;
-	}
+	if(!isset($_SESSION)) 
+    { 
+        session_start(); 
+		if (!isset($_SESSION['initiated']))
+		{
+			session_regenerate_id();
+			$_SESSION['initiated'] = true;
+		}
 
-	if (isset($_SESSION['HTTP_USER_AGENT']))
-	{
-		if (isset($_SERVER['HTTP_USER_AGENT']))
+		if (isset($_SESSION['HTTP_USER_AGENT']))
 		{
-			if ($_SESSION['HTTP_USER_AGENT'] != md5($_SERVER['HTTP_USER_AGENT']))
-			{	/* Prompt for password */
-				unset($_SESSION['username']);
-				unset($_SESSION['password']);
-				unset($_SESSION['HTTP_USER_AGENT']);
-				//exit;
+			if (isset($_SERVER['HTTP_USER_AGENT']))
+			{
+				if ($_SESSION['HTTP_USER_AGENT'] != md5($_SERVER['HTTP_USER_AGENT']))
+				{	/* Prompt for password */
+					unset($_SESSION['username']);
+					unset($_SESSION['password']);
+					unset($_SESSION['HTTP_USER_AGENT']);
+					//exit;
+				}
+			}
+			else
+			{
+				if ($_SESSION['HTTP_USER_AGENT'] != md5(""))
+				{	/* Prompt for password */
+					unset($_SESSION['username']);
+					unset($_SESSION['password']);
+					unset($_SESSION['HTTP_USER_AGENT']);
+					//exit;
+				}
 			}
 		}
 		else
 		{
-			if ($_SESSION['HTTP_USER_AGENT'] != md5(""))
-			{	/* Prompt for password */
-				unset($_SESSION['username']);
-				unset($_SESSION['password']);
-				unset($_SESSION['HTTP_USER_AGENT']);
-				//exit;
+			if (isset($_SERVER['HTTP_USER_AGENT']))
+			{
+				$_SESSION['HTTP_USER_AGENT'] = md5($_SERVER['HTTP_USER_AGENT']);
 			}
-		}
-	}
-	else
-	{
-		if (isset($_SERVER['HTTP_USER_AGENT']))
-		{
-			$_SESSION['HTTP_USER_AGENT'] = md5($_SERVER['HTTP_USER_AGENT']);
-		}
-		else
-		{
-			$_SESSION['HTTP_USER_AGENT'] = md5("");
+			else
+			{
+				$_SESSION['HTTP_USER_AGENT'] = md5("");
+			}
 		}
 	}
 

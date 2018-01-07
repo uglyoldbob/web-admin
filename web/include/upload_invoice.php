@@ -4,7 +4,7 @@ require_once("exceptions.php");
 if ('upload_file.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	throw new PermissionDeniedException();
 
-include('SimpleImage.php');
+include_once('SimpleImage.php');
 
 #when something uses an image
 #permissions for the something are assumed to be the same as the something
