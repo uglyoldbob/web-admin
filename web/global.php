@@ -17,6 +17,11 @@ function test_config()
 	}
 }
 
+function __autoload($class_name) 
+{
+    include_once 'include/' . $class_name . '.php';
+}
+
 function sitename()
 {
 	global $config;

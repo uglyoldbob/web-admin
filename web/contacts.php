@@ -11,9 +11,6 @@ header('Content-type: text/html; charset=utf-8');
 <head>
 <?php
 
-function __autoload($class_name) {
-    include 'include/' . $class_name . '.php';
-}
 require("include/forms.php");
 
 try
