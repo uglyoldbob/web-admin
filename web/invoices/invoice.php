@@ -1,7 +1,7 @@
 <?php
-$config = parse_ini_file("../config.ini");
-require_once("../global.php");
-require_once("../include/exceptions.php");
+$config = parse_ini_file(dirname(__FILE__) . "/../config.ini");
+require_once(dirname(__FILE__) . "/../global.php");
+require_once(dirname(__FILE__) . "/../include/exceptions.php");
 start_my_session();	//start php session
 
 header('Content-type: text/html; charset=utf-8');

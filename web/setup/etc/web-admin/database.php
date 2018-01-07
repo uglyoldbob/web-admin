@@ -179,7 +179,14 @@ function do_stuff()
 	closeDataBase();
 }
 
-do_stuff();
+try
+{
+	do_stuff();
+}
+catch (Exception $e)
+{
+	echo "ERROR\n";
+}
 
 
 ?>
