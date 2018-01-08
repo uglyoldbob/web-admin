@@ -87,31 +87,45 @@ function do_top_menu($indx)
 	echo "<div>\n<ul class=\"topmenu\">\n";
 	echo "	<li><a ";
 	if ($indx == 0)
+	{
 		echo "class=selected ";
+	}
 	echo "href=\"" . rootPageURL() . "/index.php\">Home</a></li>\n";
 	echo "	<li><a ";
 	if ($indx == 1)
+	{
 		echo "class=selected ";
+	}
 	echo "href=\"" . rootPageURL() . "/payments.php\">Payments</a></li>\n";
 	echo "	<li><a ";
 	if ($indx == 2)
+	{
 		echo "class=selected ";
+	}
 	echo "href=\"" . rootPageURL() . "/contacts.php\">Contacts</a></li>\n";
 	echo "	<li><a ";
 	if ($indx == 3)
+	{
 		echo "class=selected ";
+	}
 	echo "href=\"" . rootPageURL() . "/jobs.php\">Jobs</a></li>\n";
 	echo "	<li><a ";
 	if ($indx == 4)
+	{
 		echo "class=selected ";
+	}
 	echo "href=\"" . rootPageURL() . "/locations.php\">Locations</a></li>\n";
 	echo "	<li><a ";
 	if ($indx == 5)
+	{
 		echo "class=selected ";	
+	}
 	echo "href=\"" . rootPageURL() . "/maintenance.php\">Maintenance</a></li>\n";
 	echo "	<li><a ";
 	if ($indx == 6)
+	{
 		echo "class=selected ";	
+	}
 	echo "href=\"" . rootPageURL() . "/cp.php\">Control Panel</a></li>\n";
 	echo "</ul>\n</div>\n";
 	echo "<div class=\"clear\"></div>\n";
@@ -122,7 +136,10 @@ function curPageURL()
 	$pageURL = 'http';
 	if (array_key_exists("HTTPS", $_SERVER))
 	{
-		if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+		if ($_SERVER["HTTPS"] == "on") 
+		{
+			$pageURL .= "s";
+		}
 	}
 	$pageURL .= "://";
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
@@ -143,7 +160,10 @@ function rootPageURL()
 	$pageURL = 'http';
 	if (array_key_exists("HTTPS", $_SERVER))
 	{
-		if ($_SERVER["HTTPS"] == "on") {$pageURL .= "s";}
+		if ($_SERVER["HTTPS"] == "on") 
+		{
+			$pageURL .= "s";
+		}
 	}
 	$pageURL .= "://";
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
@@ -276,7 +296,9 @@ function check_specific_permission($results, $permission)
 	foreach ($results as $permcheck)
 	{
 		if ($permcheck[1] == $permission)
+		{
 			return "yes";
+		}
 	}
 	return "no";
 }
@@ -644,13 +666,17 @@ function selectTimePeriod()
 	$result = $mysql_db->query($query);
 	echo "        <option ";
 	if ($_SESSION['period'] == "all")
+	{
     		echo "selected ";
+	}
 	echo	"value=\"all\">Everything</option>\n";    
 	while($row = $result->fetch_array(MYSQLI_BOTH))
 	{
         echo "    	<option ";
         if ($_SESSION['period'] == $row["year(date_paid)"])
+		{
     	    echo "selected ";
+		}
         echo "value=\"" . $row["year(date_paid)"] . "\">" . $row["year(date_paid)"] . " Tax Year</options>\n";
 	}
 	echo	"	</select>\n";
@@ -783,9 +809,13 @@ function get_phone_options($id1, $id2)
 		$query = "SELECT phone_mobile, phone_home, phone_other " .
 			"FROM contacts WHERE emp_id = ";
 		if ($i == 0)
+		{
 			$query .= $id1;
+		}
 		else
+		{
 			$query .= $id2;
+		}
 
 		$query .= " LIMIT 1;";
 		$result = $mysql_db->query($query);
@@ -794,9 +824,13 @@ function get_phone_options($id1, $id2)
 			for ($j = 0; $j < 3; $j++)
 			{
 				if ($i == 0)
+				{
 					$phone[$i*3+$j]['name'] = print_contact($id1);
+				}
 				else
+				{
 					$phone[$i*3+$j]['name'] = print_contact($id2);
+				}
 				switch($j)
 				{
 				case 1:

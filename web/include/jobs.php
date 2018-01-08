@@ -105,10 +105,14 @@ class jobs
 		global $mysql_db;
 		$cust1 = $data["cust1_id"];
 		if (is_numeric($cust1) == FALSE)
+		{
 			$cust1 = 0;
+		}
 		$cust2 = $data["cust2_id"];
 		if (is_numeric($cust2) == FALSE)
+		{
 			$cust2 = 0;
+		}
 		$comments = $mysql_db->real_escape_string($data["comments"]);
 		$query = "INSERT INTO jobs (" .
 			"`job_name` ," .	"`id` ," . "`cust_billing` , " . "`cust_shipping` , " .
@@ -289,9 +293,13 @@ class jobs
 		echo "</table><br>\n";
 	
 		if ($this->start_page > 0)
+		{
 			echo '<a href="' . rootPageURL() . '/jobs.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
+		}
 		if ($next_page == 1)
+		{
 			echo '<a href="' . rootPageURL() . '/jobs.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
+		}
 		$contact_results->close();
 	}
 	
@@ -328,7 +336,9 @@ class jobs
 			
 			$select_radio = $row['phone_notify_id'];
 			if (is_numeric($select_radio) == FALSE)
+			{
 				$select_radio = 6;
+			}
 
 			echo "	<input class=\"buttons\" type=\"checkbox\" name=\"mod_phone1\" ";
 			echo "onclick=\"cb_hide_show(this, $('#mod_phone1'));\" />Change this phone number<br >\n";
@@ -348,7 +358,9 @@ class jobs
 			echo "	<input class=\"buttons\" type=\"radio\" name=\"phone1\" " .
 				 "value=\"6\" ";
 			if ($select_radio == 6)
+			{
 				echo "checked ";
+			}
 			echo ">None<br >\n";
 			echo "	</div>\n";
 			

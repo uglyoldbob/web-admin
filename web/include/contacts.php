@@ -127,7 +127,9 @@ class contacts
 				
 				echo "This " . $row['classification'] . " is ";
 				if ($row['payment_eligible'] == 0)
+				{
 					echo "<b>NOT</b> ";
+				}
 				echo "eligible to be paid<br>\n";
 				
 				echo "Soon to print payment information<br>\n";
@@ -208,7 +210,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"last_name\" value=\"" . $last_name . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -218,7 +222,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"first_name\" value=\"" . $first_name . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -228,7 +234,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"username\" value=\"" . $username . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -238,7 +246,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"classify\" value=\"" . $classify . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -248,7 +258,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"eligible\" value=\"" . $eligible . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -258,7 +270,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"mobile\" value=\"" . $mobile . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -268,7 +282,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"home\" value=\"" . $home . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -278,7 +294,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"other\" value=\"" . $other . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -288,7 +306,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"website\" value=\"" . $website . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -298,7 +318,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"email\" value=\"" . $email . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -308,7 +330,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"street\" value=\"" . $street . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -318,7 +342,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"city\" value=\"" . $city . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -328,7 +354,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"state\" value=\"" . $state . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -338,7 +366,9 @@ class contacts
 		echo "			<td>";
 		echo "<input type=\"text\" name=\"zip\" value=\"" . $zip . "\" size=\"70\"";
 		if ($_POST["action"] == "")
+		{
 			echo " disabled";
+		}
 		echo " >";
 		echo "</td>\n";
 		echo "		</tr>\n";
@@ -375,14 +405,18 @@ class contacts
 		global $mysql_db;
 		$id_num = $this->contact;
 		if (is_numeric($id_num) == FALSE)
+		{
 			$id_num = 0;
+		}
 		$last_name = $mysql_db->real_escape_string($withdata["last_name"]);
 		$first_name = $mysql_db->real_escape_string($withdata["first_name"]);
 		$username = $mysql_db->real_escape_string($withdata["username"]);
 		$classification = $mysql_db->real_escape_string($withdata["classify"]);
 		$eligibility = $withdata["eligible"];
 		if (is_numeric($eligibility) == FALSE)
+		{
 			$eligibility = 0;
+		}
 		$mobile = $mysql_db->real_escape_string($withdata["mobile"]);
 		$home = $mysql_db->real_escape_string($withdata["home"]);
 		$other = $mysql_db->real_escape_string($withdata["other"]);
@@ -568,9 +602,13 @@ class contacts
 		}
 	
 		if ($this->start_page > 0)
+		{
 			echo '<a href="' . rootPageURL() . '/contacts.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
+		}
 		if ($next_page == 1)
+		{
 			echo '<a href="/contacts.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
+		}
 	
 		echo "			<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
 			 "				<input type=\"hidden\" name=\"action\" value=\"create\">\n" .

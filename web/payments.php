@@ -3,7 +3,10 @@ require_once("global.php");
 require_once("include/exceptions.php");
 
 start_my_session();	//start php session
-header('Content-type: text/html; charset=utf-8');
+if (!headers_sent())
+{
+	header('Content-type: text/html; charset=utf-8');
+}
 
 ?>
 <!DOCTYPE HTML>
@@ -28,7 +31,9 @@ try
 	openDatabase();
 
 	if (is_numeric($contact) == FALSE)
+	{
 		$contact = 0;
+	}
 
 	if (!(array_key_exists("page", $_GET)))
 	{
@@ -36,7 +41,9 @@ try
 	}
 	$start_page = $_GET["page"];
 	if (is_numeric($start_page) == FALSE)
+	{
 		$start_page = 0;
+	}
 
 	?>
 
@@ -546,10 +553,12 @@ try
 			if ($contact != 0)
 			{
 				if ($start_page > 0)
+				{
 					echo '<a href="' . rootPageURL() . 
 						'/payments.php?contact=' . $contact . 
 						'&page=' . ($start_page-1) . 
 						'">Previous page</a>  ';
+				}
 				if ($next_page == 1)
 				{
 					echo '<a href="' . rootPageURL() . '/payments.php?contact=' .

@@ -42,7 +42,9 @@ function payment_form($id, $payee_id, $payer_id, $amount, $earned, $paid, $comme
 	echo '<form method="POST" action="payments.php" enctype="multipart/form-data">' . "\n";
 	echo "	<input type=\"hidden\" name=\"action\" value=\"apply\">\n";
 	if ($id != 0)
+	{
 		echo '<b>Payment ID: </b>Id number: <input class="fields" type="text" value="' . $id . '" name="pay_id" readonly>' . "<br >\n";
+	}
 	echo '	<b>Payment by: </b>';
 	
 	make_autocomplete('<b>Contact Name:</b> ', $payer_id, "name_payer",

@@ -3,7 +3,10 @@ require_once("global.php");
 require_once("include/exceptions.php");
 
 start_my_session();	//start php session
-header('Content-type: text/html; charset=utf-8');
+if (!headers_sent())
+{
+	header('Content-type: text/html; charset=utf-8');
+}
 
 ?>
 <!DOCTYPE HTML>
@@ -52,21 +55,27 @@ try
 		{
 			$val = $_POST["id"];
 			if (is_numeric($val) == FALSE)
+			{
 				$val = 0;
+			}
 			$contacts->create_password($val);
 		}
 		else if ($_POST["action"] == "epass")
 		{
 			$val = $_POST["id"];
 			if (is_numeric($val) == FALSE)
+			{
 				$val = 0;
+			}
 			$contacts->edit_password($val);
 		}
 		else if ($_POST["action"] == "apass")
 		{
 			$val = $_POST["id"];
 			if (is_numeric($val) == FALSE)
+			{
 				$val = 0;
+			}
 			$userid = $_SESSION['user']['emp_id'];
 			$allow = check_permission("contact_permission", $userid, $val, "%p%");
 			if (check_specific_permission($allow, "global") == "yes")

@@ -3,7 +3,10 @@ require_once("global.php");
 require_once("include/exceptions.php");
 
 start_my_session();	//start php session
-header('Content-type: text/html; charset=utf-8');
+if (!headers_sent())
+{
+	header('Content-type: text/html; charset=utf-8');
+}
 
 ?>
 <!DOCTYPE HTML>
@@ -33,11 +36,17 @@ try
 
 
 	if (isset($_GET["id"]))
+	{
 		$location = $_GET["id"];
+	}
 	else
+	{
 		$location = 0;
+	}
 	if (is_numeric($location) == FALSE)
+	{
 		$location = 0;
+	}
 
 	$stop = 0;
 	if (login_code(0) == 1)
@@ -167,7 +176,9 @@ try
 		{
 			$amount = $_POST['amount'];	//possible number of items to delete
 			if (is_numeric($location) == FALSE)
+			{
 				$location = 0;
+			}
 		
 			$move_to = $_POST['move_to'];
 			if (is_numeric($move_to) == FALSE)
@@ -240,7 +251,9 @@ try
 		{
 			$amount = $_POST['amount'];	//possible number of items to delete
 			if (is_numeric($location) == FALSE)
+			{
 				$location = 0;
+			}
 		
 			$j = 0;	//actual number of items to delete
 		

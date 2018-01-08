@@ -3,7 +3,10 @@ require_once("global.php");
 require_once("include/exceptions.php");
 
 start_my_session();	//start php session
-header('Content-type: text/html; charset=utf-8');
+if (!headers_sent())
+{
+	header('Content-type: text/html; charset=utf-8');
+}
 
 ?>
 <!DOCTYPE HTML>

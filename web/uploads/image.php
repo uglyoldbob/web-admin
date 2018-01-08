@@ -40,7 +40,10 @@ try
 
 	if ($permission == false)
 	{
-		header('Content-type: text/html; charset=utf-8');
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
 		echo "<!DOCTYPE HTML SYSTEM>\n" . 
 			 "<html>\n" . 
 			 "<head>\n" .
@@ -68,7 +71,10 @@ try
 		$img->load($file_path);
 
 		ob_start();
-		header('Content-Type: image/jpeg');
+		if (!headers_sent())
+		{
+			header('Content-Type: image/jpeg');
+		}
 		ob_end_flush();
 
 		$img->output();
