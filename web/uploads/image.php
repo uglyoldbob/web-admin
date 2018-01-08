@@ -1,6 +1,6 @@
 <?php
 require_once(dirname(__FILE__) . "/../global.php");
-include(dirname(__FILE__) . "/../include/upload_file.php");
+include_once(dirname(__FILE__) . "/../include/upload_file.php");
 require_once(dirname(__FILE__) . "/../include/exceptions.php");
 
 start_my_session();	//start php session

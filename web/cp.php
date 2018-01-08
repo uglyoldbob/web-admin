@@ -19,8 +19,8 @@ try
 	global $mysql_db;
 	openDatabase();
 
-	require("include/jobs.php");
-	require("include/finance.php");
+	require_once("include/jobs.php");
+	require_once("include/finance.php");
 
 	?>
 	<title>Control Panel: <?php sitename()?></title>

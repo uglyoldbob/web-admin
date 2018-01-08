@@ -1,7 +1,7 @@
 <?php
 
-include("passwords.php");
-include("include/contacts.php");
+include_once("passwords.php");
+include_once("include/contacts.php");
 require_once("include/exceptions.php");
 
 function test_config()

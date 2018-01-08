@@ -11,8 +11,8 @@ header('Content-type: text/html; charset=utf-8');
 <head>
 <?php
 
-include("include/upload_file.php");
-include("include/location.php");
+include_once("include/upload_file.php");
+include_once("include/location.php");
 
 try
 {
