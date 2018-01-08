@@ -16,7 +16,7 @@ try
 	$config = parse_ini_file("config.ini");
 	test_config();
 
-	require("include/forms.php");
+	require_once("include/forms.php");
 
 	if (!(array_key_exists("contact", $_GET)))
 	{

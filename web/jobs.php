@@ -11,7 +11,7 @@ header('Content-type: text/html; charset=utf-8');
 <head>
 <?php
 
-require("include/forms.php");
+require_once("include/forms.php");
 
 try
 {
