@@ -5,6 +5,7 @@
   <testsuites>
     <testsuite name="test_suite_one">
       <file>unit_tests/OneTest.php</file>
+      <file>unit_tests/indexTest.php</file>
     </testsuite>
   </testsuites>
   <logging>
