@@ -9,7 +9,7 @@ class indexTest extends TestCase
 
     public function testLoadConfig()
 	{
-		$config = parse_ini_file("config.ini");
+		$config = parse_ini_file("web/config.ini");
 		$this->assertNotEquals($config, FALSE);
 	}
 

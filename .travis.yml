@@ -17,6 +17,9 @@ before_script:
   - sed -i -e "s,\"host_or_ip\",\"127.0.0.1\",g" ./web/config.ini
   - sed -i -e "s,location_here,,g" ./web/config.ini
   - cat ./web/config.ini
+  - pwd
+  - ls -la `pwd`
+  - ls -la ./web
   - mysql -e 'CREATE DATABASE db_name;'
   - mysql db_name < ./web/setup/skeleton.sql
 
