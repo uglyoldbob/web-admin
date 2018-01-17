@@ -8,8 +8,8 @@ class indexTest extends TestCase
 {
 	private $config_name = "web/config.ini";
 	
-	private $ex1 = ConfigurationMissingException();
-	private $ex2 = PermissionDeniedException();
+	private $ex1 = new ConfigurationMissingException();
+	private $ex2 = new PermissionDeniedException();
     public function testConfig1()
 	{
 		$config = parse_ini_file($this->$config_name);
