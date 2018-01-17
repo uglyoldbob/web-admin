@@ -21,7 +21,7 @@ before_script:
   - ls -la `pwd`
   - ls -la ./web
   - mysql -e 'CREATE DATABASE db_name;'
-  - mysql db_name < ./web/setup/skeleton.sql
+  - mysql db_name < ./skeleton.sql
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
