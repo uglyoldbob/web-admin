@@ -11,7 +11,7 @@ class indexTest extends TestCase
 	private $ex1;
 	private $ex2;
 	
-	public __construct()
+	public function __construct()
 	{
 		parent::__construct();
 		$ex1 = new ConfigurationMissingException();
