@@ -3,14 +3,16 @@ namespace UnitTestFiles\Test;
 use PHPUnit\Framework\TestCase;
 
 require_once("web/global.php");
-require_once("web/include/exceptions.php");
 
 class indexTest extends TestCase
 {
 	private $config_name = "web/config.ini";
+	
+	private $ex1 = ConfigurationMissingException();
+	private $ex2 = PermissionDeniedException();
     public function testConfig1()
 	{
-		$config = parse_ini_file($config_name);
+		$config = parse_ini_file($this->$config_name);
 		$this->assertNotEquals($config, FALSE);
 	}
 	
@@ -20,7 +22,7 @@ class indexTest extends TestCase
 	public function testConfig2()
 	{
 		$config = FALSE;
-		$this->expectException(ConfigurationMissingException::class);
+		$this->expectException(get_class($this->ex1));
 		test_config($config);
 	}
 	
@@ -30,7 +32,7 @@ class indexTest extends TestCase
 	public function testConfig3()
 	{
 		unset($config);
-		$this->expectException(PermissionDeniedException::class);
+		$this->expectException(get_class($this->ex2));
 		test_config($config);
 	}
 	
@@ -39,7 +41,7 @@ class indexTest extends TestCase
 	 */
 	public function testConfig4()
 	{
-		$config = parse_ini_file($config_name);
+		$config = parse_ini_file($this->$config_name);
 		$this->assertNotEquals($config, FALSE);
 		test_config($config);
 	}
@@ -49,7 +51,7 @@ class indexTest extends TestCase
 	 */
 	public function testDbConnect()
 	{
-		$config = parse_ini_file($config_name);
+		$config = parse_ini_file($this->$config_name);
 		$this->assertNotEquals($config, FALSE);
 		openDatabase($config);
 	}
