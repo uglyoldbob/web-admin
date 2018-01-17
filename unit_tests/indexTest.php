@@ -6,19 +6,51 @@ require_once("web/global.php");
 
 class indexTest extends TestCase
 {
-
-    public function testLoadConfig()
+	private $config_name = "web/config.ini";
+    public function testConfig1()
 	{
-		$config = parse_ini_file("web/config.ini");
+		$config = parse_ini_file($config_name);
 		$this->assertNotEquals($config, FALSE);
+	}
+	
+	/**
+	 * @depends testConfig1
+	 */
+	public function testConfig2()
+	{
+		$config = FALSE;
+		$this->expectException(ConfigurationMissingException::class);
+		test_config($config);
+	}
+	
+	/**
+	 * @depends testConfig1
+	 */
+	public function testConfig3()
+	{
+		unset($config);
+		$this->expectException(PermissionDeniedException::class);
+		test_config($config);
+	}
+	
+	/**
+	 * @depends testConfig1
+	 */
+	public function testConfig4()
+	{
+		$config = parse_ini_file($config_name);
+		$this->assertNotEquals($config, FALSE);
+		test_config($config);
 	}
 
 	/**
-	 * @depends testLoadConfig
+	 * @depends testConfig4
 	 */
 	public function testDbConnect()
 	{
-		$this->assertTrue(true);
+		$config = parse_ini_file($config_name);
+		$this->assertNotEquals($config, FALSE);
+		openDatabase($config);
 	}
 }
 ?>

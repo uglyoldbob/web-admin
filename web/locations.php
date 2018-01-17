@@ -20,10 +20,10 @@ include_once("include/location.php");
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 
 	global $mysql_db;
-	openDatabase();
+	openDatabase($config);
 
 	?>
 	<title>Locations: <?php sitename()?></title>

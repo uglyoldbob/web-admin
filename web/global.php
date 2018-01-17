@@ -4,9 +4,8 @@ include_once("passwords.php");
 include_once("include/contacts.php");
 require_once("include/exceptions.php");
 
-function test_config()
+function test_config($config)
 {
-	global $config;
 	if (!isset($config))
 	{
 		throw new PermissionDeniedException();
@@ -227,9 +226,9 @@ function start_my_session()
 }
 
 //open database connection
-function openDatabase()
+function openDatabase($config)
 {
-	global $mysql_db, $config;
+	global $mysql_db;
 	$mysql_db = new mysqli($config["database_server"], 
 		$config["database_username"], $config["database_password"], 
 		$config["database_name"], $config["database_port"]);

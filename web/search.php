@@ -17,9 +17,9 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 
-	openDatabase();
+	openDatabase($config);
 
 	?>
 	<title>Search:<?php sitename()?></title>

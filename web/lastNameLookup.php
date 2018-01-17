@@ -1,6 +1,7 @@
 ﻿<?php
 
 	$config = parse_ini_file("config.ini");
+	test_config($config);
 
 	// PHP5 Implementation - uses MySQLi.
 	// mysqli('localhost', 'yourUsername', 'yourPassword', 'yourDatabase');

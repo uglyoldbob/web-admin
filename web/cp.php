@@ -17,10 +17,10 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 	
 	global $mysql_db;
-	openDatabase();
+	openDatabase($config);
 
 	require_once("include/jobs.php");
 	require_once("include/finance.php");

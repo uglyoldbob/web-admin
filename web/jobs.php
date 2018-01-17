@@ -19,11 +19,11 @@ require_once("include/forms.php");
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 
 	$jobs = new jobs();
 
-	openDatabase();
+	openDatabase($config);
 
 	?>
 	<title>Jobs List: <?php sitename()?></title>

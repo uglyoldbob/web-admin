@@ -8,10 +8,10 @@ start_my_session();	//start php session
 try
 {
 	$config = parse_ini_file(dirname(__FILE__) . "/../config.ini");
-	test_config();
+	test_config($config);
 
 	global $mysql_db;
-	openDatabase();
+	openDatabase($config);
 	$stop = 0;
 	if (login_code(1) == 1)
 	{

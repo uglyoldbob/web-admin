@@ -17,7 +17,7 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 
 	require_once("include/forms.php");
 
@@ -28,7 +28,7 @@ try
 	$contact = $_GET["contact"];
 
 	global $mysql_db;
-	openDatabase();
+	openDatabase($config);
 
 	if (is_numeric($contact) == FALSE)
 	{

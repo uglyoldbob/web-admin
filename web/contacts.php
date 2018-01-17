@@ -19,10 +19,10 @@ require_once("include/forms.php");
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 	$contacts = new contacts();
 
-	openDatabase();
+	openDatabase($config);
 	//TODO : create a header.php
 
 	?>

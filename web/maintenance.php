@@ -17,10 +17,10 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config();
+	test_config($config);
 
 	global $mysql_db;
-	openDatabase();
+	openDatabase($config);
 
 	?>
 	<title>Maintenance: <?php sitename()?></title>
