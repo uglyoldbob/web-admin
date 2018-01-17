@@ -3,6 +3,7 @@ namespace UnitTestFiles\Test;
 use PHPUnit\Framework\TestCase;
 
 require_once("web/global.php");
+require_once("web/include/exceptions.php");
 
 class indexTest extends TestCase
 {
