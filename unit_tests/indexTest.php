@@ -14,8 +14,8 @@ class indexTest extends TestCase
 	public function __construct()
 	{
 		parent::__construct();
-		$ex1 = new \ConfigurationMissingException("bla");
-		$ex2 = new \PermissionDeniedException("bla");
+		$this->ex1 = new \ConfigurationMissingException("bla");
+		$this->ex2 = new \PermissionDeniedException("bla");
 	}
 	
     public function testConfig1()
