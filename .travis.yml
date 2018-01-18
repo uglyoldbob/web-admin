@@ -8,6 +8,8 @@ matrix:
     - php: hhvm
       sudo: required
     - php: nightly
+  allow_failures:
+    - php: hhvm
 
 services:
   - mysql
