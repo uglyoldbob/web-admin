@@ -30,17 +30,15 @@ class indexTest extends TestCase
 	public function testConfig2()
 	{
 		$config = FALSE;
-		$this->expectException(get_class($this->ex1));
+		if (method_exists($this,'expectException'))
+		{
+			$this->expectException(get_class($this->ex1));
+		}
+		else
+		{
+			$this->setExpectedException(get_class($this->ex1));
+		}
 		test_config($config);
-	}
-	
-	/**
-	 * @depends testConfig1
-	 */
-	public function testConfig3()
-	{
-		$this->expectException(get_class($this->ex2));
-		test_config();
 	}
 	
 	/**
