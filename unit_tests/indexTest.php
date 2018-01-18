@@ -20,7 +20,7 @@ class indexTest extends TestCase
 	
     public function testConfig1()
 	{
-		$config = parse_ini_file($this->$config_name);
+		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 	}
 	
@@ -49,7 +49,7 @@ class indexTest extends TestCase
 	 */
 	public function testConfig4()
 	{
-		$config = parse_ini_file($this->$config_name);
+		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		test_config($config);
 	}
@@ -59,7 +59,7 @@ class indexTest extends TestCase
 	 */
 	public function testDbConnect()
 	{
-		$config = parse_ini_file($this->$config_name);
+		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		openDatabase($config);
 	}
