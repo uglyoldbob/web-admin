@@ -39,9 +39,8 @@ class indexTest extends TestCase
 	 */
 	public function testConfig3()
 	{
-		unset($config);
 		$this->expectException(get_class($this->ex2));
-		test_config($config);
+		test_config();
 	}
 	
 	/**
