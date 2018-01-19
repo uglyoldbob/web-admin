@@ -28,7 +28,7 @@ class indexTest extends TestCase
 		set_error_handler(array($this, "errorHandler"));
 		if ($this->session_id = @file_get_contents($this->session_file))
 		{
-			session_id($session_id);
+			session_id($this->session_id);
 		}
 		else
 		{
@@ -43,12 +43,13 @@ class indexTest extends TestCase
 	
 	public function assertError($errstr, $errno)
 	{
-		$state = "ERRORZ:<br />\n";
+		$state = "ERRORZ:\n";
 		foreach ($this->errors as $error)
 		{
-			$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "<br />\n";
+			$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "\n";
 			if ($error["errstr"] === $errstr && $error["errno"] === $errno)
 			{
+				$this->assertTrue(true);
 				return;
 			}
 		}
@@ -60,15 +61,16 @@ class indexTest extends TestCase
 	{
 		if (count($this->errors) > 0)
 		{
-			$state = "ERRORZ:<br />\n";
+			$state = "ERRORZ:\n";
 			foreach ($this->errors as $err)
 			{
-				$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "<br />\n";
+				$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "\n";
 			}
 
 			$this->fail("Errors were found where none were expected\n" . $state,
 				var_export($this->errors, TRUE));
 		}
+		$this->assertTrue(true);
 	}
 	
 	public function testAssertErrors1()
