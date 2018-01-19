@@ -43,14 +43,16 @@ class indexTest extends TestCase
 	
 	public function assertError($errstr, $errno)
 	{
+		$state = "ERRORZ:<br />\n";
 		foreach ($this->errors as $error)
 		{
+			$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "<br />\n";
 			if ($error["errstr"] === $errstr && $error["errno"] === $errno)
 			{
 				return;
 			}
 		}
-		$this->fail("Error with level " . $errno . " and message '" . $errstr . "' not found in ",
+		$this->fail("Error with level " . $errno . " and message '" . $errstr . "' not found in:\n" . $state,
 			var_export($this->errors, TRUE));
 	}
 	
@@ -58,7 +60,13 @@ class indexTest extends TestCase
 	{
 		if (count($this->errors) > 0)
 		{
-			$this->fail("Errors were found where none were expected: ",
+			$state = "ERRORZ:<br />\n";
+			foreach ($this->errors as $err)
+			{
+				$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "<br />\n";
+			}
+
+			$this->fail("Errors were found where none were expected\n" . $state,
 				var_export($this->errors, TRUE));
 		}
 	}
