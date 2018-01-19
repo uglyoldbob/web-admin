@@ -38,7 +38,7 @@ class indexTest extends TestCase
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
 	{
-		$this->errors[] = compact("errno", "errstr", "errfile", "errline", "errcontext");
+		$this->errors[] = compact("errno", "errstr", "errfile", "errline");
 	}
 	
 	public function assertError($errstr, $errno)
