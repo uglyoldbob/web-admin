@@ -2,17 +2,11 @@
   stderr="true"
   verbose="true"
  >
-  <testsuites>
-    <testsuite name="test_suite_one">
-      <file>unit_tests/OneTest.php</file>
-      <file>unit_tests/indexTest.php</file>
-    </testsuite>
-  </testsuites>
   <logging>
     <log type="coverage-clover" target="coverage.xml"/>
   </logging>
   <filter>
-    <whitelist processUncoveredFilesFromWhitelist="true">
+    <whitelist>
 	  <directory suffix=".php">./web</directory>
 	  <exclude>
 	  	<directory suffix=".php">./web/include/fpdf16/tutorial</directory>

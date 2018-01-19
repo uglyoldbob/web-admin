@@ -28,5 +28,6 @@ before_script:
   - mysql -e 'CREATE DATABASE db_name;'
   - mysql db_name < ./skeleton.sql
 
-after_success:
+script:
+  - phpunit unit_tests/indexText.php
   - bash <(curl -s https://codecov.io/bash)
