@@ -53,6 +53,18 @@ class indexTest extends TestCase
 		}
 	}
 	
+	public function testNoErrors1()
+	{
+		trigger_error("Triggered error");
+		$this->assertNoErrors();
+	}
+	
+	public function testNoErrors2()
+	{
+		require_once("idontexist.php");
+		$this->assertNoErrors();
+	}
+	
     public function testConfig1()
 	{
 		$config = parse_ini_file($this->config_name);

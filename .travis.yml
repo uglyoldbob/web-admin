@@ -8,13 +8,15 @@ matrix:
     - php: hhvm
       sudo: required
     - php: nightly
+  allow_failures:
+    - php: hhvm
 
 services:
   - mysql
 
 before_script:
-  #check php for syntax errors
-  - '! find ./web -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
+  #check for php errors
+  - '! find ./web -type f -name "*.php" ! -path "./web/include/fpdf16/tutorial*" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
   #workaround for hhvm and phpunit
   - curl -sSLf -o ~/.phpenv/versions/hhvm/bin/phpunit https://phar.phpunit.de/phpunit-5.7.phar
   #website setup steps
