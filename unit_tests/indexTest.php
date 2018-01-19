@@ -40,6 +40,8 @@ class indexTest extends TestCase
 	{
 		//handle cases where session_id is regenerated
 		file_put_contents($this->session_file, session_id());
+		session_write_close();
+		session_unset();
 	}
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)

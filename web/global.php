@@ -174,10 +174,8 @@ function rootPageURL()
 
 function start_my_session()
 {
-	if(!isset($_SESSION)) 
-    { 
-        session_start();
-	}
+	session_start();
+
 	if (!isset($_SESSION['initiated']))
 	{
 		session_regenerate_id();
