@@ -29,5 +29,5 @@ before_script:
   - mysql db_name < ./skeleton.sql
 
 script:
-  - phpunit unit_tests/indexText.php
+  - phpunit UnitTests/indexText.php
   - bash <(curl -s https://codecov.io/bash)
