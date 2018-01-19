@@ -10,12 +10,14 @@ class indexTest extends TestCase
 	
 	private $ex1;
 	private $ex2;
+	private $ex3;
 	
 	public function __construct()
 	{
 		parent::__construct();
 		$this->ex1 = new \ConfigurationMissingException("bla");
 		$this->ex2 = new \PermissionDeniedException("bla");
+		$this->ex3 = new \DatabaseConnectionFailedException("bla");
 	}
 	
     public function testConfig1()
@@ -54,10 +56,30 @@ class indexTest extends TestCase
 	/**
 	 * @depends testConfig4
 	 */
-	public function testDbConnect()
+	public function testDbConnect1()
 	{
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
+		openDatabase($config);
+	}
+	
+	/**
+	 * @depends testConfig4
+	 */
+	public function testDbConnect2()
+	{
+		if (method_exists($this,'expectException'))
+		{
+			$this->expectException(get_class($this->ex3));
+		}
+		else
+		{
+			$this->setExpectedException(get_class($this->ex3));
+		}
+		$config = parse_ini_file($this->config_name);
+		$this->assertNotEquals($config, FALSE);
+		$config["database_username"] = "notRealUser";
+		$config["database_password"] = "notActualPassword";
 		openDatabase($config);
 	}
 }
