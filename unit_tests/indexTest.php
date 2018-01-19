@@ -156,12 +156,24 @@ class indexTest extends TestCase
 		$this->assertNoErrors();
 	}
 	
-	public function testSessionStart()
+	public function testSessionStart1()
 	{
 		start_my_session();
 		$this->assertNoErrors();
 		$this->assertTrue($_SESSION['initiated']);
+		$this->assertEquals($_SESSION['HTTP_USER_AGENT'], md5(""));
 	}
 
+	public function testSessionStart2()
+	{
+		$_SESSION['HTTP_USER_AGENT'] = 'NOT A VALID MD5!';
+		$_SESSION['username'] = 'something';
+		$_SESSION['password'] = 'something';
+		start_my_session();
+		$this->assertNoErrors();
+		$this->assertNotInstanceOf('string', $_SESSION['username']);
+		$this->assertNotInstanceOf('string', $_SESSION['password']);
+		$this->assertNotInstanceOf('string', $_SESSION['HTTP_USER_AGENT']);
+	}
 }
 ?>
