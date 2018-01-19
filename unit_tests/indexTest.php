@@ -7,10 +7,12 @@ require_once("web/global.php");
 class indexTest extends TestCase
 {
 	private $config_name = "web/config.ini";
+	private $session_file = "./session_id.txt";
 	
 	private $ex1;
 	private $ex2;
 	private $ex3;
+	private $session_id;
 	
 	public function __construct()
 	{
@@ -24,6 +26,14 @@ class indexTest extends TestCase
 	{
 		$this->errors = array();
 		set_error_handler(array($this, "errorHandler"));
+		if ($this->session_id = @file_get_contents($this->session_file))
+		{
+			session_id($session_id);
+		}
+		else
+		{
+			file_put_contents($this->session_file, session_id());
+		}
 	}
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
@@ -101,6 +111,7 @@ class indexTest extends TestCase
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		test_config($config);
+		$this->assertNoErrors();
 	}
 
 	/**
@@ -111,6 +122,7 @@ class indexTest extends TestCase
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		openDatabase($config);
+		$this->assertNoErrors();
 	}
 	
 	/**
@@ -133,5 +145,13 @@ class indexTest extends TestCase
 		openDatabase($config);
 		$this->assertNoErrors();
 	}
+	
+	public function testSessionStart()
+	{
+		start_my_session();
+		$this->assertNoErrors();
+		$this->assertTrue($_SESSION['initiated']);
+	}
+
 }
 ?>
