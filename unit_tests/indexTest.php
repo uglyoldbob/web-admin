@@ -53,15 +53,20 @@ class indexTest extends TestCase
 		}
 	}
 	
-	public function testNoErrors1()
+	public function testAssertErrors1()
 	{
 		trigger_error("Triggered error");
-		$this->assertNoErrors();
+		$this->assertError("Triggered error", E_USER_NOTICE);
 	}
 	
-	public function testNoErrors2()
+	public function testAssertErrors2()
 	{
-		include_once("idontexist.php");
+		include("idontexist.php");
+		$this->assertError("include(idontexist.php): failed to open stream: No such file or directory", E_WARNING);
+	}
+	
+	public function testAssertErrors3()
+	{
 		$this->assertNoErrors();
 	}
 	
