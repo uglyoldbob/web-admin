@@ -36,6 +36,12 @@ class indexTest extends TestCase
 		}
 	}
 	
+	protected function tearDown()
+	{
+		//handle cases where session_id is regenerated
+		file_put_contents($this->session_file, session_id());
+	}
+	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
 	{
 		$this->errors[] = compact("errno", "errstr", "errfile", "errline");
@@ -164,11 +170,15 @@ class indexTest extends TestCase
 		$this->assertEquals($_SESSION['HTTP_USER_AGENT'], md5(""));
 	}
 
+	/**
+	 * @depends testSessionStart1
+	 */
 	public function testSessionStart2()
 	{
 		$_SESSION['HTTP_USER_AGENT'] = 'NOT A VALID MD5!';
 		$_SESSION['username'] = 'something';
 		$_SESSION['password'] = 'something';
+		$_SERVER['HTTP_USER_AGENT'] = "WHATEVER";
 		start_my_session();
 		$this->assertNoErrors();
 		if (isset($_SESSION['username']))
