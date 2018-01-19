@@ -72,7 +72,7 @@ class indexTest extends TestCase
 		}
 		$this->assertTrue(true);
 	}
-	
+
 	public function testAssertErrors1()
 	{
 		trigger_error("Triggered error");
@@ -171,9 +171,18 @@ class indexTest extends TestCase
 		$_SESSION['password'] = 'something';
 		start_my_session();
 		$this->assertNoErrors();
-		$this->assertNotInstanceOf('string', $_SESSION['username']);
-		$this->assertNotInstanceOf('string', $_SESSION['password']);
-		$this->assertNotInstanceOf('string', $_SESSION['HTTP_USER_AGENT']);
+		if (isset($_SESSION['username']))
+		{
+			$this->fail("Failed to unset $_SESSION['username']");
+		}
+		if (isset($_SESSION['password']))
+		{
+			$this->fail("Failed to unset $_SESSION['password']");
+		}
+		if (isset($_SESSION['HTTP_USER_AGENT']))
+		{
+			$this->fail("Failed to unset $_SESSION['HTTP_USER_AGENT']");
+		}
 	}
 }
 ?>
