@@ -61,7 +61,7 @@ class indexTest extends TestCase
 	
 	public function testNoErrors2()
 	{
-		require_once("idontexist.php");
+		include_once("idontexist.php");
 		$this->assertNoErrors();
 	}
 	
