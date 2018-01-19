@@ -173,15 +173,15 @@ class indexTest extends TestCase
 		$this->assertNoErrors();
 		if (isset($_SESSION['username']))
 		{
-			$this->fail("Failed to unset $_SESSION['username']");
+			$this->fail('Failed to unset $_SESSION[\'username\']');
 		}
 		if (isset($_SESSION['password']))
 		{
-			$this->fail("Failed to unset $_SESSION['password']");
+			$this->fail('Failed to unset $_SESSION[\'password\']');
 		}
 		if (isset($_SESSION['HTTP_USER_AGENT']))
 		{
-			$this->fail("Failed to unset $_SESSION['HTTP_USER_AGENT']");
+			$this->fail('Failed to unset $_SESSION[\'HTTP_USER_AGENT\']');
 		}
 	}
 }
