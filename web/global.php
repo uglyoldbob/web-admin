@@ -174,7 +174,10 @@ function rootPageURL()
 
 function start_my_session()
 {
-	session_start();
+	if (session_status() != PHP_SESSION_ACTIVE)
+	{
+		session_start();
+	}
 
 	if (!isset($_SESSION['initiated']))
 	{
