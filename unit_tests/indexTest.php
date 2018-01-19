@@ -20,6 +20,39 @@ class indexTest extends TestCase
 		$this->ex3 = new \DatabaseConnectionFailedException("bla");
 	}
 	
+	protected function setUp()
+	{
+		$this->errors = array();
+		set_error_handler(array($this, "errorHandler"));
+	}
+	
+	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
+	{
+		$this->errors[] = compact("errno", "errstr", "errfile", "errline", "errcontext");
+	}
+	
+	public function assertError($errstr, $errno)
+	{
+		foreach ($this->errors as $error)
+		{
+			if ($error["errstr"] === $errstr && $error["errno"] === $errno)
+			{
+				return;
+			}
+		}
+		$this->fail("Error with level " . $errno . " and message '" . $errstr . "' not found in ",
+			var_export($this->errors, TRUE));
+	}
+	
+	public function assertNoErrors()
+	{
+		if (count($this->errors) > 0)
+		{
+			$this->fail("Errors were found where none were expected: ",
+				var_export($this->errors, TRUE));
+		}
+	}
+	
     public function testConfig1()
 	{
 		$config = parse_ini_file($this->config_name);
@@ -81,6 +114,7 @@ class indexTest extends TestCase
 		$config["database_username"] = "notRealUser";
 		$config["database_password"] = "notActualPassword";
 		openDatabase($config);
+		$this->assertNoErrors();
 	}
 }
 ?>
