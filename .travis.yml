@@ -16,7 +16,7 @@ services:
 
 before_script:
   #workaround for hhvm and phpunit
-  - curl -sSf -o ~/.phpenv/versions/hhvm/bin/phpunit https://phar.phpunit.de/phpunit-5.7.phar
+  - curl -sSLf -o ~/.phpenv/versions/hhvm/bin/phpunit https://phar.phpunit.de/phpunit-5.7.phar
   #website setup steps
   - cp ./example_config.ini ./web/config.ini
   - sed -i -e "s,\"username\",\"travis\",g" ./web/config.ini
