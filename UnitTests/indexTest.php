@@ -177,5 +177,13 @@ class indexTest extends TestCase
 			$this->fail('Failed to unset $_SESSION[\'HTTP_USER_AGENT\']');
 		}
 	}
+	
+	/**
+	 * @depends testSessionStart2
+	 */
+	public function testPage1()
+	{
+		require_once("index.php");
+	}
 }
 ?>
