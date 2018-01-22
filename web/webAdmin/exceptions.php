@@ -15,7 +15,7 @@ interface IException
     public function __construct($message = null, $code = 0);
 }
 
-abstract class CustomException extends Exception implements IException
+abstract class CustomException extends \Exception implements IException
 {
     protected $message = 'Unknown exception';     // Exception message
     private   $string;                            // Unknown
