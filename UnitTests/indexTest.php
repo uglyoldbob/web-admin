@@ -99,6 +99,7 @@ class indexTest extends TestCase
 			$this->setExpectedException('\webAdmin\ConfigurationMissingException');
 		}
 		require_once("webAdmin/exceptions.php");
+		require_once("global.php");
 		test_config($config);
 	}
 	
@@ -110,6 +111,7 @@ class indexTest extends TestCase
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		require_once("webAdmin/exceptions.php");
+		require_once("global.php");
 		test_config($config);
 		$this->assertNoErrors();
 	}
@@ -122,6 +124,7 @@ class indexTest extends TestCase
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		require_once("webAdmin/exceptions.php");
+		require_once("global.php");
 		openDatabase($config);
 		$this->assertNoErrors();
 	}
@@ -144,6 +147,7 @@ class indexTest extends TestCase
 		$config["database_username"] = "notRealUser";
 		$config["database_password"] = "notActualPassword";
 		require_once("webAdmin/exceptions.php");
+		require_once("global.php");
 		openDatabase($config);
 		$this->assertNoErrors();
 	}
@@ -151,6 +155,7 @@ class indexTest extends TestCase
 	public function testSessionStart1()
 	{
 		require_once("webAdmin/exceptions.php");
+		require_once("global.php");
 		start_my_session();
 		$this->assertNoErrors();
 		$this->assertTrue($_SESSION['initiated']);
@@ -167,6 +172,7 @@ class indexTest extends TestCase
 		$_SESSION['password'] = 'something';
 		$_SERVER['HTTP_USER_AGENT'] = "WHATEVER";
 		require_once("webAdmin/exceptions.php");
+		require_once("global.php");
 		start_my_session();
 		$this->assertNoErrors();
 		if (isset($_SESSION['username']))
