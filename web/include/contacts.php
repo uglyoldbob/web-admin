@@ -34,7 +34,7 @@ class contacts
 		}
 	}
 	
-	public function single()
+	public function single($config)
 	{
 		global $mysql_db;
 		$uid = $_SESSION['user']['emp_id'];
@@ -69,15 +69,15 @@ class contacts
 
 			echo print_contact($this->contact);
 			echo "</h3>\n";
-			echo "<a href=\"" . rootPageURL() . "/payments.php?contact=" . $this->contact . "\">View payments</a><br>\n";
+			echo "<a href=\"" . rootPageURL($config) . "/payments.php?contact=" . $this->contact . "\">View payments</a><br>\n";
 
-			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
+			echo "	<form action=\"" . rootPageURL($config) . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 				 "		<input type=\"hidden\" name=\"payer\" value=\"" . $row['emp_id'] . "\">\n" .
 				 "		<input class=\"buttons\" type=\"submit\" value=\"This contact made a payment\"/>\n" .
 				 "	</form>\n";
-			echo "	<form action=\"" . rootPageURL() . "/payments.php\" method=\"post\">\n" .
+			echo "	<form action=\"" . rootPageURL($config) . "/payments.php\" method=\"post\">\n" .
 				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 				 "		<input type=\"hidden\" name=\"payee\" value=\"" . $row['emp_id'] . "\">\n" .
@@ -502,10 +502,9 @@ class contacts
 		}
 	}
 	
-	public function table()
+	public function table($config)
 	{
 		global $mysql_db;
-		global $config;
 		
 		$uid = $_SESSION['user']['emp_id'];
 		$query = "SELECT * FROM contacts, contact_permission WHERE " .
@@ -528,7 +527,7 @@ class contacts
 		{
 			echo "	<tr>\n";
 	
-			echo "		<td>" . "<a href=\"". rootPageURL() . 
+			echo "		<td>" . "<a href=\"". rootPageURL($config) . 
 				 "/contacts.php?contact=" . $row['emp_id'] . 
 				 "\">View</a>";
 
@@ -538,7 +537,7 @@ class contacts
 			{
 				if (is_null($row['password']))
 				{
-					echo "\n		<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+					echo "\n		<form action=\"" . rootPageURL($config) . "/contacts.php\" method=\"post\">\n" .
 						 "			<input type=\"hidden\" name=\"action\" value=\"cpass\">\n" .
 						 "			<input type=\"hidden\" name=\"id\" value=\"" . $row['emp_id'] . "\">\n" .
 						 "			<input class=\"buttons\" type=\"submit\" value=\"Init Password\"/>\n" .
@@ -546,7 +545,7 @@ class contacts
 				}
 				else
 				{
-					echo "\n		<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+					echo "\n		<form action=\"" . rootPageURL($config) . "/contacts.php\" method=\"post\">\n" .
 						 "			<input type=\"hidden\" name=\"action\" value=\"epass\">\n" .
 						 "			<input type=\"hidden\" name=\"id\" value=\"" . $row['emp_id'] . "\">\n" .
 						 "			<input class=\"buttons\" type=\"submit\" value=\"Edit Password\"/>\n" .
@@ -603,14 +602,14 @@ class contacts
 	
 		if ($this->start_page > 0)
 		{
-			echo '<a href="' . rootPageURL() . '/contacts.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
+			echo '<a href="' . rootPageURL($config) . '/contacts.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
 		}
 		if ($next_page == 1)
 		{
 			echo '<a href="/contacts.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
 		}
 	
-		echo "			<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+		echo "			<form action=\"" . rootPageURL($config) . "/contacts.php\" method=\"post\">\n" .
 			 "				<input type=\"hidden\" name=\"action\" value=\"create\">\n" .
 			 "				<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 			 "				<input class=\"buttons\" type=\"submit\" value=\"New contact\"/>\n" .
@@ -960,7 +959,7 @@ class contacts
 		return 0;	//username does not exist
 	}
 
-	public function create_password($val)
+	public function create_password($val, $config)
 	{	//creates a form to submit in order to create a password
 		$userid = $_SESSION['user']['emp_id'];
 		$allow = check_permission("contact_permission", $userid, $val, "%p%");
@@ -973,7 +972,7 @@ class contacts
 		{
 			echo "<h3>Creating password for : " . print_contact($val) .
 				"</h3>\n";
-			echo "<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+			echo "<form action=\"" . rootPageURL($config) . "/contacts.php\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"apass\"><br>\n" .
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $val . "\"><br>\n" .
 				 "	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
@@ -983,7 +982,7 @@ class contacts
 		}
 	}
 	
-	public function edit_password($val)
+	public function edit_password($val, $config)
 	{	//creates a form to submit in order to change a password
 		$userid = $_SESSION['user']['emp_id'];
 		$allow = check_permission("contact_permission", $userid, $val, "%p%");
@@ -997,7 +996,7 @@ class contacts
 			echo "<h3>Changing password for : " . print_contact($val) .
 				"</h3>\n";
 
-			echo "<form action=\"" . rootPageURL() . "/contacts.php\" method=\"post\">\n" .
+			echo "<form action=\"" . rootPageURL($config) . "/contacts.php\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"apass\"><br>\n" .
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $val . "\"><br>\n" .
 				 "	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .

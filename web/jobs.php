@@ -47,7 +47,7 @@ try
 
 	?>
 	<title>Jobs List: <?php sitename($config)?></title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 
 	<body>
@@ -63,7 +63,7 @@ try
 
 	//make sure the user is logged in properly
 	$stop = 0;
-	if (login_code(0) == 1)
+	if (login_code(0, $config) == 1)
 	{
 		$stop = 1;
 	}
@@ -102,7 +102,7 @@ try
 		if ($_POST["action"] != "edit")
 		{	//don't create the new job button if the create job form is going to be displayed
 			//don't create the new job button if a specific job is going to be displayed
-			echo "<form action=\"" . rootPageURL() . "/jobs.php\" method=\"post\">\n" .
+			echo "<form action=\"" . rootPageURL($config) . "/jobs.php\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
 				 "	<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 				 "	<input class=\"buttons\" type=\"submit\" value=\"Create new job\"/>\n" .
@@ -147,7 +147,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -157,7 +157,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -167,7 +167,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -177,7 +177,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

@@ -43,14 +43,14 @@ try
 
 	?>
 	<title>Search:<?php sitename($config)?></title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 
 	<?php
 
 	$stop = 0;
-	if (login_code(0) == 1)
+	if (login_code(0, $config) == 1)
 	{
 		$stop = 1;
 	}
@@ -58,7 +58,7 @@ try
 	global $mysql_db;
 	if ($stop == 0)
 	{
-		echo '<a href="' . rootPageURL() . '">Return to main</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL($config) . '">Return to main</a>' . "<br >\n";
 
 		if ($_POST['action'] == "search")
 		{
@@ -79,7 +79,7 @@ try
 					echo " (" . $row['description'] . ")";
 				}
 				echo " at ";
-				echo '<a href="' . rootPageURL() . '/locations.php?id=' . 
+				echo '<a href="' . rootPageURL($config) . '/locations.php?id=' . 
 					get_location($row['id']) . "\">";
 				print_location($row['location']);
 				echo '</a>';
@@ -108,7 +108,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -118,7 +118,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -128,7 +128,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -138,7 +138,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

@@ -4,7 +4,7 @@ if ('location.php' == basename($_SERVER['SCRIPT_FILENAME']))
 	throw new \webAdmin\PermissionDeniedException();
 
 
-function do_loc($apply)
+function do_loc($apply, $config)
 {
 	global $mysql_db;
 	global $location;
@@ -100,11 +100,11 @@ function do_loc($apply)
 		echo "	<input class=\"buttons\" type='submit' value='Add these locations' >\n";
 		echo "</form>\n";
 
-		echo '<a href="' . rootPageURL() . '/locations.php?id=' . $location . '">Nevermind, don\'t add locations</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL($config) . '/locations.php?id=' . $location . '">Nevermind, don\'t add locations</a>' . "<br >\n";
 	}
 }
 
-function do_equ($apply)
+function do_equ($apply, $config)
 {
 	global $mysql_db;
 	global $location;
@@ -217,7 +217,7 @@ function do_equ($apply)
 		echo "	<input class=\"buttons\" type='submit' value='Add this equipment' >\n";
 		echo "</form>\n";
 		
-		echo '<a href="' . rootPageURL() . '/locations.php?id=' . $location . '">Nevermind, don\'t add equipment</a>' . "<br >\n";
+		echo '<a href="' . rootPageURL($config) . '/locations.php?id=' . $location . '">Nevermind, don\'t add equipment</a>' . "<br >\n";
 	}
 }
 

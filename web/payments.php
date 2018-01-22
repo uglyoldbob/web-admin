@@ -68,7 +68,7 @@ try
 	?>
 
 	<title>Payment Details: <?php sitename($config)?></title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 
 	<body>
@@ -117,7 +117,7 @@ try
 	<?php
 
 	$stop = 0;
-	if (login_code(0) == 1)
+	if (login_code(0, $config) == 1)
 	{
 		$stop = 1;
 	}
@@ -247,7 +247,7 @@ try
 		if (isset($_SESSION['payment_reference']))
 		{
 		    echo "Payment id " . $_SESSION['payment_reference'] . " is selected<br>\n";
-		    echo "    <form action=\"" . rootPageURL() . 
+		    echo "    <form action=\"" . rootPageURL($config) . 
 				"/payments.php\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"action\" value=\"unselect\">\n" .
@@ -322,7 +322,7 @@ try
 				else
 				{
 					echo "Error retrieving payment details.<br >\n";
-					echo '<form method="POST" action="' . rootPageURL() .
+					echo '<form method="POST" action="' . rootPageURL($config) .
 						'/payments.php" >' . "\n";
 					echo '	<input class="buttons" type="submit" value="Cancel"/>' . "\n";
 					echo '</form>' . "\n";
@@ -344,7 +344,7 @@ try
 			echo print_contact($contact);
 			echo "</h3>\n";
 		
-			echo "<form action=\"" . rootPageURL() . "/contacts.php?contact=" . 
+			echo "<form action=\"" . rootPageURL($config) . "/contacts.php?contact=" . 
 				$contact . "\" method=\"post\">\n" .
 				"	<input type=\"hidden\" name=\"action\"" . 
 				" value=\"view\">\n" .
@@ -365,7 +365,7 @@ try
 			{
 				if ($row['Rows'] != 0)
 				{
-				echo "<form action=\"" . rootPageURL() . 
+				echo "<form action=\"" . rootPageURL($config) . 
 					"/payments.php\" method=\"get\">\n" .
 					'	<input type="hidden" name="contact"' .
 					' value="' . $contact . "\">\n" .
@@ -453,7 +453,7 @@ try
 				echo "	<tr>\n";
 			
 				echo "		<td>" . $row['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"copy\">\n" .
@@ -462,7 +462,7 @@ try
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
 					"\"Copy\"/>\n" .
 					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"edit\">\n" .
@@ -474,14 +474,14 @@ try
 				echo "</td>\n";
 			
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL() . 
+				echo "<a href=\"" . rootPageURL($config) . 
 					"/payments.php?contact=" . $row['pay_to'] . "\"> ";
 				echo print_contact($row['pay_to']);
 				echo "</a>";
 				echo "</td>\n";
 			
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL() . 
+				echo "<a href=\"" . rootPageURL($config) . 
 					"/payments.php?contact=" . $row['paid_by'] . "\"> ";
 				echo print_contact($row['paid_by']);
 				echo "</a>";
@@ -552,7 +552,7 @@ try
 				}
 				else
 				{
-					echo "		<td>" . '<a href="' . rootPageURL() .
+					echo "		<td>" . '<a href="' . rootPageURL($config) .
 						'/' . $row['invoice'] . 
 						'" target="_blank">Download</a></td>' . "\n";
 				}
@@ -574,14 +574,14 @@ try
 			{
 				if ($start_page > 0)
 				{
-					echo '<a href="' . rootPageURL() . 
+					echo '<a href="' . rootPageURL($config) . 
 						'/payments.php?contact=' . $contact . 
 						'&page=' . ($start_page-1) . 
 						'">Previous page</a>  ';
 				}
 				if ($next_page == 1)
 				{
-					echo '<a href="' . rootPageURL() . '/payments.php?contact=' .
+					echo '<a href="' . rootPageURL($config) . '/payments.php?contact=' .
 						$contact . '&page=' . ($start_page+1) . 
 						'">Next page</a>' . "<br >\n";
 				}
@@ -597,16 +597,16 @@ try
 			else
 			{
 				if ($start_page > 0)
-					echo '<a href="' . rootPageURL() . 
+					echo '<a href="' . rootPageURL($config) . 
 						'/payments.php?page=' . ($start_page-1) . 
 						'">Previous page</a>  ';
 				if ($next_page == 1)
 				{
-					echo '<a href="' . rootPageURL() . '/payments.php?page=' . 
+					echo '<a href="' . rootPageURL($config) . '/payments.php?page=' . 
 						($start_page+1) . '">Next page</a>' . "<br >\n";
 				}
 
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"edit\">\n" .
@@ -629,7 +629,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -639,7 +639,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -649,7 +649,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -659,7 +659,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

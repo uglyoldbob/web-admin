@@ -42,6 +42,9 @@ abstract class CustomException extends \Exception implements IException
 
 class TestException extends CustomException {}
 class ConfigurationMissingException extends CustomException {}
+class SiteConfigurationException extends CustomException {}
 class PermissionDeniedException extends CustomException {}
 class DatabaseConnectionFailedException extends CustomException {}
+class NotLoggedInException extends CustomException {}
+class InvalidUsernameOrPasswordException extends CustomException {}
 ?>

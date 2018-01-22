@@ -97,10 +97,9 @@ function remove_entry($img_id)
 //1 - permission denied for upload
 //2 - file upload error
 //3 - unsupported file uploaded
-function upload_image($file, $uploader, $prefix, &$id)
+function upload_image($file, $uploader, $prefix, &$id, $config)
 {	//$uploader - userid of the person doing the upload
 	//$prefix - the string to prefix to the image name stored on the server
-	global $config;
 	if ($file['error'] > 0)
 	{
 		echo "Error: " . $_FILES['file']['error'] . "<br />";
@@ -147,7 +146,7 @@ function upload_image($file, $uploader, $prefix, &$id)
 			if ($thefile->save($destination_thumb) == TRUE)
 			{
 				echo 'Successfully uploaded' . "<br >\n";
-				echo '<img src="' . rootPageURL() . '/uploads/image.php?id=' . $img_id . ".jpg\"> <br >\n";
+				echo '<img src="' . rootPageURL($config) . '/uploads/image.php?id=' . $img_id . ".jpg\"> <br >\n";
 				finish_image_entry($img_id, $destination_vga, $destination_thumb);
 			}
 			else

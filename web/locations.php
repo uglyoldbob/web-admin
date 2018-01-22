@@ -47,7 +47,7 @@ try
 
 	?>
 	<title>Locations: <?php sitename($config)?></title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 
 	<body>
@@ -69,7 +69,7 @@ try
 	}
 
 	$stop = 0;
-	if (login_code(0) == 1)
+	if (login_code(0, $config) == 1)
 	{
 		$stop = 1;
 	}
@@ -341,7 +341,7 @@ try
 							' (' . $row['location'] . ")</h2><br >\n";
 						if ($row['img_id'])
 						{
-							echo '<img src="' . rootPageURL() . '/uploads/image.php?id=' . 
+							echo '<img src="' . rootPageURL($config) . '/uploads/image.php?id=' . 
 								$row['img_id'] . ".jpg\" alt=\"No image\"> <br >\n";
 						}
 						else
@@ -357,7 +357,7 @@ try
 					}
 					if ($root_location == 0)
 					{
-						echo '<a href="' . rootPageURL() . '/locations.php?id=' . $row2['id'] . '">Return to ' . 
+						echo '<a href="' . rootPageURL($config) . '/locations.php?id=' . $row2['id'] . '">Return to ' . 
 							$row2['description'] . '</a>' . "<br >\n";
 					}
 				}
@@ -398,11 +398,11 @@ try
 					}
 
 					echo "	<div class=\"loc_grid_elem\">\n";
-					echo '		<a href="' . rootPageURL() . '/locations.php?id=' . $row['id'] . "\"><br>\n";
+					echo '		<a href="' . rootPageURL($config) . '/locations.php?id=' . $row['id'] . "\"><br>\n";
 	
 					if ($row['img_id'])
 					{
-						echo '		<img src="' . rootPageURL() .
+						echo '		<img src="' . rootPageURL($config) .
 							'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">";
 					}
 					else
@@ -461,7 +461,7 @@ try
 					echo "		<th>Description</th>\n";
 					echo "	</tr>\n";
 				}
-				//echo '<a href="' . rootPageURL() . '/equipment.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
+				//echo '<a href="' . rootPageURL($config) . '/equipment.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
 				//echo $row['quantity'] . " " . $row['unit'] . " " . $row['name'] . ", (" . $row['description'] . ")<br >\n";
 
 				echo "	<tr>\n";
@@ -475,7 +475,7 @@ try
 				echo "		<td><a href=maintenance.php?id=" . $row['id'] . ">\n";
 				if ($row['img_id'])
 				{
-					echo '<img src="' . rootPageURL() .
+					echo '<img src="' . rootPageURL($config) .
 							'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">\n";
 					echo "		";
 				}
@@ -534,7 +534,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -544,7 +544,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -554,7 +554,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -564,7 +564,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

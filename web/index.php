@@ -20,6 +20,7 @@ class Autoloader
 }
 Autoloader::register();
 
+require_once("webAdmin/exceptions.php");
 require_once("global.php");
 
 start_my_session();	//start php session
@@ -40,68 +41,50 @@ try
 	test_config($config);
 
 	global $mysql_db;
-	openDatabase($config);
+	$mysql_db = openDatabase($config);
 	?>
 	<title><?php sitename($config)?></title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 </head>
 <body>
 	<?php
 
-	$stop = 0;
-	if (login_code(0) == 1)
-	{
-		$stop = 1;
-	}
+	$currentUser = new \webAdmin\user($config);
+	$currentUser->login(0, $mysql_db);
+	
+	do_top_menu(0);
+	echo "Something goes here?<br>\n";
 
-	/*
-	$to = "thomas.epperson@gmail.com";
-	$subject = "test message";
-	$body = "this is a test message";
-	if (mail($to, $subject, $body))
-	{
-		echo("<p>Message successfully sent!</p>");
-	}
-	else
-	{
-		echo("<p>Message delivery failed...</p>");
-	}*/
-
-
-	// uploading file example
-	//for testing only
-	/*?>
-	<form action="upload_file.php" method="post"
-	enctype="multipart/form-data">
-	<label for="file">Filename:</label>
-	<input type="file" name="file" id="file"><br>
-	<input type="submit" name="submit" value="Submit">
-	</form>
-	<?php
-	*/
-
-	if ($stop == 0)
-	{
-		do_top_menu(0);
-		echo "Something goes here?<br>\n";
-	}
-	closeDatabase();
+	closeDatabase($mysql_db);
 }
 catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
 }
+catch (\webAdmin\SiteConfigurationException $e)
+{
+	?>
+	<title>Site Configuration Error</title>
+	<?php do_css($config) ?>
+	</head>
+	<body>
+	<h1>Site configuration error</h1>
+	<?php
+	if (isset($_GET['debug']))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
+}
 catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -111,21 +94,60 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
 	<?php
 }
+catch (\webAdmin\InvalidUsernameOrPasswordException $e)
+{
+	echo "<h3>Invalid username or password</h3>\n";
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create']=1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\NotLoggedInException $e)
+{
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create']=1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
 catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>
 	<?php
+	if (isset($_GET['debug']))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 
 ?>

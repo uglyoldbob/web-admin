@@ -44,7 +44,7 @@ try
 
 	?>
 	<title>Maintenance: <?php sitename($config)?></title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 
@@ -73,7 +73,7 @@ try
 	}
 
 	$stop = 0;
-	if (login_code(0) == 1)
+	if (login_code(0, $config) == 1)
 	{
 		$stop = 1;
 	}
@@ -175,7 +175,7 @@ try
 				$expense_found = 1;
 				echo "	<tr>\n";				
 				echo "		<td>" . $expenserow['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"edit\">\n" .
@@ -184,7 +184,7 @@ try
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
 					"\"Edit\"/>\n" .
 					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 						"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
 						"		<input type=\"hidden\" name=" . 
 						"\"action\" value=\"remove_expense\">\n" .
@@ -196,14 +196,14 @@ try
 				echo "</td>\n";
 			
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL() . 
+				echo "<a href=\"" . rootPageURL($config) . 
 					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
 				echo print_contact($expenserow['pay_to']);
 				echo "</a>";
 				echo "</td>\n";
 			
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL() . 
+				echo "<a href=\"" . rootPageURL($config) . 
 					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
 				echo print_contact($expenserow['paid_by']);
 				echo "</a>";
@@ -260,7 +260,7 @@ try
 				}
 				else
 				{
-					echo "		<td>" . '<a href="' . rootPageURL() .
+					echo "		<td>" . '<a href="' . rootPageURL($config) .
 						'/' . $expenserow['invoice'] . 
 						'" target="_blank">Download</a></td>' . "\n";
 				}
@@ -288,7 +288,7 @@ try
 		    
 		    if (isset($_SESSION['payment_reference']))
 			{
-				echo "    <form action=\"" . rootPageURL() . 
+				echo "    <form action=\"" . rootPageURL($config) . 
 					"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"add_expense\">\n" .
@@ -305,7 +305,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -315,7 +315,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -325,7 +325,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -335,7 +335,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css() ?>
+	<?php do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

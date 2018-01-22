@@ -232,7 +232,7 @@ class jobs
 		}
 	}
 	
-	public function table()
+	public function table($config)
 	{
 		global $mysql_db;
 		if ($this->contact != 0)
@@ -272,7 +272,7 @@ class jobs
 	
 			echo "		<td>\n";
 						
-			echo "			<a href=\"". rootPageURL() . "/jobs.php?job=" . $row['id'] . "\">View</a>\n";
+			echo "			<a href=\"". rootPageURL($config) . "/jobs.php?job=" . $row['id'] . "\">View</a>\n";
 			echo "		</td>\n";
 			
 			echo "		<td>";
@@ -294,23 +294,23 @@ class jobs
 	
 		if ($this->start_page > 0)
 		{
-			echo '<a href="' . rootPageURL() . '/jobs.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
+			echo '<a href="' . rootPageURL($config) . '/jobs.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
 		}
 		if ($next_page == 1)
 		{
-			echo '<a href="' . rootPageURL() . '/jobs.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
+			echo '<a href="' . rootPageURL($config) . '/jobs.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
 		}
 		$contact_results->close();
 	}
 	
-	public function list_job()
+	public function list_job($config)
 	{
 		global $mysql_db;
 		$query = "SELECT * FROM jobs WHERE id = " . $this->job . " LIMIT 1;";
 		$result = $mysql_db->query($query);
 		if($row = $result->fetch_array(MYSQLI_BOTH))
 		{
-			echo "<form action=\"" . rootPageURL() . "/jobs.php\" method=\"post\">\n" .
+			echo "<form action=\"" . rootPageURL($config) . "/jobs.php\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"modjob\">\n" .
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $this->job . "\">\n";
 			
@@ -417,7 +417,7 @@ class jobs
 				$expense_found = 1;
 				echo "	<tr>\n";				
 				echo "		<td>" . $expenserow['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"edit\">\n" .
@@ -426,7 +426,7 @@ class jobs
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
 					"\"Edit\"/>\n" .
 					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL() . 
+				echo "	<form action=\"" . rootPageURL($config) . 
 					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"remove_expense\">\n" .
@@ -438,14 +438,14 @@ class jobs
 				echo "</td>\n";
 				
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL() . 
+				echo "<a href=\"" . rootPageURL($config) . 
 					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
 				echo print_contact($expenserow['pay_to']);
 				echo "</a>";
 				echo "</td>\n";
 				
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL() . 
+				echo "<a href=\"" . rootPageURL($config) . 
 					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
 				echo print_contact($expenserow['paid_by']);
 				echo "</a>";
@@ -501,7 +501,7 @@ class jobs
 				}
 				else
 				{
-					echo "		<td>" . '<a href="' . rootPageURL() .
+					echo "		<td>" . '<a href="' . rootPageURL($config) .
 						'/' . $expenserow['invoice'] . 
 						'" target="_blank">Download</a></td>' . "\n";
 				}
@@ -520,7 +520,7 @@ class jobs
 			
 			if (isset($_SESSION['payment_reference']))
 			{
-				echo "    <form action=\"" . rootPageURL() . 
+				echo "    <form action=\"" . rootPageURL($config) . 
 					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"add_payment\">\n" .

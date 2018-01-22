@@ -34,7 +34,7 @@ try
 	global $mysql_db;
 	openDatabase($config);
 	$stop = 0;
-	if (login_code(1) == 1)
+	if (login_code(1, $config) == 1)
 	{
 		$stop = 1;
 		throw new Exception('stuff');
@@ -45,7 +45,6 @@ try
 	if (is_numeric($thumb) == FALSE)
 		$location = 0;
 	//verify permissions first
-	global $config;
 	$query = "SELECT * FROM images WHERE id='" . $filename . "'";
 	$results = $mysql_db->query($query);
 	$permission = false;
@@ -69,7 +68,7 @@ try
 			 "<html>\n" . 
 			 "<head>\n" .
 			 "<title>" .sitename($config) . "</title>\n";
-		do_css();
+		do_css($config);
 		echo	 "</head>\n" .
 			 "<body>\n" .
 			 "<h3>The image cannot be retrieved.</h3>\n<br >\n" .
