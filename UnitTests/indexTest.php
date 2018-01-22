@@ -2,28 +2,17 @@
 namespace UnitTestFiles\Test;
 use PHPUnit\Framework\TestCase;
 
-require_once("web/global.php");
-
 class indexTest extends TestCase
 {
-	private $config_name = "web/config.ini";
+	private $config_name = "config.ini";
 	private $session_file = "./session_id.txt";
 	
-	private $ex1;
-	private $ex2;
-	private $ex3;
 	private $session_id;
-	
-	public function __construct()
-	{
-		parent::__construct();
-		$this->ex1 = new \ConfigurationMissingException("bla");
-		$this->ex2 = new \PermissionDeniedException("bla");
-		$this->ex3 = new \DatabaseConnectionFailedException("bla");
-	}
 	
 	protected function setUp()
 	{
+		chdir("./web");
+		require_once("global.php");
 		$this->errors = array();
 		set_error_handler(array($this, "errorHandler"));
 		if ($this->session_id = @file_get_contents($this->session_file))
@@ -61,8 +50,7 @@ class indexTest extends TestCase
 				return;
 			}
 		}
-		$this->fail("Error with level " . $errno . " and message '" . $errstr . "' not found in:\n" . $state,
-			var_export($this->errors, TRUE));
+		$this->fail("Error with level " . $errno . " and message '" . $errstr . "' not found in:\n" . $state);
 	}
 	
 	public function assertNoErrors()
@@ -75,8 +63,7 @@ class indexTest extends TestCase
 				$state .= $err['errno'] . ", " . $err['errstr'] . ", " . $err['errfile'] . ", " . $err['errline'] . "\n";
 			}
 
-			$this->fail("Errors were found where none were expected\n" . $state,
-				var_export($this->errors, TRUE));
+			$this->fail("Errors were found where none were expected:\n" . $state);
 		}
 		$this->assertTrue(true);
 	}
@@ -85,12 +72,6 @@ class indexTest extends TestCase
 	{
 		trigger_error("Triggered error");
 		$this->assertError("Triggered error", E_USER_NOTICE);
-	}
-	
-	public function testAssertErrors2()
-	{
-		include("idontexist.php");
-		$this->assertError("include(idontexist.php): failed to open stream: No such file or directory", E_WARNING);
 	}
 	
 	public function testAssertErrors3()
@@ -112,11 +93,11 @@ class indexTest extends TestCase
 		$config = FALSE;
 		if (method_exists($this,'expectException'))
 		{
-			$this->expectException(get_class($this->ex1));
+			$this->expectException('ConfigurationMissingException');
 		}
 		else
 		{
-			$this->setExpectedException(get_class($this->ex1));
+			$this->setExpectedException('ConfigurationMissingException');
 		}
 		test_config($config);
 	}
@@ -150,11 +131,11 @@ class indexTest extends TestCase
 	{
 		if (method_exists($this,'expectException'))
 		{
-			$this->expectException(get_class($this->ex3));
+			$this->expectException('DatabaseConnectionFailedException');
 		}
 		else
 		{
-			$this->setExpectedException(get_class($this->ex3));
+			$this->setExpectedException('DatabaseConnectionFailedException');
 		}
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
