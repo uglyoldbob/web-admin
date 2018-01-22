@@ -1,8 +1,7 @@
 <?php
-require_once("exceptions.php");
 #this script must be included in another script to use properly
 if ('upload_file.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	throw new PermissionDeniedException();
+	throw new \webAdmin\PermissionDeniedException();
 
 include_once('SimpleImage.php');
 

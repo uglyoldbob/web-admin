@@ -1,7 +1,6 @@
 <?php
-require_once("exceptions.php");
 if ('forms.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	throw new PermissionDeniedException();
+	throw new \webAdmin\PermissionDeniedException();
 
 function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions, $autolist)
 {

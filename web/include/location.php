@@ -1,8 +1,7 @@
 <?php
-require_once("exceptions.php");
 
 if ('location.php' == basename($_SERVER['SCRIPT_FILENAME']))
-	throw new PermissionDeniedException();
+	throw new \webAdmin\PermissionDeniedException();
 
 
 function do_loc($apply)

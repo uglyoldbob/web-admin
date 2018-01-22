@@ -2,17 +2,16 @@
 
 include_once("passwords.php");
 include_once("include/contacts.php");
-require_once("include/exceptions.php");
 
 function test_config($config)
 {
 	if (!isset($config))
 	{
-		throw new PermissionDeniedException();
+		throw new \webAdmin\PermissionDeniedException();
 	}
 	if ($config==FALSE)
 	{
-		throw new ConfigurationMissingException();
+		throw new \webAdmin\ConfigurationMissingException();
 	}
 }
 
@@ -231,7 +230,7 @@ function openDatabase($config)
 		$config["database_name"], $config["database_port"]);
 	if ($mysql_db->connect_errno)
 	{
-		throw new DatabaseConnectionFailedException();
+		throw new \webAdmin\DatabaseConnectionFailedException();
 	}
 	//TODO: implement calling this function
 	//mysqli_set_charset()
