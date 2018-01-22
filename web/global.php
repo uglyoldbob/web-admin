@@ -16,9 +16,8 @@ function test_config($config)
 	}
 }
 
-function sitename()
+function sitename($config)
 {
-	global $config;
 	echo $config["name"];
 }
 

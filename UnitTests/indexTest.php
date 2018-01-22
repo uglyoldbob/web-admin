@@ -93,11 +93,11 @@ class indexTest extends TestCase
 		$config = FALSE;
 		if (method_exists($this,'expectException'))
 		{
-			$this->expectException('ConfigurationMissingException');
+			$this->expectException('\webAdmin\ConfigurationMissingException');
 		}
 		else
 		{
-			$this->setExpectedException('ConfigurationMissingException');
+			$this->setExpectedException('\webAdmin\ConfigurationMissingException');
 		}
 		test_config($config);
 	}
@@ -131,11 +131,11 @@ class indexTest extends TestCase
 	{
 		if (method_exists($this,'expectException'))
 		{
-			$this->expectException('DatabaseConnectionFailedException');
+			$this->expectException('\webAdmin\DatabaseConnectionFailedException');
 		}
 		else
 		{
-			$this->setExpectedException('DatabaseConnectionFailedException');
+			$this->setExpectedException('\webAdmin\DatabaseConnectionFailedException');
 		}
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);

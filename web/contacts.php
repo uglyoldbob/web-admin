@@ -1,6 +1,26 @@
 <?php
+/**
+* Simple autoloader, so we don't need Composer just for this.
+*/
+class Autoloader
+{
+    public static function register()
+    {
+        spl_autoload_register(function ($class) 
+		{
+            $file = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
+            if (file_exists($file)) 
+			{
+                require $file;
+                return true;
+            }
+            return false;
+        });
+    }
+}
+Autoloader::register();
+
 require_once("global.php");
-require_once("include/exceptions.php");
 
 start_my_session();	//start php session
 if (!headers_sent())
@@ -27,7 +47,7 @@ try
 
 	?>
 
-	<title>Contact Listing: <?php sitename()?></title>
+	<title>Contact Listing: <?php sitename($config)?></title>
 	<?php do_css() ?>
 	</head>
 	<body>
@@ -119,7 +139,7 @@ try
 
 	closeDatabase();
 }
-catch (ConfigurationMissingException $e)
+catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
@@ -129,7 +149,7 @@ catch (ConfigurationMissingException $e)
 	<h1>Site configuration error</h1>
 	<?php
 }
-catch (DatabaseConnectionFailedException $e)
+catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
@@ -139,7 +159,7 @@ catch (DatabaseConnectionFailedException $e)
 	<h1>Site configuration error</h1>
 	<?php
 }
-catch (PermissionDeniedException $e)
+catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>

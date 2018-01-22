@@ -1,13 +1,34 @@
 <?php
-require_once(dirname(__FILE__) . "/../global.php");
-include_once(dirname(__FILE__) . "/../include/upload_file.php");
-require_once(dirname(__FILE__) . "/../include/exceptions.php");
+chdir("../");
+/**
+* Simple autoloader, so we don't need Composer just for this.
+*/
+class Autoloader
+{
+    public static function register()
+    {
+        spl_autoload_register(function ($class) 
+		{
+            $file = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
+            if (file_exists($file)) 
+			{
+                require $file;
+                return true;
+            }
+            return false;
+        });
+    }
+}
+Autoloader::register();
+
+require_once("global.php");
+include_once("include/upload_file.php");
 
 start_my_session();	//start php session
 
 try
 {
-	$config = parse_ini_file(dirname(__FILE__) . "/../config.ini");
+	$config = parse_ini_file("config.ini");
 	test_config($config);
 
 	global $mysql_db;
@@ -47,7 +68,7 @@ try
 		echo "<!DOCTYPE HTML SYSTEM>\n" . 
 			 "<html>\n" . 
 			 "<head>\n" .
-			 "<title>" .sitename() . "</title>\n";
+			 "<title>" .sitename($config) . "</title>\n";
 		do_css();
 		echo	 "</head>\n" .
 			 "<body>\n" .
@@ -81,19 +102,19 @@ try
 	}
 	closeDatabase();
 }
-catch (ConfigurationMissingException $e)
+catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<h1>Site configuration error</h1>
 	<?php
 }
-catch (DatabaseConnectionFailedException $e)
+catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<h1>Site configuration error</h1>
 	<?php
 }
-catch (PermissionDeniedException $e)
+catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<h1>Permission Denied</h1>

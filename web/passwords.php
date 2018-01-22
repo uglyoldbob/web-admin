@@ -1,12 +1,5 @@
 <?php
 
-require_once("include/exceptions.php");
-
-if ('passwords.php' == basename($_SERVER['SCRIPT_FILENAME']))
-{
-	throw new PermissionDeniedException();
-}
-
 /*
  * Password hashing with PBKDF2.
  * Author: havoc AT defuse.ca
