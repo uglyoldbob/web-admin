@@ -156,6 +156,9 @@ class indexTest extends TestCase
 	{
 		require_once("webAdmin/exceptions.php");
 		require_once("global.php");
+		$config = parse_ini_file($this->config_name);
+		test_config($config);
+		$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
 		start_my_session();
 		$this->assertNoErrors();
 		$this->assertTrue($_SESSION['initiated']);
@@ -173,6 +176,9 @@ class indexTest extends TestCase
 		$_SERVER['HTTP_USER_AGENT'] = "WHATEVER";
 		require_once("webAdmin/exceptions.php");
 		require_once("global.php");
+		$config = parse_ini_file($this->config_name);
+		test_config($config);
+		$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
 		start_my_session();
 		$this->assertNoErrors();
 		if (isset($_SESSION['username']))
