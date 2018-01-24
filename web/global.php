@@ -403,43 +403,6 @@ function closeDataBase($mysql_db)
 	$mysql_db->close();
 }
 
-function print_contact($contact_id, $config)
-{	//outputs the contact name
-	global $mysql_db;
-
-	$output = "";
-
-	$query = "SELECT last_name, first_name FROM contacts WHERE emp_id = " . $contact_id;
-	
-	$contact_results = $mysql_db->query($query);
-	
-	$last_name_first = $config['last_name_first']; 
-	
-	if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
-	{
-		if ($last_name_first == 1)
-		{
-			if ($row['last_name'] != "")
-				$output .= $row['last_name'];
-			if ($row['first_name'] != "")
-				$output .= ', ' . $row['first_name'];
-		}
-		else
-		{
-			if ($row['first_name'] != "")
-				$output .= $row['first_name'];
-			if ($row['last_name'] != "")
-				$output .= ' ' . $row['last_name'];
-		}
-		$contact_results->free();
-	}
-	else
-	{
-		$output .= "ERROR";
-	}
-	return $output;
-}
-
 function get_category_sum($contact, $category)
 {
 	global $mysql_db;

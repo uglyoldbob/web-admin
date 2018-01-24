@@ -3,13 +3,17 @@ namespace webAdmin;
 class user
 {
 	private $config;
+	private $mysql_db;
+	private $table_name;
 	
-	public function __construct($config)
+	public function __construct($config, $mysql_db, $table_name)
 	{
 		$this->config = $config;
+		$this->mysql_db = $mysql_db;
+		$this->table_name = $table_name;
 	}
 	
-	public function login($quiet, $mysql_db)
+	public function login($quiet)
 	{	//prints and executes code for the login script
 		//returns exceptions
 		#TODO : produce the div tags when quiet=1 and output is actually produced
@@ -35,17 +39,17 @@ class user
 		{
 			if (isset($_POST["username"]))
 			{
-				$attempt_username = $mysql_db->real_escape_string($_POST["username"]);
+				$attempt_username = $this->mysql_db->real_escape_string($_POST["username"]);
 				
 				if (isset($_POST["email"]))
 				{
-					$attempt_email = $mysql_db->real_escape_string($_POST["email"]);
+					$attempt_email = $this->mysql_db->real_escape_string($_POST["email"]);
 					if (isset($_POST["pass2"]))
 					{
-						$attempt_pass1 = $mysql_db->real_escape_string($_POST["pass2"]);
+						$attempt_pass1 = $this->mysql_db->real_escape_string($_POST["pass2"]);
 						if (isset($_POST["pass3"]))
 						{
-							$attempt_pass2 = $mysql_db->real_escape_string($_POST["pass3"]);						
+							$attempt_pass2 = $this->mysql_db->real_escape_string($_POST["pass3"]);
 							if ($attempt_pass1 != $attempt_pass2)
 							{
 								echo "Passwords do not match!<br>\n";
@@ -82,7 +86,7 @@ class user
 		{	//show registration form
 			if (isset($_POST["username"]))
 			{
-				$previous_username = $mysql_db->real_escape_string($_POST["username"]);
+				$previous_username = $this->mysql_db->real_escape_string($_POST["username"]);
 			}
 			else
 			{
@@ -90,7 +94,7 @@ class user
 			}
 			if (isset($_POST["email"]))
 			{
-				$previous_email = $mysql_db->real_escape_string($_POST["email"]);
+				$previous_email = $this->mysql_db->real_escape_string($_POST["email"]);
 			}
 			else
 			{
@@ -107,8 +111,8 @@ class user
 		}
 		else if ($_POST["action"] == "login")
 		{	//retrieve submitted username and password, if applicable
-			$username = $mysql_db->real_escape_string($_POST["username"]);
-			$passworder = $mysql_db->real_escape_string($_POST["password"]);
+			$username = $this->mysql_db->real_escape_string($_POST["username"]);
+			$passworder = $this->mysql_db->real_escape_string($_POST["password"]);
 		
 			$_SESSION['username'] = $username;
 		}
@@ -134,13 +138,13 @@ class user
 		}
 		else if ($_POST["action"] == "apply_pass")
 		{	//attempt to change the user password
-			$oldpass = $mysql_db->real_escape_string($_POST['pass1']);
-			$newpass = $mysql_db->real_escape_string($_POST['pass2']);
-			$passmatch = $mysql_db->real_escape_string($_POST['pass3']);
+			$oldpass = $this->mysql_db->real_escape_string($_POST['pass1']);
+			$newpass = $this->mysql_db->real_escape_string($_POST['pass2']);
+			$passmatch = $this->mysql_db->real_escape_string($_POST['pass3']);
 			if ($newpass == $passmatch)
 			{
 				$uid = $_SESSION['user']['emp_id'];
-				contacts::store_user_pword($uid, $oldpass, $newpass);
+				$this->store_user_pword($uid, $oldpass, $newpass);
 			}
 			else
 			{
@@ -151,8 +155,8 @@ class user
 		#logic for logging in and normal activity
 		if (isset($_SESSION['username']))
 		{
-			$query = "SELECT * FROM contacts WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
-			$results = $mysql_db->query($query);
+			$query = "SELECT * FROM " . $this->table_name . " WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
+			$results = $this->mysql_db->query($query);
 			if ($results)
 			{
 				$row = $results->fetch_array(MYSQLI_BOTH);
@@ -173,9 +177,9 @@ class user
 					$temp = hash_password($passworder, $row['salt'], $row['stretching']);
 					if ( ($row['password'] == $temp) && ($row['stretching'] != $this->config['key_stretching_value']) )
 					{	//password is good, key stretching needs to be fixed
-						contacts::mod_user_pword($row['emp_id'], $passworder);
-						$fquery = "SELECT * From contacts WHERE username='" . $_SESSION['username'] . "'LIMIT 1;";
-						$fresults = $mysql_db->query($fquery);
+						$this->set_user_pword($row['emp_id'], $passworder);
+						$fquery = "SELECT * From " . $this->table_name . " WHERE username='" . $_SESSION['username'] . "'LIMIT 1;";
+						$fresults = $this->mysql_db->query($fquery);
 						if ($fresults)
 						{
 							$row = $fresults->fetch_array(MYSQLI_BOTH);
@@ -196,15 +200,15 @@ class user
 					$_SESSION['user'] = $row;
 					if ($_POST["action"] == "login")
 					{
-						$query = "UPDATE contacts SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
-						$mysql_db->query($query);
-						$query = "UPDATE contacts SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
-						$mysql_db->query($query);
+						$query = "UPDATE " . $this->table_name . " SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+						$this->mysql_db->query($query);
+						$query = "UPDATE " . $this->table_name . " SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+						$this->mysql_db->query($query);
 					}
 					if ($quiet == 0)
 					{
 						echo "<h3>Welcome ";
-						echo print_contact($_SESSION['user']['emp_id'], $this->config);
+						echo $this->get_name($_SESSION['user']['emp_id']);
 						echo "</h3>\n";
 						echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
 							 "	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
@@ -221,8 +225,8 @@ class user
 				}
 				else
 				{	//password fail match
-					$query = "UPDATE contacts SET fail_logins=fail_logins+1 WHERE username = " . $_SESSION['username'] . ";";
-					$mysql_db->query($query);
+					$query = "UPDATE " . $this->table_name . " SET fail_logins=fail_logins+1 WHERE username = " . $_SESSION['username'] . ";";
+					$this->mysql_db->query($query);
 					unset($_SESSION['username']);
 					unset($_SESSION['password']);
 					throw new InvalidUsernameOrPasswordException();
@@ -244,14 +248,193 @@ class user
 		if ($quiet == 0)
 		{
 			echo "</div>\n";
-		}	
+		}
+	}
 
-		return $retv;
+	private function change_user_pword($uid, $oldpass, $newpass)
+	{
+		$userid = $_SESSION['user']['emp_id'];
+		//TODO check for permission to modify password
+
+		$query = "SELECT fail_pass_change, username, password, " .
+				 "salt, stretching FROM " . $this->table_name . " WHERE emp_id = '" .
+				 $uid . "' LIMIT 1;";
+
+		$results = $this->mysql_db->query($query);
+		if ($results)
+		{
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_pass_change'] >= $this->config['max_fail_pass_changes'])
+			{
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+			else if ($row['password'] == hash_password($oldpass, $row['salt'], $row['stretching']))
+			{	//ok the old password matches
+				$salt = generate_salt();
+
+				$query = "UPDATE " . $this->table_name . " SET `salt` = '" . $salt . "' WHERE emp_id = " . $uid . ";";
+				if ($this->mysql_db->query($query) == TRUE)
+				{
+					echo "User salt stored successfully<br >\n";
+					$hash_pass = hash_password($newpass, $salt, $this->config['key_stretching_value']);
+					$query = "UPDATE " . $this->table_name . " SET `stretching` = '" . $this->config['key_stretching_value'] .
+						"' WHERE emp_id = " . $uid . "; ";
+					if ($this->mysql_db->query($query) == TRUE)
+					{
+						echo "User stretching stored successfully<br >\n";
+						$query = "UPDATE " . $this->table_name . " SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $uid . ";";
+						if ($this->mysql_db->query($query) == TRUE)
+						{
+							echo "User password stored successfully<br >\n";
+						}
+						else
+						{
+							echo "Failed to save user password<br >\n";
+						}
+					}
+					else
+					{
+						echo "Failed to save user stretching<br >\n";
+					}
+				}
+				else
+				{
+					echo "Failed to save user salt<br >\n";
+				}
+			}
+			else
+			{	//password fail match
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+				$query = "UPDATE " . $this->table_name . " SET fail_pass_change=fail_pass_change+1 WHERE emp_id = " . $uid . ";";
+				$this->mysql_db->query($query);
+				echo	"<h3>Invalid username or password</h3><br >\n";
+			}
+		}
+		else
+		{	//contact not found
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			echo	"<h3>Invalid username or password</h3><br >\n";
+		}
+		$results->close();
+	}
+
+	public function get_name($contact_id)
+	{	//outputs the contact name
+		$output = "";
+		$query = "SELECT last_name, first_name FROM " . $this->table_name . " WHERE emp_id = " . $contact_id;
+		$contact_results = $this->mysql_db->query($query);
+		$last_name_first = $this->config['last_name_first'];
+
+		if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
+		{
+			if ($last_name_first == 1)
+			{
+				if ($row['last_name'] != "")
+					$output .= $row['last_name'];
+				if ($row['first_name'] != "")
+					$output .= ', ' . $row['first_name'];
+			}
+			else
+			{
+				if ($row['first_name'] != "")
+					$output .= $row['first_name'];
+				if ($row['last_name'] != "")
+					$output .= ' ' . $row['last_name'];
+			}
+			$contact_results->free();
+		}
+		else
+		{
+			$output .= "ERROR";
+		}
+		return $output;
 	}
 	
+	private function does_user_exist($username)
+	{
+		//check to see that the username does not exist first
+		$query = "SELECT * FROM " . $this->table_name . " WHERE username='" . $username . "' LIMIT 1;";
+		$results = $this->mysql_db->query($query);
+		if ($results)
+		{
+			if ($results->num_rows != 0)
+			{
+				return 1;	//username exists
+			}
+		}
+		return 0;	//username does not exist
+	}
+
+	private function create_user($username, $email)
+	{
+		$query = "INSERT INTO `" . $this->table_name . "` (username, email)" .
+				 " VALUES ('" . $username . "', '" . $email . "');";
+		$results = $this->mysql_db->query($query);
+		//TODO: handle errors?
+		return $this->mysql_db->insert_id;
+	}
+
+	private function set_user_password($userid, $pw)
+	{
+		$query = "SELECT fail_pass_change, username, password, " .
+				 "salt FROM " . $this->table_name . " WHERE emp_id = '" .
+				 $userid . "' LIMIT 1;";
+
+		$results = $this->mysql_db->query($query);
+		if ($results)
+		{
+			$row = $results->fetch_array(MYSQLI_BOTH);
+			if ($row['fail_pass_change'] >= $this->config['max_fail_pass_changes'])
+			{
+				unset($_SESSION['username']);
+				unset($_SESSION['password']);
+			}
+			else if (is_null($row['password']))
+			{	//ok a password does not exist
+				//make a new salt
+				$salt = generate_salt();
+
+				$query = "UPDATE " . $this->table_name . " SET `salt` = '" . $salt . "' WHERE emp_id = " . $userid . ";";
+				if ($this->mysql_db->query($query) == TRUE)
+				{
+					//echo "User salt stored successfully<br >\n";
+					//value in config file used when creating or storing passwords
+					$hash_pass = hash_password($pw, $salt, $this->config['key_stretching_value']);
+					$query = "UPDATE " . $this->table_name . " SET `stretching` = '" . $this->config['key_stretching_value'] .
+						"' WHERE emp_id = " . $userid . "; ";
+					if ($this->mysql_db->query($query) == TRUE)
+					{
+						//echo "User stretching stored successfully<br >\n";
+						$query = "UPDATE " . $this->table_name . " SET `password` = '" . $hash_pass . "' WHERE emp_id = " . $userid . ";";
+						if ($this->mysql_db->query($query) == TRUE)
+						{
+							//echo "User password stored successfully<br >\n";
+						}
+						else
+						{
+							echo "Failed to save user password<br >\n";
+						}
+					}
+					else
+					{
+						echo "Failed to save user stretching<br >\n";
+						echo $query . " 1 <br >\n";
+					}
+				}
+				else
+				{
+					echo "Failed to save user salt<br >\n";
+				}
+			}
+		}
+	}
+
 	public function register($attempt_username, $attempt_email, $attempt_pw)
 	{
-		global $mysql_db;
 		//validate the email address?
 		if (!filter_var($attempt_email, FILTER_VALIDATE_EMAIL))
 		{
@@ -259,16 +442,18 @@ class user
 			$_POST["action"] = "register";
 			return 0;	//invalid email
 		}
-		if (contacts::does_user_exist($attempt_username))
+		if ($this->does_user_exist($attempt_username))
 		{
 			return 0;
 		}
 		
+		if ($this->config['user_create_type'] != "direct")
+		{	//other nonimplemented registration method
+			return 0;
+		}
 		//ok, create the user
-		contacts::create_contact($attempt_username, $attempt_email);
-		$temp_uid = contacts::get_id_num($attempt_username);
-		contacts::setup_user_pword($temp_uid, $attempt_pw);
-		
+		$userid = $this->create_user($attempt_username, $attempt_email);
+		$this->set_user_password($userid, $attempt_pw);
 		return 1;
 	}
 }

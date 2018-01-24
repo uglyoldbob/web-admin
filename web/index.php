@@ -23,7 +23,6 @@ Autoloader::register();
 require_once("webAdmin/exceptions.php");
 require_once("global.php");
 
-start_my_session();	//start php session
 if (!headers_sent())
 {
 	header('Content-type: text/html; charset=utf-8');
@@ -42,6 +41,11 @@ try
 
 	global $mysql_db;
 	$mysql_db = openDatabase($config);
+	
+	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
+	start_my_session();	//start php session
+
+	
 	?>
 	<title><?php sitename($config)?></title>
 	<?php do_css($config) ?>
@@ -49,13 +53,11 @@ try
 <body>
 	<?php
 
-	$currentUser = new \webAdmin\user($config);
-	$currentUser->login(0, $mysql_db);
+	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+	$currentUser->login(0);
 	
-	do_top_menu(0);
+	do_top_menu(0, $config);
 	echo "Something goes here?<br>\n";
-
-	closeDatabase($mysql_db);
 }
 catch (\webAdmin\ConfigurationMissingException $e)
 {
