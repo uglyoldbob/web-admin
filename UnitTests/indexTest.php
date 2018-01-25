@@ -159,6 +159,7 @@ class indexTest extends TestCase
 		require_once("global.php");
 		$config = parse_ini_file($this->config_name);
 		test_config($config);
+		$mysql_db = openDatabase($config);
 		$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
 		start_my_session();
 		$this->assertNoErrors();
@@ -180,6 +181,7 @@ class indexTest extends TestCase
 		require_once("global.php");
 		$config = parse_ini_file($this->config_name);
 		test_config($config);
+		$mysql_db = openDatabase($config);
 		$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
 		start_my_session();
 		$this->assertNoErrors();
