@@ -52,12 +52,20 @@ class session
 	 */
 	public function _read($id)
 	{
-		$statement = $this->db->prepare('select ifnull(data,'') as data from (select 1 as dummy) as a left join ' . $this->table_name . ' on id="');
+		$statement = $this->db->prepare('select data from ' . $this->table_name . ' where id=?');
 		$statement->bind_param('s', $id);
 		$statement->execute();
-		$statement->bind_result($data);
-		$statement->fetch();
-		return $data;
+		$statement->store_result();
+		if ($statement->num_rows > 0)
+		{
+			$statement->bind_result($data);
+			$statement->fetch();
+			return $data;
+		}
+		else
+		{
+			return '';
+		}
 	}
 	
 	/**
