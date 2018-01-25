@@ -155,6 +155,7 @@ class indexTest extends TestCase
 	public function testSessionStart1()
 	{
 		require_once("webAdmin/exceptions.php");
+		require_once("webAdmin/session.php");
 		require_once("global.php");
 		$config = parse_ini_file($this->config_name);
 		test_config($config);
@@ -175,6 +176,7 @@ class indexTest extends TestCase
 		$_SESSION['password'] = 'something';
 		$_SERVER['HTTP_USER_AGENT'] = "WHATEVER";
 		require_once("webAdmin/exceptions.php");
+		require_once("webAdmin/session.php");
 		require_once("global.php");
 		$config = parse_ini_file($this->config_name);
 		test_config($config);
