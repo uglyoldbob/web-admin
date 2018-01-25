@@ -67,6 +67,10 @@ catch (\webAdmin\ConfigurationMissingException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\SiteConfigurationException $e)
 {
@@ -77,7 +81,7 @@ catch (\webAdmin\SiteConfigurationException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
-	if (isset($_GET['debug']))
+	if (isset($_GET['debug']) || ($config['debug']==1))
 	{
 		echo "Details: " . (string)$e . "<br />\n";
 	}
@@ -91,6 +95,10 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\PermissionDeniedException $e)
 {
@@ -101,6 +109,10 @@ catch (\webAdmin\PermissionDeniedException $e)
 	<body>
 	<h1>Permission Denied</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 {
@@ -146,7 +158,7 @@ catch (Exception $e)
 	<body>
 	<h1>Error</h1>
 	<?php
-	if (isset($_GET['debug']))
+	if (isset($_GET['debug']) || ($config['debug']==1))
 	{
 		echo "Details: " . (string)$e . "<br />\n";
 	}

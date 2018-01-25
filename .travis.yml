@@ -25,6 +25,8 @@ before_script:
   - sed -i -e "s,\"password\",\"\",g" ./web/config.ini
   - sed -i -e "s,\"host_or_ip\",\"127.0.0.1\",g" ./web/config.ini
   - sed -i -e "s,location_here,,g" ./web/config.ini
+  - sed -i -e  "s,require_https = 1,require_https = 0,g" ./web/config.ini
+  - sed -i -e  "s,debug = 0,debug = 1,g" ./web/config.ini
   - mysql -e 'CREATE DATABASE db_name;'
   - mysql db_name < ./skeleton.sql
 
