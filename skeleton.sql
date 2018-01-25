@@ -1,6 +1,6 @@
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `contacts` (
+CREATE TABLE `users` (
   `emp_id` int(11) NOT NULL AUTO_INCREMENT,
   `last_name` varchar(255) NOT NULL,
   `middle_name` varchar(255) NOT NULL,
@@ -13,7 +13,6 @@ CREATE TABLE `contacts` (
   `fail_pass_change` int(11) NOT NULL DEFAULT '0',
   `classification` varchar(25) NOT NULL DEFAULT 'Employee',
   `payment_eligible` tinyint(1) NOT NULL DEFAULT '0',
-  `ssn` varchar(11) NOT NULL,
   `phone_mobile` varchar(25) NOT NULL,
   `phone_home` varchar(25) NOT NULL,
   `phone_other` varchar(25) NOT NULL,
@@ -177,6 +176,11 @@ CREATE TABLE `properties` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `sessions` (
+  `id` varchar(32) NOT NULL,
+  `access` int(10) UNSIGNED DEFAULT NULL,
+  `data` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 CREATE TABLE `status` (
   `id` int(32) NOT NULL,
   `item` int(11) NOT NULL,
