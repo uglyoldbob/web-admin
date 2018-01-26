@@ -124,7 +124,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
 		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
 		"</form>\n";
-	if ($config['allow_user_create']=1)
+	if ($config['allow_user_create'] == 1)
 	{
 		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
@@ -141,7 +141,7 @@ catch (\webAdmin\NotLoggedInException $e)
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
 		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
 		"</form>\n";
-	if ($config['allow_user_create']=1)
+	if ($config['allow_user_create'] == 1)
 	{
 		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
