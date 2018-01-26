@@ -205,6 +205,17 @@ class indexTest extends TestCase
 	public function testPage1()
 	{
 		require_once("index.php");
+		$this->assertNoErrors();
+	}
+	
+	/**
+	 * @depends testPage1
+	 */
+	public function testPage2()
+	{
+		$_POST["action"] = "register";
+		require_once("index.php");
+		$this->assertNoErrors();
 	}
 }
 ?>
