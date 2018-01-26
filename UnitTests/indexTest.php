@@ -13,9 +13,8 @@ class indexTest extends TestCase
 
 	private $session_id;
 	
-	public function __construct()
+	public function setUpBeforeClass()
 	{
-		parent::__construct();
 		//generate a password for testing
 		//not actually cryptographically secure or sufficiently random
 		$this->test_pw = substr(md5(rand()), 0, 16);
