@@ -246,14 +246,14 @@ class indexTest extends TestCase
 		$query = "select * from users;";
 		$result = $mysql_db->query($query);
 		$this->assertNoErrors();
-		$this->assertEquals($results->num_rows, 1);
+		$this->assertEquals(1, $result->num_rows);
 		$row = $result->fetch_row();
 		$this->assertNoErrors();
-		$this->assertEquals($row[4], $this->test_user);
-		$this->assertEquals($row[5], indexTest::$test_pw);
-		$this->assertNotEquals($row[6], '');
-		$this->assertEquals($row[7], 169000);
-		$this->assertEquals($row[16], $this->test_email);
+		$this->assertEquals($this->test_user, $row[4]);
+		$this->assertEquals(indexTest::$test_pw, $row[5]);
+		$this->assertNotEquals('', $row[6]);
+		$this->assertEquals(169000, $row[7]);
+		$this->assertEquals($this->test_email, $row[16]);
 	}
 }
 ?>
