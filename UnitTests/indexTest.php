@@ -250,7 +250,7 @@ class indexTest extends TestCase
 		$row = $result->fetch_row();
 		$this->assertNoErrors();
 		$this->assertEquals($this->test_user, $row[4]);
-		$this->assertEquals(indexTest::$test_pw, $row[5]);
+		$this->assertNotEquals(indexTest::$test_pw, $row[5]);
 		$this->assertNotEquals('', $row[6]);
 		$this->assertEquals(169000, $row[7]);
 		$this->assertEquals($this->test_email, $row[16]);
