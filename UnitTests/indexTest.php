@@ -255,5 +255,27 @@ class indexTest extends TestCase
 		$this->assertEquals(169000, $row[7]);
 		$this->assertEquals($this->test_email, $row[16]);
 	}
+
+	/**
+	 * @depends testPage3
+	 */
+	public function testPage4()
+	{
+		$_POST["action"] = "login";
+		$_POST["username"] = $this->test_user;
+		$_POST["password"] = indexTest::$test_pw;
+		require_once("index.php");
+		$this->assertNoErrors();
+	}
+
+	/**
+	 * @depends testPage4
+	 */
+	public function testPage5()
+	{
+		$_POST["action"] = "logout";
+		require_once("index.php");
+		$this->assertNoErrors();
+	}
 }
 ?>
