@@ -8,7 +8,7 @@ class indexTest extends TestCase
 	private $session_file = "./session_id.txt";
 	
 	private $test_user = "testuser";
-	private $test_pw = "";
+	private static $test_pw = "";
 	private $test_email = "test@testing.com";
 
 	private $session_id;
@@ -17,7 +17,7 @@ class indexTest extends TestCase
 	{
 		//generate a password for testing
 		//not actually cryptographically secure or sufficiently random
-		$this->test_pw = substr(md5(rand()), 0, 16);
+		indexTest::$test_pw = substr(md5(rand()), 0, 16);
 	}
 
 	protected function setUp()
@@ -236,8 +236,8 @@ class indexTest extends TestCase
 	{
 		$_POST["action"] = "create_user";
 		$_POST["username"] = $this->test_user;
-		$_POST["pass2"] = $this->test_pw;
-		$_POST["pass3"] = $this->test_pw;
+		$_POST["pass2"] = indexTest::$test_pw;
+		$_POST["pass3"] = indexTest::$test_pw;
 		$_POST["email"] = $this->test_email;
 		require_once("index.php");
 		$this->assertNoErrors();
@@ -250,7 +250,7 @@ class indexTest extends TestCase
 		$row = $result->fetch_row();
 		$this->assertNoErrors();
 		$this->assertEquals($row[4], $this->test_user);
-		$this->assertEquals($row[5], $this->test_pw);
+		$this->assertEquals($row[5], indexTest::$test_pw);
 		$this->assertNotEquals($row[6], '');
 		$this->assertEquals($row[7], 169000);
 		$this->assertEquals($row[16], $this->test_email);
