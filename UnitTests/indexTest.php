@@ -13,7 +13,7 @@ class indexTest extends TestCase
 
 	private $session_id;
 	
-	public function setUpBeforeClass()
+	public static function setUpBeforeClass()
 	{
 		//generate a password for testing
 		//not actually cryptographically secure or sufficiently random
