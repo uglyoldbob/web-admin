@@ -1,8 +1,7 @@
 <?php
-
+namespace webAdmin;
 class finance
 {
-
 	public static function table_of_transaction_categories()
 	{
 		global $mysql_db;
@@ -16,12 +15,15 @@ class finance
 		$query = "SELECT code, name FROM transaction_categories;";
 		$result = $mysql_db->query($query);
 		
-		while ($row = $result->fetch_array(MYSQLI_BOTH))
+		if ($result && $result->num_rows > 0)
 		{
-			echo $mysql_db->real_escape_string($row['code']);
-			echo ", " . $mysql_db->real_escape_string($row['name']) . "<br>\n";
+			while ($row = $result->fetch_array(MYSQLI_BOTH))
+			{
+				echo $mysql_db->real_escape_string($row['code']);
+				echo ", " . $mysql_db->real_escape_string($row['name']) . "<br>\n";
+			}
 		}
-		
+
 		echo "   <form method=\"POST\">\n";
 		echo "	<input type=\"hidden\" name=\"action\" value=\"create_transaction_category\">\n";
 		echo "	<input type=\"checkbox\" name=\"create_transaction_category\" ";

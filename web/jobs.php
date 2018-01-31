@@ -9,6 +9,7 @@ class Autoloader
         spl_autoload_register(function ($class) 
 		{
             $file = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
+			$file = str_replace('_', DIRECTORY_SEPARATOR, $file);
             if (file_exists($file)) 
 			{
                 require $file;
@@ -20,9 +21,9 @@ class Autoloader
 }
 Autoloader::register();
 
+require_once("webAdmin/exceptions.php");
 require_once("global.php");
 
-start_my_session();	//start php session
 if (!headers_sent())
 {
 	header('Content-type: text/html; charset=utf-8');
@@ -34,18 +35,18 @@ if (!headers_sent())
 <head>
 <?php
 
-require_once("include/forms.php");
-
 try
 {
 	$config = parse_ini_file("config.ini");
 	test_config($config);
 
-	$jobs = new jobs();
-
-	openDatabase($config);
-
-	?>
+	global $mysql_db;
+	$mysql_db = openDatabase($config);
+	
+	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
+	start_my_session();	//start php session
+	
+?>
 	<title>Jobs List: <?php sitename($config)?></title>
 	<?php do_css($config) ?>
 	</head>
@@ -56,92 +57,74 @@ try
 	<script type="text/javascript" src="jscript.js"></script>
 
 	<?php
+	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca");
 
+	$currentUser->require_login(0);
+	
 	#TODO : create a job_status_codes table
 	#TODO : use the job_status_codes table for statuses of jobs
 
 
-	//make sure the user is logged in properly
-	$stop = 0;
-	if (login_code(0, $config) == 1)
-	{
-		$stop = 1;
-	}
-	if ($stop == 0)
-	{
-		do_top_menu(3);
 	
-		if ($_POST["action"] == "apply")
-		{	//apply job data
-			$jobs->create_job($_POST);
-			$_POST["action"] = "";	//transition to listing the newly created job
-		}
-		else if ($_POST["action"] == "modjob")
+	
+	$jobs = new \webAdmin\jobs($config);
+
+	do_top_menu(3, $config);
+
+	if ($_POST["action"] == "apply")
+	{	//apply job data
+		$jobs->create_job($_POST);
+		$_POST["action"] = "";	//transition to listing the newly created job
+	}
+	else if ($_POST["action"] == "modjob")
+	{
+		$jobs->modify_job($_POST);
+		$_POST["action"] = "";	//transition to listing the newly created job
+	}
+	else if ($_POST["action"] == "add_payment")
+	{
+		if (isset($_SESSION['payment_reference']))
 		{
-			$jobs->modify_job($_POST);
-			$_POST["action"] = "";	//transition to listing the newly created job
-		}
-		else if ($_POST["action"] == "add_payment")
-		{
-			if (isset($_SESSION['payment_reference']))
-			{
-				$expense_query = "INSERT INTO job_expenses (job_id, payment_id) VALUES (" .
-					$mysql_db->real_escape_string($_GET['job']) . ", " . $mysql_db->real_escape_string($_SESSION['payment_reference']) . ");";
-				$mysql_db->query($expense_query);
-			}
-			$_POST["action"] = "";	//transition to listing the newly modified job
-		}
-		else if ($_POST["action"] == "remove_expense")
-		{
-			$expense_query = "DELETE from job_expenses WHERE job_id=" .
-				$mysql_db->real_escape_string($_GET['job']) . " AND payment_id=" . $mysql_db->real_escape_string($_POST['id']) . " LIMIT 1;";
+			$expense_query = "INSERT INTO job_expenses (job_id, payment_id) VALUES (" .
+				$mysql_db->real_escape_string($_GET['job']) . ", " . $mysql_db->real_escape_string($_SESSION['payment_reference']) . ");";
 			$mysql_db->query($expense_query);
-			$_POST["action"] = "";	//transition to listing the newly modified job
 		}
-	
-		if ($_POST["action"] != "edit")
-		{	//don't create the new job button if the create job form is going to be displayed
-			//don't create the new job button if a specific job is going to be displayed
-			echo "<form action=\"" . rootPageURL($config) . "/jobs.php\" method=\"post\">\n" .
-				 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
-				 "	<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
-				 "	<input class=\"buttons\" type=\"submit\" value=\"Create new job\"/>\n" .
-				 "</form>";
-		}
-		if (($_POST["action"] == "edit") || ($jobs->job != 0))
-		{
-			if ($jobs->job != 0)
-			{	//do this when listing information for a specific job
-				$jobs->list_job();			
-			}
-			else
-			{	//do this when creating a new job
-				echo "<h3>Creating new job:</h3>\n";
-				$jobs->new_job_form();
-			}
-		}
-		else	//if (($_POST["action"] == "")
-		{	//do this when listing all jobs
-			$jobs->table();
-		}
-	
-		//bcmul, bcadd,
-		//
+		$_POST["action"] = "";	//transition to listing the newly modified job
+	}
+	else if ($_POST["action"] == "remove_expense")
+	{
+		$expense_query = "DELETE from job_expenses WHERE job_id=" .
+			$mysql_db->real_escape_string($_GET['job']) . " AND payment_id=" . $mysql_db->real_escape_string($_POST['id']) . " LIMIT 1;";
+		$mysql_db->query($expense_query);
+		$_POST["action"] = "";	//transition to listing the newly modified job
 	}
 
-	/*
-	$query = "SHOW SESSION STATUS";
-	$result = $mysql_db->query($query);
-	while ($row = $result->fetch_array(MYSQLI_BOTH))
+	if ($_POST["action"] != "edit")
+	{	//don't create the new job button if the create job form is going to be displayed
+		//don't create the new job button if a specific job is going to be displayed
+		echo "<form action=\"" . rootPageURL($config) . "/jobs.php\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
+			 "	<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Create new job\"/>\n" .
+			 "</form>";
+	}
+	if (($_POST["action"] == "edit") || ($jobs->job != 0))
 	{
-		echo $row[0] . " " . $row[1];
-		echo "<br >\n";
-	}*/
-
-	//this function is undefined
-	//print_r(mysqli_get_client_stats());
-
-	closeDatabase();
+		if ($jobs->job != 0)
+		{	//do this when listing information for a specific job
+			$jobs->list_job();			
+		}
+		else
+		{	//do this when creating a new job
+			echo "<h3>Creating new job:</h3>\n";
+			$jobs->new_job_form();
+		}
+	}
+	else	//if (($_POST["action"] == "")
+	{	//do this when listing all jobs
+		$jobs->table();
+	}
 }
 catch (\webAdmin\ConfigurationMissingException $e)
 {
@@ -152,6 +135,10 @@ catch (\webAdmin\ConfigurationMissingException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
@@ -162,6 +149,10 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\PermissionDeniedException $e)
 {
@@ -172,6 +163,53 @@ catch (\webAdmin\PermissionDeniedException $e)
 	<body>
 	<h1>Permission Denied</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
+}
+catch (\webAdmin\InvalidUsernameOrPasswordException $e)
+{
+	echo "<h3>Invalid username or password</h3>\n";
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create'] == 1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\NotLoggedInException $e)
+{
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create'] == 1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\CertificateException $e)
+{
+	echo "<b>A certificate is required to access this page</b><br />\n";
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (Exception $e)
 {
@@ -182,6 +220,10 @@ catch (Exception $e)
 	<body>
 	<h1>Error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 
 

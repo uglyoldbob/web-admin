@@ -100,6 +100,11 @@ CREATE TABLE `inspections` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `intermediate_ca` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cert` text not null,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 CREATE TABLE `jobs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cust_billing` int(11) NOT NULL,
@@ -176,6 +181,11 @@ CREATE TABLE `properties` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `root_ca` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `cert` text not null,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
 CREATE TABLE `sessions` (
   `id` varchar(32) NOT NULL,
   `access` int(10) UNSIGNED DEFAULT NULL,

@@ -1,7 +1,6 @@
 <?php
 
 include_once("passwords.php");
-include_once("include/contacts.php");
 
 function test_config($config)
 {
@@ -378,15 +377,18 @@ function selectTimePeriod()
 	{
     		echo "selected ";
 	}
-	echo	"value=\"all\">Everything</option>\n";    
-	while($row = $result->fetch_array(MYSQLI_BOTH))
+	echo	"value=\"all\">Everything</option>\n";
+	if ($result && $result->num_rows > 0)
 	{
-        echo "    	<option ";
-        if ($_SESSION['period'] == $row["year(date_paid)"])
+		while($row = $result->fetch_array(MYSQLI_BOTH))
 		{
-    	    echo "selected ";
+			echo "    	<option ";
+			if ($_SESSION['period'] == $row["year(date_paid)"])
+			{
+				echo "selected ";
+			}
+			echo "value=\"" . $row["year(date_paid)"] . "\">" . $row["year(date_paid)"] . " Tax Year</options>\n";
 		}
-        echo "value=\"" . $row["year(date_paid)"] . "\">" . $row["year(date_paid)"] . " Tax Year</options>\n";
 	}
 	echo	"	</select>\n";
 	echo "	<input class=\"buttons\" type=\"submit\" value=\"Go\">\n" .

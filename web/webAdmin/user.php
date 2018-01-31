@@ -6,6 +6,9 @@ class user
 	private $mysql_db;
 	private $table_name;
 	
+	private $root_ca_table;
+	private $intermediate_ca_table;
+	
 	public function __construct($config, $mysql_db, $table_name)
 	{
 		$this->config = $config;
@@ -13,7 +16,80 @@ class user
 		$this->table_name = $table_name;
 	}
 	
-	public function login($quiet)
+	public function certificate_tables($rootca, $intca)
+	{
+		$this->root_ca_table = $rootca;
+		$this->intermediate_ca_table = $intca;
+		$this->verify_certificates();
+	}
+	
+	private function verify_root_certificates()
+	{
+		$query = 'select cert from ' . $this->root_ca_table;
+		$result = $this->mysql_db->query($query);
+		$intermediate_check = new \File_X509();
+		if ($result && ($result->num_rows > 0))
+		{
+			while ($row = $result->fetch_assoc())
+			{
+				$cert = $row['cert'];
+				$x509 = new \File_X509();
+				$x509->loadX509($cert);
+				if (!($x509->validateSignature(false)))
+					throw new SiteConfigurationException("Invalid ROOT CA certificate found");
+				$intermediate_check->loadCA($cert);
+			}
+		}
+		return $intermediate_check;
+	}
+	
+	private function verify_certificates()
+	{
+		$intermediate_check = $this->verify_root_certificates();
+
+		$query = 'select cert from ' . $this->intermediate_ca_table;
+		$result = $this->mysql_db->query($query);
+		if ($result && ($result->num_rows > 0))
+		{
+			while ($row = $result->fetch_assoc())
+			{
+				$cert = $row['cert'];
+				$intermediate_check->loadX509($cert);
+				if (!($intermediate_check->validateSignature()))
+					throw new SiteConfigurationException("Invalid INTERMEDIATE CA certificate found");
+				$intermediate_check->loadCA($cert);
+			}
+		}
+		return $intermediate_check;
+	}
+	
+	public function require_certificate()
+	{
+		if (!(array_key_exists("SSL_CLIENT_CERT", $_SERVER)))
+		{
+			throw new CertificateException("No certificate");
+		}
+		if (!isset($_SERVER['SSL_CLIENT_M_SERIAL'])
+            || !isset($_SERVER['SSL_CLIENT_V_END'])
+			|| !isset($_SERVER['SSL_CLIENT_V_START'])
+            || !isset($_SERVER['SSL_CLIENT_I_DN']) 
+			|| !isset($_SERVER['SSL_CLIENT_V_REMAIN']) )
+		{
+			throw new CertificateException("Invalid signature on certificate found");
+        }
+		
+		if ($_SERVER['SSL_CLIENT_V_REMAIN'] <= 0)
+		{
+			throw new CertificateException("Certificate is expired");
+		}
+		
+		$check = $this->verify_certificates();
+		$check->loadX509($_SERVER['SSL_CLIENT_CERT']);
+		if (!($check->validateSignature()))
+			throw new CertificateException("Invalid signature on certificate found");
+	}
+	
+	public function require_login($quiet)
 	{	//prints and executes code for the login script
 		//returns exceptions
 		#TODO : produce the div tags when quiet=1 and output is actually produced

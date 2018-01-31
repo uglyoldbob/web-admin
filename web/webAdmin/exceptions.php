@@ -47,4 +47,5 @@ class PermissionDeniedException extends CustomException {}
 class DatabaseConnectionFailedException extends CustomException {}
 class NotLoggedInException extends CustomException {}
 class InvalidUsernameOrPasswordException extends CustomException {}
+class CertificateException extends CustomException {}
 ?>

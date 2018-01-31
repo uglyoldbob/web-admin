@@ -9,6 +9,7 @@ class Autoloader
         spl_autoload_register(function ($class) 
 		{
             $file = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
+			$file = str_replace('_', DIRECTORY_SEPARATOR, $file);
             if (file_exists($file)) 
 			{
                 require $file;
@@ -54,7 +55,20 @@ try
 	<?php
 
 	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->login(0);
+	$currentUser->certificate_tables("root_ca", "intermediate_ca");
+
+	$currentUser->require_login(0);
+	try
+	{
+		$currentUser->require_certificate();
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
+			 "</form>\n";
+	}
+	catch (\webAdmin\CertificateException $e)
+	{
+	}
 	
 	do_top_menu(0, $config);
 	echo "Something goes here?<br>\n";
@@ -148,6 +162,10 @@ catch (\webAdmin\NotLoggedInException $e)
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
 	}
+}
+catch (\webAdmin\CertificateException $e)
+{
+	echo "<b>A certificate is required to access this page</b><br />\n";
 }
 catch (Exception $e)
 {

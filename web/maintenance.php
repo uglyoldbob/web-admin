@@ -9,6 +9,7 @@ class Autoloader
         spl_autoload_register(function ($class) 
 		{
             $file = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
+			$file = str_replace('_', DIRECTORY_SEPARATOR, $file);
             if (file_exists($file)) 
 			{
                 require $file;
@@ -20,9 +21,9 @@ class Autoloader
 }
 Autoloader::register();
 
+require_once("webAdmin/exceptions.php");
 require_once("global.php");
 
-start_my_session();	//start php session
 if (!headers_sent())
 {
 	header('Content-type: text/html; charset=utf-8');
@@ -40,7 +41,10 @@ try
 	test_config($config);
 
 	global $mysql_db;
-	openDatabase($config);
+	$mysql_db = openDatabase($config);
+	
+	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
+	start_my_session();	//start php session
 
 	?>
 	<title>Maintenance: <?php sitename($config)?></title>
@@ -52,6 +56,10 @@ try
 	<script type="text/javascript" src="jscript.js"></script>
 
 	<?php
+	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca");
+
+	$currentUser->require_login(0);
 
 	if (isset($_GET["id"]))
 	{
@@ -72,234 +80,226 @@ try
 		$id_valid = 0;
 	}
 
-	$stop = 0;
-	if (login_code(0, $config) == 1)
+	do_top_menu(5, $config);
+
+	if (isset($_POST["action"]))
 	{
-		$stop = 1;
+		if (($_POST["action"]=="add_maintenance") && ($id_valid==1))
+		{
+			$mod_query = "INSERT INTO maintenance (equipment_id, notes_done) VALUES (" .
+				"'" . $id . "','" . $mysql_db->real_escape_string($_POST["notes"]) . "');";
+			
+			if ($mysql_db->query($mod_query) == TRUE)
+			{
+				echo "Successfully inserted new maintenance item<br >\n";
+			}
+			else
+			{
+				echo $mysql_db->error . "<br>\n";
+				echo $mod_query . "<br>\n";
+			}
+		}
+		if (($_POST["action"]=="add_expense") && ($id_valid==1))
+		{
+			$expense_query = "INSERT INTO maintenance_expenses (equipment_id, payment_id) VALUES (" .
+				$id . ", " . $mysql_db->real_escape_string($_SESSION['payment_reference']) . ");";
+			$mysql_db->query($expense_query);
+		}
+		else if ($_POST["action"] == "remove_expense")
+		{
+			$expense_query = "DELETE from maintenance_expenses WHERE equipment_id=" .
+				$id . " AND payment_id=" . $mysql_db->real_escape_string($_POST['id']) . " LIMIT 1;";
+			$mysql_db->query($expense_query);
+			$_POST["action"] = "";	//transition to listing the newly modified job
+		}
 	}
 
-	if ($stop == 0)
+	if ($id_valid == 1)
 	{
-		do_top_menu(5);
-
-		if (isset($_POST["action"]))
+		$equip_query = "SELECT * FROM equipment WHERE id=" . $id;
+		$equip_results = $mysql_db->query($equip_query);
+		if($equip_row = $equip_results->fetch_array(MYSQLI_BOTH))
 		{
-		    if (($_POST["action"]=="add_maintenance") && ($id_valid==1))
-		    {
-		        $mod_query = "INSERT INTO maintenance (equipment_id, notes_done) VALUES (" .
-		            "'" . $id . "','" . $mysql_db->real_escape_string($_POST["notes"]) . "');";
-		        
-		        if ($mysql_db->query($mod_query) == TRUE)
-			    {
-					echo "Successfully inserted new maintenance item<br >\n";
-				}
-				else
-				{
-		            echo $mysql_db->error . "<br>\n";
-					echo $mod_query . "<br>\n";
-				}
-		    }
-		    if (($_POST["action"]=="add_expense") && ($id_valid==1))
-		    {
-				$expense_query = "INSERT INTO maintenance_expenses (equipment_id, payment_id) VALUES (" .
-					$id . ", " . $mysql_db->real_escape_string($_SESSION['payment_reference']) . ");";
-				$mysql_db->query($expense_query);
-		    }
-			else if ($_POST["action"] == "remove_expense")
-			{
-				$expense_query = "DELETE from maintenance_expenses WHERE equipment_id=" .
-					$id . " AND payment_id=" . $mysql_db->real_escape_string($_POST['id']) . " LIMIT 1;";
-				$mysql_db->query($expense_query);
-				$_POST["action"] = "";	//transition to listing the newly modified job
-			}
+			echo "<h1>" . $equip_row["name"] . "<br>" . $equip_row['description'] . "<br></h1>\n";
 		}
 
-		if ($id_valid == 1)
-		{
-		    $equip_query = "SELECT * FROM equipment WHERE id=" . $id;
-		    $equip_results = $mysql_db->query($equip_query);
-		    if($equip_row = $equip_results->fetch_array(MYSQLI_BOTH))
-			{
-		        echo "<h1>" . $equip_row["name"] . "<br>" . $equip_row['description'] . "<br></h1>\n";
-			}
+		echo "<a href=locations.php?id=" . $equip_row['location'] . ">Locate this equipment</a><br>\n";
 
-		    echo "<a href=locations.php?id=" . $equip_row['location'] . ">Locate this equipment</a><br>\n";
-
-			$query = "SELECT * FROM maintenance WHERE equipment_id=" . $id;
-		}
-		else
-		{
-			echo "Listing RECENT maintenance for all equipment.<br>\n";
-			$query = "SELECT maintenance.*, equipment.* FROM maintenance INNER JOIN equipment ON equipment.id = maintenance.equipment_id";
-		}
-		$results = $mysql_db->query($query);
+		$query = "SELECT * FROM maintenance WHERE equipment_id=" . $id;
+	}
+	else
+	{
+		echo "Listing RECENT maintenance for all equipment.<br>\n";
+		$query = "SELECT maintenance.*, equipment.* FROM maintenance INNER JOIN equipment ON equipment.id = maintenance.equipment_id";
+	}
+	$results = $mysql_db->query($query);
+	if ($results && $results->num_rows > 0)
+	{
 		while($row = $results->fetch_array(MYSQLI_BOTH))
 		{
-		    if ($id_valid == 1)
-		    {
-		        echo "<b>" . $row["when_done"] . "</b> :" . $row['notes_done'] . "<br>\n";
-		    }
-		    else
-		    {
-		        echo "<a href=maintenance.php?id=" . $row['id'] . ">\n";
-		        echo "<b>" . $row["name"] . ", " . $row['description'] . "</b></a>\n";
-		        echo " <i>" . $row["when_done"] . "</i> :" . $row['notes_done'] . "<br>\n";
-		    }
-		}
-
-		if ($id_valid == 1)
-		{
-		    $query = "SELECT payments.* FROM payments INNER JOIN maintenance_expenses ON payments.payment_id=maintenance_expenses.payment_id WHERE maintenance_expenses.equipment_id=" . $id;
-			$expense_found = 0;
-			$expense_result = $mysql_db->query($query);
-			echo "	<b>Maintenance expense history</b>:<br >\n";
-			echo "<table style=\"width: 100%\" border=\"1\" >\n";
-			echo "	<tr>\n";
-			echo "		<th>ID#</th>\n";
-			echo "		<th>Payment to</th>\n";
-			echo "		<th>Paid by</th>\n";
-			echo "		<th>Amount paid</th>\n";
-			echo "		<th>Date earned</th>\n";
-			echo "		<th>Date paid</th>\n";
-			echo "		<th>Comments</th>\n";
-			echo "		<th>Category</th>\n";
-			echo "		<th>Invoice</th>\n";
-			echo "	</tr>\n";
-			$assets = 0;
-			$liable = 0;
-			$o_assets = 0;
-			$o_liable = 0;
-			while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
+			if ($id_valid == 1)
 			{
-		        $expenserow['expense'] = 1;
-				$expense_found = 1;
-				echo "	<tr>\n";				
-				echo "		<td>" . $expenserow['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL($config) . 
-					"/payments.php\" method=\"post\">\n" .
+				echo "<b>" . $row["when_done"] . "</b> :" . $row['notes_done'] . "<br>\n";
+			}
+			else
+			{
+				echo "<a href=maintenance.php?id=" . $row['id'] . ">\n";
+				echo "<b>" . $row["name"] . ", " . $row['description'] . "</b></a>\n";
+				echo " <i>" . $row["when_done"] . "</i> :" . $row['notes_done'] . "<br>\n";
+			}
+		}
+	}
+
+	if ($id_valid == 1)
+	{
+		$query = "SELECT payments.* FROM payments INNER JOIN maintenance_expenses ON payments.payment_id=maintenance_expenses.payment_id WHERE maintenance_expenses.equipment_id=" . $id;
+		$expense_found = 0;
+		$expense_result = $mysql_db->query($query);
+		echo "	<b>Maintenance expense history</b>:<br >\n";
+		echo "<table style=\"width: 100%\" border=\"1\" >\n";
+		echo "	<tr>\n";
+		echo "		<th>ID#</th>\n";
+		echo "		<th>Payment to</th>\n";
+		echo "		<th>Paid by</th>\n";
+		echo "		<th>Amount paid</th>\n";
+		echo "		<th>Date earned</th>\n";
+		echo "		<th>Date paid</th>\n";
+		echo "		<th>Comments</th>\n";
+		echo "		<th>Category</th>\n";
+		echo "		<th>Invoice</th>\n";
+		echo "	</tr>\n";
+		$assets = 0;
+		$liable = 0;
+		$o_assets = 0;
+		$o_liable = 0;
+		while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
+		{
+			$expenserow['expense'] = 1;
+			$expense_found = 1;
+			echo "	<tr>\n";				
+			echo "		<td>" . $expenserow['payment_id'] . " ";
+			echo "	<form action=\"" . rootPageURL($config) . 
+				"/payments.php\" method=\"post\">\n" .
+				"		<input type=\"hidden\" name=" . 
+				"\"action\" value=\"edit\">\n" .
+				"		<input type=\"hidden\" name=" . 
+				"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
+				"		<input class=\"buttons\" type=\"submit\" value=" . 
+				"\"Edit\"/>\n" .
+				"	</form>\n";
+			echo "	<form action=\"" . rootPageURL($config) . 
+					"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
-					"\"action\" value=\"edit\">\n" .
+					"\"action\" value=\"remove_expense\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
-					"\"Edit\"/>\n" .
+					"\"Remove\"/>\n" .
 					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL($config) . 
-						"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
-						"		<input type=\"hidden\" name=" . 
-						"\"action\" value=\"remove_expense\">\n" .
-						"		<input type=\"hidden\" name=" . 
-						"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
-						"		<input class=\"buttons\" type=\"submit\" value=" . 
-						"\"Remove\"/>\n" .
-						"	</form>\n";
-				echo "</td>\n";
-			
-				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($config) . 
-					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
-				echo print_contact($expenserow['pay_to']);
-				echo "</a>";
-				echo "</td>\n";
-			
-				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($config) . 
-					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
-				echo print_contact($expenserow['paid_by']);
-				echo "</a>";
-				echo "</td>\n";
-			
-				echo "		<td>";
-				if (isset($contact))
-				{
-					if ($contact != 0)
-					{
-						if ($expenserow['expense'] == 0)
-						{
-							echo "+";
-						}
-						else
-						{
-							echo "-";
-						}
-					}
-				}
-				echo "$" . $expenserow['amount_earned'] . "</td>\n";
-				//blank_check function on next 4 lines
-				echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
-				echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
-				echo "		<td>" . ($expenserow['comments']) . "</td>\n";
-				echo "		<td>" . ($expenserow['category']) . "</td>\n";
-			
-				if ($expenserow['date_paid'] != "0000-00-00")
+			echo "</td>\n";
+		
+			echo "		<td>";
+			echo "<a href=\"" . rootPageURL($config) . 
+				"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
+			echo print_contact($expenserow['pay_to']);
+			echo "</a>";
+			echo "</td>\n";
+		
+			echo "		<td>";
+			echo "<a href=\"" . rootPageURL($config) . 
+				"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
+			echo print_contact($expenserow['paid_by']);
+			echo "</a>";
+			echo "</td>\n";
+		
+			echo "		<td>";
+			if (isset($contact))
+			{
+				if ($contact != 0)
 				{
 					if ($expenserow['expense'] == 0)
 					{
-						$assets += $expenserow['amount_earned'];
+						echo "+";
 					}
 					else
 					{
-						$liable += $expenserow['amount_earned'];
+						echo "-";
 					}
+				}
+			}
+			echo "$" . $expenserow['amount_earned'] . "</td>\n";
+			//blank_check function on next 4 lines
+			echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
+			echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
+			echo "		<td>" . ($expenserow['comments']) . "</td>\n";
+			echo "		<td>" . ($expenserow['category']) . "</td>\n";
+		
+			if ($expenserow['date_paid'] != "0000-00-00")
+			{
+				if ($expenserow['expense'] == 0)
+				{
+					$assets += $expenserow['amount_earned'];
 				}
 				else
 				{
-					if ($expenserow['expense'] == 0)
-					{
-						$o_assets += $expenserow['amount_earned'];
-					}
-					else
-					{
-						$o_liable += $expenserow['amount_earned'];
-					}
+					$liable += $expenserow['amount_earned'];
 				}
-	
-				if ($expenserow['invoice'] == "")
+			}
+			else
+			{
+				if ($expenserow['expense'] == 0)
 				{
-					echo "		<td>Not available</td>\n";
+					$o_assets += $expenserow['amount_earned'];
 				}
 				else
 				{
-					echo "		<td>" . '<a href="' . rootPageURL($config) .
-						'/' . $expenserow['invoice'] . 
-						'" target="_blank">Download</a></td>' . "\n";
+					$o_liable += $expenserow['amount_earned'];
 				}
-				echo "	</tr>\n";
+			}
 
-			}
-			if ($expense_found == 0)
+			if ($expenserow['invoice'] == "")
 			{
-				echo "	<tr><td>No expenses found</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n";
+				echo "		<td>Not available</td>\n";
 			}
-			echo "</table><br>\n";
-			echo "Outstanding expenses: " . $o_liable . "<br>\n";
-			echo "Outstanding income: " . $o_assets . "<br>\n";
-			echo "Expenses: " . $liable . "<br>\n";
-		    
-			echo "   <form method=\"POST\">\n";
-			echo "	<input type=\"hidden\" name=\"action\" value=\"add_maintenance\">\n";
-			echo "	<input class=\"buttons\" type=\"checkbox\" name=\"add_maintenance\" ";
-			echo "onclick=\"cb_hide_show(this, $('#add_maintenance'));\" />Add a maintenance item<br >\n";
-			echo "	<div id=\"add_maintenance\" style=\"display: none;\">\n";
-			echo '	<textarea name="notes" id="notes" rows=4 cols=75 ></textarea><br >' . "\n";
-			echo "	<input class=\"buttons\" type=\"submit\" value=\"Create\">";
-			echo "	</div>\n";
-			echo "   </form>\n";
-		    
-		    if (isset($_SESSION['payment_reference']))
+			else
 			{
-				echo "    <form action=\"" . rootPageURL($config) . 
-					"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
-					"		<input type=\"hidden\" name=" . 
-					"\"action\" value=\"add_expense\">\n" .
-					"		<input class=\"buttons\" type=\"submit\" value=" . 
-					"\"Add selected payment\"/>\n" .
-					"	</form>\n";
+				echo "		<td>" . '<a href="' . rootPageURL($config) .
+					'/' . $expenserow['invoice'] . 
+					'" target="_blank">Download</a></td>' . "\n";
 			}
+			echo "	</tr>\n";
+
+		}
+		if ($expense_found == 0)
+		{
+			echo "	<tr><td>No expenses found</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>\n";
+		}
+		echo "</table><br>\n";
+		echo "Outstanding expenses: " . $o_liable . "<br>\n";
+		echo "Outstanding income: " . $o_assets . "<br>\n";
+		echo "Expenses: " . $liable . "<br>\n";
+		
+		echo "   <form method=\"POST\">\n";
+		echo "	<input type=\"hidden\" name=\"action\" value=\"add_maintenance\">\n";
+		echo "	<input class=\"buttons\" type=\"checkbox\" name=\"add_maintenance\" ";
+		echo "onclick=\"cb_hide_show(this, $('#add_maintenance'));\" />Add a maintenance item<br >\n";
+		echo "	<div id=\"add_maintenance\" style=\"display: none;\">\n";
+		echo '	<textarea name="notes" id="notes" rows=4 cols=75 ></textarea><br >' . "\n";
+		echo "	<input class=\"buttons\" type=\"submit\" value=\"Create\">";
+		echo "	</div>\n";
+		echo "   </form>\n";
+		
+		if (isset($_SESSION['payment_reference']))
+		{
+			echo "    <form action=\"" . rootPageURL($config) . 
+				"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
+				"		<input type=\"hidden\" name=" . 
+				"\"action\" value=\"add_expense\">\n" .
+				"		<input class=\"buttons\" type=\"submit\" value=" . 
+				"\"Add selected payment\"/>\n" .
+				"	</form>\n";
 		}
 	}
-
-	closeDatabase();
 }
 catch (\webAdmin\ConfigurationMissingException $e)
 {
@@ -310,6 +310,10 @@ catch (\webAdmin\ConfigurationMissingException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
@@ -320,6 +324,10 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 	<body>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\PermissionDeniedException $e)
 {
@@ -330,6 +338,53 @@ catch (\webAdmin\PermissionDeniedException $e)
 	<body>
 	<h1>Permission Denied</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
+}
+catch (\webAdmin\InvalidUsernameOrPasswordException $e)
+{
+	echo "<h3>Invalid username or password</h3>\n";
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create'] == 1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\NotLoggedInException $e)
+{
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create'] == 1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\CertificateException $e)
+{
+	echo "<b>A certificate is required to access this page</b><br />\n";
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (Exception $e)
 {
@@ -340,6 +395,10 @@ catch (Exception $e)
 	<body>
 	<h1>Error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 
 

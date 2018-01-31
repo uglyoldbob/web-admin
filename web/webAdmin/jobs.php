@@ -1,13 +1,16 @@
 <?php
-
+namespace webAdmin;
 class jobs
 {
 	public $job;
 	protected $contact;
 	protected $start_page;
 	
-	function __construct()
+	private $config;
+	
+	function __construct($config)
 	{
+		$this->config = $config;
 		if (!(array_key_exists("job", $_GET)))
 		{
 			$this->job = 0;
@@ -54,11 +57,13 @@ class jobs
 		}
 		$query = "SELECT code, Description FROM status_codes;";
 		$result = $mysql_db->query($query);
-		
-		while ($row = $result->fetch_array(MYSQLI_BOTH))
+		if ($result && $result->num_rows > 0)
 		{
-			echo $mysql_db->real_escape_string($row['code']);
-			echo ", " . $mysql_db->real_escape_string($row['Description']) . "<br>\n";
+			while ($row = $result->fetch_array(MYSQLI_BOTH))
+			{
+				echo $mysql_db->real_escape_string($row['code']);
+				echo ", " . $mysql_db->real_escape_string($row['Description']) . "<br>\n";
+			}
 		}
 		
 		echo "   <form method=\"POST\">\n";
@@ -232,7 +237,7 @@ class jobs
 		}
 	}
 	
-	public function table($config)
+	public function table()
 	{
 		global $mysql_db;
 		if ($this->contact != 0)
@@ -248,7 +253,7 @@ class jobs
 		}
 		$contact_results = $mysql_db->query($query);
 		
-		if ($contact_results->num_rows > 30)
+		if ($contact_results && ($contact_results->num_rows > 30))
 		{
 			$next_page = 1;
 		}
@@ -266,51 +271,55 @@ class jobs
 		echo "		<th>Comments</th>\n";
 		echo "	</tr>\n";
 	
-		while($row = $contact_results->fetch_array(MYSQLI_BOTH))
+		if ($contact_results && ($contact_results->num_rows > 0))
 		{
-			echo "	<tr>\n";
-	
-			echo "		<td>\n";
-						
-			echo "			<a href=\"". rootPageURL($config) . "/jobs.php?job=" . $row['id'] . "\">View</a>\n";
-			echo "		</td>\n";
-			
-			echo "		<td>";
-			echo $mysql_db->real_escape_string($row['job_name']);
-			echo "</td>\n";
-	
-			echo "		<td>";
-			echo print_contact($mysql_db->real_escape_string($row['cust_billing']));
-			echo "</td>\n";
-			echo "		<td>";
-			echo print_contact($mysql_db->real_escape_string($row['cust_shipping']));
-			echo "</td>\n";
-			echo "		<td>" . $mysql_db->real_escape_string($row['comments']) . "</td>\n";
-	
-			echo "	</tr>\n";
+			while($row = $contact_results->fetch_array(MYSQLI_BOTH))
+			{
+				echo "	<tr>\n";
+		
+				echo "		<td>\n";
+							
+				echo "			<a href=\"". rootPageURL($this->config) . "/jobs.php?job=" . $row['id'] . "\">View</a>\n";
+				echo "		</td>\n";
+				
+				echo "		<td>";
+				echo $mysql_db->real_escape_string($row['job_name']);
+				echo "</td>\n";
+		
+				echo "		<td>";
+				echo print_contact($mysql_db->real_escape_string($row['cust_billing']));
+				echo "</td>\n";
+				echo "		<td>";
+				echo print_contact($mysql_db->real_escape_string($row['cust_shipping']));
+				echo "</td>\n";
+				echo "		<td>" . $mysql_db->real_escape_string($row['comments']) . "</td>\n";
+		
+				echo "	</tr>\n";
+			}
 		}
 	
 		echo "</table><br>\n";
 	
 		if ($this->start_page > 0)
 		{
-			echo '<a href="' . rootPageURL($config) . '/jobs.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
+			echo '<a href="' . rootPageURL($this->config) . '/jobs.php?page=' . ($this->start_page-1) . '">Previous page</a>  ';
 		}
 		if ($next_page == 1)
 		{
-			echo '<a href="' . rootPageURL($config) . '/jobs.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
+			echo '<a href="' . rootPageURL($this->config) . '/jobs.php?page=' . ($this->start_page+1) . '">Next page</a>' . "<br >\n";
 		}
-		$contact_results->close();
+		if ($contact_results)
+			$contact_results->close();
 	}
 	
-	public function list_job($config)
+	public function list_job()
 	{
 		global $mysql_db;
 		$query = "SELECT * FROM jobs WHERE id = " . $this->job . " LIMIT 1;";
 		$result = $mysql_db->query($query);
 		if($row = $result->fetch_array(MYSQLI_BOTH))
 		{
-			echo "<form action=\"" . rootPageURL($config) . "/jobs.php\" method=\"post\">\n" .
+			echo "<form action=\"" . rootPageURL($this->config) . "/jobs.php\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"modjob\">\n" .
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $this->job . "\">\n";
 			
@@ -417,7 +426,7 @@ class jobs
 				$expense_found = 1;
 				echo "	<tr>\n";				
 				echo "		<td>" . $expenserow['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL($config) . 
+				echo "	<form action=\"" . rootPageURL($this->config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"edit\">\n" .
@@ -426,7 +435,7 @@ class jobs
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
 					"\"Edit\"/>\n" .
 					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL($config) . 
+				echo "	<form action=\"" . rootPageURL($this->config) . 
 					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"remove_expense\">\n" .
@@ -438,14 +447,14 @@ class jobs
 				echo "</td>\n";
 				
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($config) . 
+				echo "<a href=\"" . rootPageURL($this->config) . 
 					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
 				echo print_contact($expenserow['pay_to']);
 				echo "</a>";
 				echo "</td>\n";
 				
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($config) . 
+				echo "<a href=\"" . rootPageURL($this->config) . 
 					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
 				echo print_contact($expenserow['paid_by']);
 				echo "</a>";
@@ -501,7 +510,7 @@ class jobs
 				}
 				else
 				{
-					echo "		<td>" . '<a href="' . rootPageURL($config) .
+					echo "		<td>" . '<a href="' . rootPageURL($this->config) .
 						'/' . $expenserow['invoice'] . 
 						'" target="_blank">Download</a></td>' . "\n";
 				}
@@ -520,7 +529,7 @@ class jobs
 			
 			if (isset($_SESSION['payment_reference']))
 			{
-				echo "    <form action=\"" . rootPageURL($config) . 
+				echo "    <form action=\"" . rootPageURL($this->config) . 
 					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"add_payment\">\n" .
