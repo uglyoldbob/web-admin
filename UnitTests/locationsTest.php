@@ -4,8 +4,8 @@ use PHPUnit\Framework\TestCase;
 
 require 'UnitTests/ModifiedTestCase.php';
 
-class paymentsTest extends ModifiedTestCase
-{
+class locationsTest extends ModifiedTestCase
+{	
 	private $test_user = "testuser";
 	private static $test_pw = "";
 	private $test_email = "test@testing.com";
@@ -14,12 +14,12 @@ class paymentsTest extends ModifiedTestCase
 	{
 		//generate a password for testing
 		//not actually cryptographically secure or sufficiently random
-		paymentsTest::$test_pw = substr(md5(rand()), 0, 16);
+		locationsTest::$test_pw = substr(md5(rand()), 0, 16);
 	}
-	
+
 	public function testPage1()
 	{
-		require_once("payments.php");
+		require_once("locations.php");
 		$this->assertNoErrors();
 	}
 }

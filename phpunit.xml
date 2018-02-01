@@ -10,6 +10,11 @@
       <file>UnitTests/indexTest.php</file>
       <file>UnitTests/paymentsTest.php</file>
       <file>UnitTests/contactsTest.php</file>
+      <file>UnitTests/jobsTest.php</file>
+      <file>UnitTests/locationsTest.php</file>
+      <file>UnitTests/maintenanceTest.php</file>
+      <file>UnitTests/cpTest.php</file>
+      <file>UnitTests/imageTest.php</file>
     </testsuite>
   </testsuites>
   <logging>
