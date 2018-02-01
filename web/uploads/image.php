@@ -10,6 +10,7 @@ class Autoloader
         spl_autoload_register(function ($class) 
 		{
             $file = str_replace('\\', DIRECTORY_SEPARATOR, $class).'.php';
+			$file = str_replace('_', DIRECTORY_SEPARATOR, $file);
             if (file_exists($file)) 
 			{
                 require $file;
@@ -21,10 +22,8 @@ class Autoloader
 }
 Autoloader::register();
 
+require_once("webAdmin/exceptions.php");
 require_once("global.php");
-include_once("include/upload_file.php");
-
-start_my_session();	//start php session
 
 try
 {
@@ -32,14 +31,20 @@ try
 	test_config($config);
 
 	global $mysql_db;
-	openDatabase($config);
-	$stop = 0;
-	if (login_code(1, $config) == 1)
-	{
-		$stop = 1;
-		throw new Exception('stuff');
-	}
+	$mysql_db = openDatabase($config);
+	
+	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
+	start_my_session();	//start php session
+	
+	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca");
 
+	$currentUser->require_login(1);
+	include_once("include/upload_file.php");
+	
+	if (!(array_key_exists("id", $_GET)))
+		throw new Exception("Id not specified");
+	
 	$filename = $mysql_db->real_escape_string($_GET['id']);
 	$thumb = @$_GET['thumb'];
 	if (is_numeric($thumb) == FALSE)
@@ -48,10 +53,16 @@ try
 	$query = "SELECT * FROM images WHERE id='" . $filename . "'";
 	$results = $mysql_db->query($query);
 	$permission = false;
-	$row;
-	if ($row = @$results->fetch_array(MYSQLI_BOTH))
+	if ($results && ($results->num_rows > 0))
 	{
-		$permission = check_for_read_permission($filename);
+		if ($row = $results->fetch_array(MYSQLI_BOTH))
+		{
+			$permission = check_for_read_permission($filename);
+		}
+		else
+		{
+			$error = "Invalid image.";
+		}
 	}
 	else
 	{
@@ -99,31 +110,85 @@ try
 
 		$img->output();
 	}
-	closeDatabase();
 }
 catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<h1>Site configuration error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<h1>Permission Denied</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
+}
+catch (\webAdmin\InvalidUsernameOrPasswordException $e)
+{
+	echo "<h3>Invalid username or password</h3>\n";
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create'] == 1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\NotLoggedInException $e)
+{
+	echo "<b>Please login</b>\n" .
+		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+		"</form>\n";
+	if ($config['allow_user_create'] == 1)
+	{
+		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+			 "</form>\n";
+	}
+}
+catch (\webAdmin\CertificateException $e)
+{
+	echo "<b>A certificate is required to access this page</b><br />\n";
 }
 catch (Exception $e)
 {
 	?>
 	<h1>Error</h1>
 	<?php
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 
 ?>
