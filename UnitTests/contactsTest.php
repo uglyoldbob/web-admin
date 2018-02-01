@@ -14,7 +14,7 @@ class contactsTest extends ModifiedTestCase
 	{
 		//generate a password for testing
 		//not actually cryptographically secure or sufficiently random
-		paymentsTest::$test_pw = substr(md5(rand()), 0, 16);
+		contactsTest::$test_pw = substr(md5(rand()), 0, 16);
 	}
 
 	public function testPage1()
