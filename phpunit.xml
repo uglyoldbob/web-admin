@@ -24,7 +24,11 @@
     <whitelist>
 	  <directory suffix=".php">./web</directory>
 	  <exclude>
-	  	<directory suffix=".php">./web/include/fpdf16/tutorial</directory>
+		<directory suffix=".php">./web/include/fpdf16</directory>
+		<directory suffix=".php">./web/Crypt</directory>
+		<directory suffix=".php">./web/File</directory>
+		<directory suffix=".php">./web/Net</directory>
+		<directory suffix=".php">./web/Math</directory>
 	  </exclude>
 	</whitelist>
   </filter>
