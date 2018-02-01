@@ -2,7 +2,7 @@
 namespace UnitTestFiles\Test;
 use PHPUnit\Framework\TestCase;
 
-require 'UnitTests/ModifiedTestCase.php';
+require_once 'UnitTests/ModifiedTestCase.php';
 
 class contactsTest extends ModifiedTestCase
 {	
