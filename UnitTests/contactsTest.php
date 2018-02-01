@@ -2,6 +2,8 @@
 namespace UnitTestFiles\Test;
 use PHPUnit\Framework\TestCase;
 
+require 'UnitTests/ModifiedTestCase.php';
+
 class paymentsTest extends ModifiedTestCase
 {	
 	private $test_user = "testuser";
