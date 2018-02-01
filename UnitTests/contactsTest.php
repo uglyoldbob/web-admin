@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 
 require 'UnitTests/ModifiedTestCase.php';
 
-class paymentsTest extends ModifiedTestCase
+class contactsTest extends ModifiedTestCase
 {	
 	private $test_user = "testuser";
 	private static $test_pw = "";
