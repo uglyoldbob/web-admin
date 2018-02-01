@@ -9,6 +9,7 @@
       <file>UnitTests/OneTest.php</file>
       <file>UnitTests/indexTest.php</file>
       <file>UnitTests/paymentsTest.php</file>
+      <file>UnitTests/contactsTest.php</file>
     </testsuite>
   </testsuites>
   <logging>
