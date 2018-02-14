@@ -197,7 +197,7 @@ try
 	if ($_POST['action'] == "move_equ")
 	{
 		$amount = $_POST['amount'];	//possible number of items to delete
-		if (is_numeric($location) == FALSE)
+		if (!is_numeric($location))
 		{
 			$location = 0;
 		}
@@ -209,8 +209,6 @@ try
 		}
 	
 		
-		$an_error = 0;
-		
 		for ($i = 0; $i < $amount; $i++)
 		{
 			$query = "UPDATE equipment SET location = " . $move_to . " WHERE OWNER = " . $_SESSION['user']['emp_id'] . 
@@ -218,16 +216,11 @@ try
 			if (!$mysql_db->query($query))
 			{
 				throw new Exception("Error: " . $mysql_db->error . "<br >\n");
-				$an_error = 1;
 			}
 		}
 	
-		if ($an_error == 0)
-		{
-			echo "Equipment moved successfully<br >\n";
-		}
+		echo "Equipment moved successfully<br >\n";
 		$_POST["action"] = "";
-
 	}
 
 	if (($_POST["action"] == "del_equ") && ($_POST["move"] != ""))
