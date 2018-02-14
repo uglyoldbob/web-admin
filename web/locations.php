@@ -172,8 +172,6 @@ try
 			if (is_numeric($location) == FALSE)
 				$location = 0;
 			
-			$an_error = 0;
-			
 			for ($i = 0; $i < $amount; $i++)
 			{
 				$query = "DELETE FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . 
@@ -181,14 +179,10 @@ try
 				if (!$mysql_db->query($query))
 				{
 					throw new Exception("Error: " . $mysql_db->error . "<br >\n");
-					$an_error = 1;
 				}
 			}
-		
-			if ($an_error == 0)
-			{
-				echo "Equipment deleted successfully<br >\n";
-			}
+
+			echo "Equipment deleted successfully<br >\n";
 			$_POST["action"] = "";
 		}
 
@@ -207,8 +201,6 @@ try
 			}
 		
 			
-			$an_error = 0;
-			
 			for ($i = 0; $i < $amount; $i++)
 			{
 				$query = "UPDATE equipment SET location = " . $move_to . " WHERE OWNER = " . $_SESSION['user']['emp_id'] . 
@@ -216,14 +208,10 @@ try
 				if (!$mysql_db->query($query))
 				{
 					throw new Exception("Error: " . $mysql_db->error . "<br >\n");
-					$an_error = 1;
 				}
 			}
 		
-			if ($an_error == 0)
-			{
-				echo "Equipment moved successfully<br >\n";
-			}
+			echo "Equipment moved successfully<br >\n";
 			$_POST["action"] = "";
 
 		}
