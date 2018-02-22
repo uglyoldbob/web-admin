@@ -79,12 +79,10 @@ class user
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) . "','" .
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "','" .
 		 $this->userid . "');";
-		echo "<pre>" . $query . "</pre><br />\n";
 		$results = $this->mysql_db->query($query);
 		if ($results)
 		{
 			$cert_id = $this->mysql_db->insert_id;
-			echo "Successfully inserted certificate id: " . $cert_id . "<br />\n";
 		}
 		else
 		{
@@ -96,7 +94,10 @@ class user
 	public function require_registered_certificate()
 	{
 		$this->require_certificate();
-		$query = "SELECT * FROM " . $this->user_cert_table . " WHERE `serial` = '" .
+		$query = "SELECT * FROM " . $this->user_cert_table . 
+		 " INNER JOIN " . $this->table_name . " ON " . $this->table_name . ".emp_id = " .
+		 $this->user_cert_table . ".userid" .
+		 " WHERE `serial` = '" .
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_M_SERIAL']) .
 		 "' AND `issuer` = '" .
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) .
@@ -106,6 +107,13 @@ class user
 		if ($result->num_rows <= 0)
 		{
 			throw new CertificateException("Unregistered certificate");
+		}
+		else
+		{
+			$row = $result->fetch_array(MYSQLI_BOTH);
+			$this->passhash = $row['password'];
+			$this->userid = $row['emp_id'];
+			$this->username = $row['username'];
 		}
 	}
 	
@@ -183,6 +191,25 @@ class user
 			}
 		}
 	}
+	
+	public function require_login_or_registered_certificate()
+	{
+		try
+		{
+			$this->require_login(0);
+			echo "Password login<br />\n";
+		}
+		catch (InvalidUsernameOrPasswordException $e)
+		{
+			$this->require_registered_certificate();
+			echo "Certificate1 login<br />\n";
+		}
+		catch (NotLoggedInException $e)
+		{
+			$this->require_registered_certificate();
+			echo "Certificate2 login<br />\n";
+		}
+	}
 
 	public function require_login($quiet)
 	{	//only successfully finishes if a user is logged in, otherwise it throws exceptions
@@ -244,7 +271,6 @@ class user
 						}
 						$temp = hash_password($passworder, $row['salt'], $this->config['key_stretching_value']);
 						$row['password'] = $temp;
-						$this->userid = $row['emp_id'];
 					}
 					unset($passworder);
 					$_SESSION['password'] = $temp;
@@ -254,6 +280,7 @@ class user
 				{	#successful login
 					#TODO : limit the number of valid sessions for users? create a valid session table?
 					$_SESSION['user'] = $row;
+					$this->userid = $row['emp_id'];
 					if ($_POST["action"] == "login")
 					{
 						$query = "UPDATE " . $this->table_name . " SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";

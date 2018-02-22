@@ -83,7 +83,7 @@ try
 	{
 	}
 
-	$currentUser->require_login(0);
+	$currentUser->require_login_or_registered_certificate();
 	
 	do_top_menu(0, $config);
 	echo "Something goes here?<br>\n";
