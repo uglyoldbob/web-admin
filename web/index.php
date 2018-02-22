@@ -34,8 +34,6 @@ if (!headers_sent())
 <html>
 <head>
 <?php
-echo $_SERVER['SSL_CLIENT_CERT_CHAIN_0'];
-echo "<br />";
 
 try
 {
@@ -162,6 +160,10 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
 	}
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
+	}
 }
 catch (\webAdmin\NotLoggedInException $e)
 {
@@ -178,6 +180,10 @@ catch (\webAdmin\NotLoggedInException $e)
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
+	}
+	if (isset($_GET['debug']) || ($config['debug']==1))
+	{
+		echo "Details: " . (string)$e . "<br />\n";
 	}
 }
 catch (\webAdmin\CertificateException $e)

@@ -11,6 +11,10 @@ class user
 	private $intermediate_ca_table;
 	private $user_cert_table;
 	
+	private $userid;
+	private $username;
+	private $passhash;
+	
 	public function __construct($config, $mysql_db, $table_name)
 	{
 		$this->config = $config;
@@ -73,7 +77,8 @@ class user
 		$query = "INSERT INTO " . $this->user_cert_table . " (`serial`, `issuer`, `identifier`, `userid`) VALUES ('" .
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_M_SERIAL']) . "','" .
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) . "','" .
-		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "');";
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "','" .
+		 $this->userid . "');";
 		echo "<pre>" . $query . "</pre><br />\n";
 		$results = $this->mysql_db->query($query);
 		if ($results)
@@ -97,16 +102,10 @@ class user
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) .
 		 "' AND `identifier` = '" .
 		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "';";
-		echo "<pre>" . $query . "</pre><br />\n";
 		$result = $this->mysql_db->query($query);
-		if ($result->num_rows > 0)
+		if ($result->num_rows <= 0)
 		{
-			while ($row = $result->fetch_row())
-			{
-				echo "<pre>";
-				print_r($row);
-				echo "</pre><br />\n";
-			}
+			throw new CertificateException("Unregistered certificate");
 		}
 	}
 	
@@ -135,29 +134,9 @@ class user
 		if (!($check->validateSignature()))
 			throw new CertificateException("Invalid signature on certificate found");
 	}
-	
-	public function require_login($quiet)
-	{	//prints and executes code for the login script
-		//returns exceptions
-		#TODO : produce the div tags when quiet=1 and output is actually produced
-		if ($quiet == 0)
-		{
-			//this div includes login, logout, and change password widgets
-			echo "<div id=\"login_control\">\n";
-		}
 
-		//if https is not detected, then assume https is not being used
-		if (!(array_key_exists("HTTPS", $_SERVER)))
-		{
-			$_SERVER["HTTPS"] = "off";
-		}
-		
-		if (($_SERVER["HTTPS"] != "on") && ($this->config['require_https'] == 1))
-		{
-			throw new SiteConfigurationException("HTTPS is required and has not been detected");
-		}
-
-		//process POST data from attempted user registration
+	public function process_user_registration()
+	{	//process POST data from attempted user registration
 		if (($_POST["action"] == "create_user") && ($this->config['allow_user_create']=1))
 		{
 			if (isset($_POST["username"]))
@@ -203,81 +182,33 @@ class user
 				}
 			}
 		}
-		
-		//If chain to determine what to do
-		if (($_POST["action"] == "register") && ($this->config['allow_user_create']=1))
-		{	//show registration form
-			if (isset($_POST["username"]))
-			{
-				$previous_username = $this->mysql_db->real_escape_string($_POST["username"]);
-			}
-			else
-			{
-				$previous_username = "";
-			}
-			if (isset($_POST["email"]))
-			{
-				$previous_email = $this->mysql_db->real_escape_string($_POST["email"]);
-			}
-			else
-			{
-				$previous_email = "";
-			}
-			echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-						"	<input type=\"hidden\" name=\"action\" value=\"create_user\">\n" .
-						"	Username: <input type=\"text\" name=\"username\" ><br>\n" .
-						"	Email: <input type=\"text\" name=\"email\" ><br>\n" .
-						"	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
-						"	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
-						"	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
-						"</form>\n";
+	}
+
+	public function require_login($quiet)
+	{	//only successfully finishes if a user is logged in, otherwise it throws exceptions
+
+		//if https is not detected, then assume https is not being used
+		if (!(array_key_exists("HTTPS", $_SERVER)))
+		{
+			$_SERVER["HTTPS"] = "off";
 		}
-		else if ($_POST["action"] == "login")
-		{	//retrieve submitted username and password, if applicable
+		
+		if (($_SERVER["HTTPS"] != "on") && ($this->config['require_https'] == 1))
+		{
+			throw new SiteConfigurationException("HTTPS is required and has not been detected");
+		}
+		
+		if ($_POST["action"] == "login")
+		{       //retrieve submitted username and password, if applicable
 			$username = $this->mysql_db->real_escape_string($_POST["username"]);
 			$passworder = $this->mysql_db->real_escape_string($_POST["password"]);
-		
-			$_SESSION['username'] = $username;
-		}
-		else if ($_POST["action"] == "logout")
-		{
-			echo "Logout<br>\n";
-			unset($_SESSION['username']);
-			unset($_SESSION['password']);
-		}
-		else if ($_POST["action"] == "change_pass")
-		{	//show form to allow changing password
-			if ($quiet == 0)
-			{
-				#TODO : create button to change mind on changing password
-				echo 	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-						"	<input type=\"hidden\" name=\"action\" value=\"apply_pass\">\n" .
-						"	Old password: <input type=\"password\" name=\"pass1\" ><br>\n" .
-						"	New password: <input type=\"password\" name=\"pass2\" ><br>\n" .
-						"	New password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
-						"	<input class=\"buttons\" type=\"submit\" value=\"Change my password\">\n" .
-						"</form>\n";
-			}
-		}
-		else if ($_POST["action"] == "apply_pass")
-		{	//attempt to change the user password
-			$oldpass = $this->mysql_db->real_escape_string($_POST['pass1']);
-			$newpass = $this->mysql_db->real_escape_string($_POST['pass2']);
-			$passmatch = $this->mysql_db->real_escape_string($_POST['pass3']);
-			if ($newpass == $passmatch)
-			{
-				$uid = $_SESSION['user']['emp_id'];
-				$this->store_user_pword($uid, $oldpass, $newpass);
-			}
-			else
-			{
-				echo "<h3>Passwords do not match</h3><br >\n";
-			}
+			$_SESSION['username'] = $username;	
 		}
 
 		#logic for logging in and normal activity
 		if (isset($_SESSION['username']))
 		{
+			$this->username = $_SESSION['username'];
 			$query = "SELECT * FROM " . $this->table_name . " WHERE username='" . $_SESSION['username'] . "' LIMIT 1;";
 			$results = $this->mysql_db->query($query);
 			if ($results)
@@ -286,9 +217,9 @@ class user
 				#TODO : more testing of the failed login logic
 				if ($row['fail_logins'] >= $this->config['max_fail_logins'])
 				{	//TODO: set time period for waiting to login
-					echo "Failed login too many times error<br>\n";
 					unset($_SESSION['username']);
 					unset($_SESSION['password']);
+					throw new InvalidUsernameOrPasswordException();
 				}
 				
 				if ($_POST["action"] == "login")
@@ -313,9 +244,11 @@ class user
 						}
 						$temp = hash_password($passworder, $row['salt'], $this->config['key_stretching_value']);
 						$row['password'] = $temp;
+						$this->userid = $row['emp_id'];
 					}
-
+					unset($passworder);
 					$_SESSION['password'] = $temp;
+					$this->passhash = $temp;
 				}
 				if (($row['password'] == $_SESSION['password']) && isset($_SESSION['password']) && ($_SESSION['password'] <> ""))
 				{	#successful login
@@ -327,23 +260,6 @@ class user
 						$this->mysql_db->query($query);
 						$query = "UPDATE " . $this->table_name . " SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
 						$this->mysql_db->query($query);
-					}
-					if ($quiet == 0)
-					{
-						echo "<h3>Welcome ";
-						echo $this->get_name($_SESSION['user']['emp_id']);
-						echo "</h3>\n";
-						echo "<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-							 "	<input type=\"hidden\" name=\"action\" value=\"logout\">\n" .
-							 "	<input class=\"buttons\" type=\"submit\" value=\"Logout\">\n" .
-							 "</form>\n";
-						if ($_POST["action"] != "change_pass")
-						{
-							echo	"<form action=\"" . curPageURL() . "\" method=\"post\">\n" .
-									"	<input type=\"hidden\" name=\"action\" value=\"change_pass\">\n" .
-									"	<input class=\"buttons\" type=\"submit\" value=\"Change my password\">\n" .
-									"</form>\n";
-						}
 					}
 				}
 				else
@@ -366,11 +282,6 @@ class user
 		else
 		{
 			throw new NotLoggedInException();
-		}
-
-		if ($quiet == 0)
-		{
-			echo "</div>\n";
 		}
 	}
 
