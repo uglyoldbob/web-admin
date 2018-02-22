@@ -82,7 +82,7 @@ try
 	else if ($_POST["action"] == "epass")
 	{
 		$val = $_POST["id"];
-		if (is_numeric($val) == FALSE)
+		if (!is_numeric($val))
 		{
 			$val = 0;
 		}
@@ -91,7 +91,7 @@ try
 	else if ($_POST["action"] == "apass")
 	{
 		$val = $_POST["id"];
-		if (is_numeric($val) == FALSE)
+		if (!is_numeric($val))
 		{
 			$val = 0;
 		}

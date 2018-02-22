@@ -130,7 +130,7 @@ class contacts
 			 "			</form>";
 	}
 	
-	public static function give_me_pword($newpass)
+	public function give_me_pword($newpass)
 	{
 		//make a new salt
 		$salt = generate_salt();

@@ -56,7 +56,7 @@ try
 
 	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
 	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
-	
+
 	if ($_POST["action"] == "register_cert")
 	{
 		try
@@ -68,7 +68,7 @@ try
 			echo "Failed to register certificate: " . (string)$e . "<br />\n";
 		}
 	}
-
+	
 	try
 	{
 		$currentUser->require_login(1);
