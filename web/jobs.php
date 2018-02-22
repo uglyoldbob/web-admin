@@ -57,16 +57,15 @@ try
 	<script type="text/javascript" src="jscript.js"></script>
 
 	<?php
-	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->certificate_tables("root_ca", "intermediate_ca");
-
-	$currentUser->require_login(0);
 	
 	#TODO : create a job_status_codes table
 	#TODO : use the job_status_codes table for statuses of jobs
 
 
-	
+	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca");
+
+	$currentUser->require_login(0);
 	
 	$jobs = new \webAdmin\jobs($config);
 

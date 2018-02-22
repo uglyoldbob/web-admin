@@ -459,7 +459,7 @@ class Crypt_RSA {
      * @return Crypt_RSA
      * @access public
      */
-    function __construct()
+    function Crypt_RSA()
     {
         if (!class_exists('Math_BigInteger')) {
             require_once('Math/BigInteger.php');

@@ -123,7 +123,7 @@ class Net_SCP {
      * @return Net_SCP
      * @access public
      */
-    function __construct($ssh)
+    function Net_SCP($ssh)
     {
         if (!is_object($ssh)) {
             return;

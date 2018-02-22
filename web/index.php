@@ -34,6 +34,8 @@ if (!headers_sent())
 <html>
 <head>
 <?php
+echo $_SERVER['SSL_CLIENT_CERT_CHAIN_0'];
+echo "<br />";
 
 try
 {
@@ -55,9 +57,20 @@ try
 	<?php
 
 	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->certificate_tables("root_ca", "intermediate_ca");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
+	
+	if ($_POST["action"] == "register_cert")
+	{
+		try
+		{
+			$currentUser->register_certificate();
+		}
+		catch (\webAdmin\CertificateException $e)
+		{
+			echo "Failed to register certificate: " . (string)$e . "<br />\n";
+		}
+	}
 
-	$currentUser->require_login(0);
 	try
 	{
 		$currentUser->require_certificate();
@@ -65,10 +78,14 @@ try
 			 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
 			 "</form>\n";
+		$currentUser->require_registered_certificate();
+		echo "You have a registered certificate<br />\n";
 	}
 	catch (\webAdmin\CertificateException $e)
 	{
 	}
+
+	$currentUser->require_login(0);
 	
 	do_top_menu(0, $config);
 	echo "Something goes here?<br>\n";

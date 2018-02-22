@@ -1,5 +1,6 @@
 <?php
 namespace webAdmin;
+
 class user
 {
 	private $config;
@@ -8,6 +9,7 @@ class user
 	
 	private $root_ca_table;
 	private $intermediate_ca_table;
+	private $user_cert_table;
 	
 	public function __construct($config, $mysql_db, $table_name)
 	{
@@ -16,10 +18,11 @@ class user
 		$this->table_name = $table_name;
 	}
 	
-	public function certificate_tables($rootca, $intca)
+	public function certificate_tables($rootca, $intca, $usercert)
 	{
 		$this->root_ca_table = $rootca;
 		$this->intermediate_ca_table = $intca;
+		$this->user_cert_table = $usercert;
 		$this->verify_certificates();
 	}
 	
@@ -61,6 +64,50 @@ class user
 			}
 		}
 		return $intermediate_check;
+	}
+	
+	public function register_certificate()
+	{
+		$this->require_certificate();
+		$this->require_login(1);
+		$query = "INSERT INTO " . $this->user_cert_table . " (`serial`, `issuer`, `identifier`, `userid`) VALUES ('" .
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_M_SERIAL']) . "','" .
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) . "','" .
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "');";
+		echo "<pre>" . $query . "</pre><br />\n";
+		$results = $this->mysql_db->query($query);
+		if ($results)
+		{
+			$cert_id = $this->mysql_db->insert_id;
+			echo "Successfully inserted certificate id: " . $cert_id . "<br />\n";
+		}
+		else
+		{
+			echo $this->mysql_db->error . "<br />\n";
+			throw new CertificateException("Failed to insert user certificate");
+		}
+	}
+	
+	public function require_registered_certificate()
+	{
+		$this->require_certificate();
+		$query = "SELECT * FROM " . $this->user_cert_table . " WHERE `serial` = '" .
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_M_SERIAL']) .
+		 "' AND `issuer` = '" .
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) .
+		 "' AND `identifier` = '" .
+		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "';";
+		echo "<pre>" . $query . "</pre><br />\n";
+		$result = $this->mysql_db->query($query);
+		if ($result->num_rows > 0)
+		{
+			while ($row = $result->fetch_row())
+			{
+				echo "<pre>";
+				print_r($row);
+				echo "</pre><br />\n";
+			}
+		}
 	}
 	
 	public function require_certificate()

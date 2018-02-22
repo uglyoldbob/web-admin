@@ -212,7 +212,7 @@ class File_ANSI {
      * @return File_ANSI
      * @access public
      */
-    function __construct()
+    function File_ANSI()
     {
         $this->setHistory(200);
         $this->setDimensions(80, 24);

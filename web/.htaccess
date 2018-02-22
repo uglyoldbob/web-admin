@@ -10,4 +10,11 @@ Allow from localhost
 Deny from all
 </Files>
 
+#ssl client configuration
+#php must verify certificate chain
+#user web browser gets no say in who we trust
+SSLVerifyClient optional_no_ca
+SSLVerifyDepth 1
+SSLOptions +StdEnvVars +ExportCertData
+
 php_value display_errors on
