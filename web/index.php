@@ -71,13 +71,20 @@ try
 
 	try
 	{
+		$currentUser->require_login(1);
 		$currentUser->require_certificate();
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
-			 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
-			 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
-			 "</form>\n";
-		$currentUser->require_registered_certificate();
-		echo "You have a registered certificate<br />\n";
+		try
+		{
+			$currentUser->require_registered_certificate();
+			echo "You have a registered certificate<br />\n";
+		}
+		catch (\webAdmin\CertificateException $e)
+		{
+			echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+				 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
+				 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
+				 "</form>\n";
+		}
 	}
 	catch (\webAdmin\CertificateException $e)
 	{
