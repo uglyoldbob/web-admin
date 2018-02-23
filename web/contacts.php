@@ -58,7 +58,6 @@ try
 
 	$currentUser->require_login(0);
 	
-	require_once("include/forms.php");
 	$contacts = new \webAdmin\contacts($config);
 	#TODO : add photos for contacts
 

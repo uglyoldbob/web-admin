@@ -40,7 +40,6 @@ try
 	$currentUser->certificate_tables("root_ca", "intermediate_ca");
 
 	$currentUser->require_login(1);
-	include_once("include/upload_file.php");
 	
 	if (!(array_key_exists("id", $_GET)))
 		throw new Exception("Id not specified");

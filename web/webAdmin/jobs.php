@@ -45,6 +45,38 @@ class jobs
 		}
 	}
 	
+	public static function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions, $autolist)
+	{
+		echo "<div>\n";
+		echo $disp . "\n";
+		echo '<input class="fields" type="text" autocomplete="off" value="';
+		if ($fill_val != 0)
+		{
+			echo print_contact($fill_val);
+		}
+		else
+		{
+			$fill_val = '';
+		}
+		echo '" name="' . $name . '" id="' . $name . '" 
+			onkeyup="lookupLastName(this.value, \'' . $fillfunc . '\', 
+				$(\'#' . $suggestions . '\'), 
+				$(\'#' . $autolist . '\'),
+				&quot;$(\'#' . $name . '\')&quot;,
+				&quot;$(\'#' . $id . '\')&quot;,
+				&quot;$(\'#' . $suggestions . '\')&quot;);"
+			 >' . "\n";
+			 //onblur="&quot;$(\'#' . $suggestions . '\')&quot;.hide().delay(500);"
+			 //TODO when the onblur is added, autocomplete fails to insert data
+		echo '	<div id="' . $suggestions . '" style="display: none;">' . "\n";
+		echo '		<div id="' . $autolist . '">' . "\n";
+		echo '			&nbsp;' . "\n";
+		echo '		</div>' . "\n";
+		echo '	</div><br >' . "\n";
+		echo '	 <input type="hidden" value="' . $fill_val . '" name="' . $id . '" id="' . $id . '">' . "\n";
+		echo "</div>\n";
+	}
+	
 	public static function table_of_job_status()
 	{
 		global $mysql_db;
@@ -155,9 +187,9 @@ class jobs
 	
 		echo '	<b>Job name: </b><input type="text" autocomplete="off" value="" name="jobname" id="jobname">' . "\n";
 		
-		make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
+		jobs::make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
 			"fillNames", "cust1_suggest", "cust1_list");
-		make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
+		jobs::make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
 			"fillNames", "cust2_suggest", "cust2_list");
 		
 		echo '	<b>Comments: </b><br >' . "\n" . '<textarea name="comments" id="comments" rows=4 cols=75 ></textarea><br >' . "\n";

@@ -72,9 +72,6 @@ try
 		$location = 0;
 	}
 
-	include_once("include/upload_file.php");
-	include_once("include/location.php");
-	
 	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
 	$results = $mysql_db->query($query);
 	if ($results && ($results->num_rows > 0))

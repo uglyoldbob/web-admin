@@ -61,7 +61,6 @@ try
 
 	$currentUser->require_login(0);
 
-	//require_once("include/finance.php");
 	do_top_menu(6, $config);
 
 	echo "Time based filtering:\n";

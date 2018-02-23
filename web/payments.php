@@ -99,8 +99,6 @@ try
 	$currentUser->certificate_tables("root_ca", "intermediate_ca");
 
 	$currentUser->require_login(0);
-	
-	require_once("include/forms.php");
 
 	if (!(array_key_exists("contact", $_GET)))
 	{
@@ -305,7 +303,7 @@ try
 			{
 				$payer = 0;
 			}
-			payment_form(0, $payee, $payer, '', '', '', '', '');
+			\webAdmin\finance::payment_form(0, $payee, $payer, '', '', '', '', '');
 		}
 		else
 		{
@@ -314,7 +312,7 @@ try
 			if($row = $payment_results->fetch_array(MYSQLI_BOTH))
 			{	//function payment_form($id, $payee_id, $payer_id, 
 				//$amount, $earned, $paid, $comments, $category)
-				payment_form($row['payment_id'], $row['pay_to'],
+				\webAdmin\finance::payment_form($row['payment_id'], $row['pay_to'],
 					$row['paid_by'], $row['amount_earned'],
 					$row['date_earned'], $row['date_paid'], 
 					$row['comments'], $row['category']);
