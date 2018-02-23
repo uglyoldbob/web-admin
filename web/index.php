@@ -71,7 +71,7 @@ try
 	
 	try
 	{
-		$currentUser->require_login(1);
+		$currentUser->require_login_or_registered_certificate();
 		$currentUser->require_certificate();
 		try
 		{
@@ -80,6 +80,7 @@ try
 		}
 		catch (\webAdmin\CertificateException $e)
 		{
+			$currentUser->require_login(1);
 			echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
 				 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
 				 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
