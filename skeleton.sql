@@ -209,6 +209,14 @@ CREATE TABLE `status_codes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `user_certs` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `serial` varchar(32) NOT NULL,
+  `issuer` varchar(1024) NOT NULL,
+  `identifier` varchar(1024) NOT NULL,
+  `userid` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 CREATE TABLE `version` (
   `id` varchar(255) NOT NULL,
   `num` int(11) NOT NULL

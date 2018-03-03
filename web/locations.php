@@ -55,9 +55,10 @@ try
 
 	<?php
 	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->certificate_tables("root_ca", "intermediate_ca");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
 
-	$currentUser->require_login(0);
+	$currentUser->show_register_certificate_button();
+	$currentUser->require_login_or_registered_certificate();
 
 	if (isset($_GET["id"]))
 	{

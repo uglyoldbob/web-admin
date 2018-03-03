@@ -37,9 +37,9 @@ try
 	start_my_session();	//start php session
 	
 	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->certificate_tables("root_ca", "intermediate_ca");
+	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
 
-	$currentUser->require_login(1);
+	$currentUser->require_login_or_registered_certificate();
 	
 	if (!(array_key_exists("id", $_GET)))
 		throw new Exception("Id not specified");

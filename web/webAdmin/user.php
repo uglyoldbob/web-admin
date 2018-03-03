@@ -14,12 +14,16 @@ class user
 	private $userid;
 	private $username;
 	private $passhash;
+	private $valid_cert;
+	private $registered_cert;
 	
 	public function __construct($config, $mysql_db, $table_name)
 	{
 		$this->config = $config;
 		$this->mysql_db = $mysql_db;
 		$this->table_name = $table_name;
+		$this->valid_cert = 0;
+		$this->registered_cert = 0;
 	}
 	
 	public function certificate_tables($rootca, $intca, $usercert)
@@ -93,54 +97,77 @@ class user
 	
 	public function require_registered_certificate()
 	{
-		$this->require_certificate();
-		$query = "SELECT * FROM " . $this->user_cert_table . 
-		 " INNER JOIN " . $this->table_name . " ON " . $this->table_name . ".emp_id = " .
-		 $this->user_cert_table . ".userid" .
-		 " WHERE `serial` = '" .
-		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_M_SERIAL']) .
-		 "' AND `issuer` = '" .
-		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) .
-		 "' AND `identifier` = '" .
-		 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "';";
-		$result = $this->mysql_db->query($query);
-		if ($result->num_rows <= 0)
+		if ($this->registered_cert == 0)
+		{
+			$this->require_certificate();
+			$query = "SELECT * FROM " . $this->user_cert_table . 
+			 " INNER JOIN " . $this->table_name . " ON " . $this->table_name . ".emp_id = " .
+			 $this->user_cert_table . ".userid" .
+			 " WHERE `serial` = '" .
+			 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_M_SERIAL']) .
+			 "' AND `issuer` = '" .
+			 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_I_DN']) .
+			 "' AND `identifier` = '" .
+			 $this->mysql_db->real_escape_string($_SERVER['SSL_CLIENT_S_DN']) . "';";
+			$result = $this->mysql_db->query($query);
+			if ($result->num_rows <= 0)
+			{
+				$this->registered_cert = -1;
+				throw new CertificateException("Unregistered certificate");
+			}
+			else
+			{
+				$row = $result->fetch_array(MYSQLI_BOTH);
+				$this->passhash = $row['password'];
+				$this->userid = $row['emp_id'];
+				$this->username = $row['username'];
+				$this->registered_cert = 1;
+			}
+		}
+		else if ($this->registered_cert == -1)
 		{
 			throw new CertificateException("Unregistered certificate");
-		}
-		else
-		{
-			$row = $result->fetch_array(MYSQLI_BOTH);
-			$this->passhash = $row['password'];
-			$this->userid = $row['emp_id'];
-			$this->username = $row['username'];
 		}
 	}
 	
 	public function require_certificate()
 	{
-		if (!(array_key_exists("SSL_CLIENT_CERT", $_SERVER)))
+		if ($this->valid_cert == 0)
 		{
-			throw new CertificateException("No certificate");
+			if (!(array_key_exists("SSL_CLIENT_CERT", $_SERVER)))
+			{
+				$this->valid_cert = -1;
+				throw new CertificateException("No certificate");
+			}
+			if (!isset($_SERVER['SSL_CLIENT_M_SERIAL'])
+				|| !isset($_SERVER['SSL_CLIENT_V_END'])
+				|| !isset($_SERVER['SSL_CLIENT_V_START'])
+				|| !isset($_SERVER['SSL_CLIENT_I_DN']) 
+				|| !isset($_SERVER['SSL_CLIENT_V_REMAIN']) )
+			{
+				$this->valid_cert = -1;
+				throw new CertificateException("Invalid signature on certificate found");
+			}
+			
+			if ($_SERVER['SSL_CLIENT_V_REMAIN'] <= 0)
+			{
+				$this->valid_cert = -1;
+				throw new CertificateException("Certificate is expired");
+			}
+			
+			$check = $this->verify_certificates();
+			$check->loadX509($_SERVER['SSL_CLIENT_CERT']);
+			if (!($check->validateSignature()))
+			{
+				$this->valid_cert = -1;
+				throw new CertificateException("Invalid signature on certificate found");
+			}
+			$this->valid_cert = 1;
 		}
-		if (!isset($_SERVER['SSL_CLIENT_M_SERIAL'])
-            || !isset($_SERVER['SSL_CLIENT_V_END'])
-			|| !isset($_SERVER['SSL_CLIENT_V_START'])
-            || !isset($_SERVER['SSL_CLIENT_I_DN']) 
-			|| !isset($_SERVER['SSL_CLIENT_V_REMAIN']) )
+		else if ($this->valid_cert == -1)
 		{
-			throw new CertificateException("Invalid signature on certificate found");
-        }
-		
-		if ($_SERVER['SSL_CLIENT_V_REMAIN'] <= 0)
-		{
-			throw new CertificateException("Certificate is expired");
+			throw new CertificateException("Invalid certificate");
 		}
-		
-		$check = $this->verify_certificates();
-		$check->loadX509($_SERVER['SSL_CLIENT_CERT']);
-		if (!($check->validateSignature()))
-			throw new CertificateException("Invalid signature on certificate found");
 	}
 
 	public function process_user_registration()
@@ -192,22 +219,58 @@ class user
 		}
 	}
 	
+	public function show_register_certificate_button()
+	{
+		try
+		{
+			$this->require_login_or_registered_certificate();
+			$this->require_certificate();
+			try
+			{
+				$this->require_registered_certificate();
+				echo "You have a registered certificate<br />\n";
+			}
+			catch (CertificateException $e)
+			{
+				$this->require_login(1);
+				echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+					 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
+					 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
+					 "</form>\n";
+			}
+		}
+		catch (CertificateException $e)
+		{
+		}
+	}
+	
 	public function require_login_or_registered_certificate()
 	{
 		try
 		{
 			$this->require_login(0);
-			echo "Password login<br />\n";
 		}
 		catch (InvalidUsernameOrPasswordException $e)
 		{
-			$this->require_registered_certificate();
-			echo "Certificate1 login<br />\n";
+			try
+			{
+				$this->require_registered_certificate();
+			}
+			catch (CertificateException $f)
+			{
+				throw new NotLoggedInException();
+			}
 		}
 		catch (NotLoggedInException $e)
 		{
-			$this->require_registered_certificate();
-			echo "Certificate2 login<br />\n";
+			try
+			{
+				$this->require_registered_certificate();
+			}
+			catch (CertificateException $f)
+			{
+				throw new NotLoggedInException();
+			}
 		}
 	}
 
