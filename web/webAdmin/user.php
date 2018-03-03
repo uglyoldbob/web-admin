@@ -16,7 +16,7 @@ class user
 	private $passhash;
 	private $valid_cert;
 	private $registered_cert;
-	
+
 	public function __construct($config, $mysql_db, $table_name)
 	{
 		$this->config = $config;
@@ -51,6 +51,23 @@ class user
 				$intermediate_check->loadCA($cert);
 			}
 		}
+		if (is_dir($this->config['root_cert_folder']))
+		{
+			$files_to_check = scandir($this->config['root_cert_folder']);
+			foreach ($files_to_check as $f)
+			{
+				$fname = $this->config['root_cert_folder'] . '/' . $f;
+				if (is_file($fname))
+				{
+					$cert = file_get_contents($fname);
+					$x509 = new \File_X509();
+					$x509->loadX509($cert);
+					if (!($x509->validateSignature(false)))
+						throw new SiteConfigurationException("Invalid ROOT CA certificate file found");
+					$intermediate_check->loadCA($cert);
+				}
+			}
+		}
 		return $intermediate_check;
 	}
 	
@@ -69,6 +86,22 @@ class user
 				if (!($intermediate_check->validateSignature()))
 					throw new SiteConfigurationException("Invalid INTERMEDIATE CA certificate found");
 				$intermediate_check->loadCA($cert);
+			}
+		}
+		if (is_dir($this->config['int_cert_folder']))
+		{
+			$files_to_check = scandir($this->config['int_cert_folder']);
+			foreach ($files_to_check as $f)
+			{
+				$fname = $this->config['int_cert_folder'] . '/' . $f;
+				if (is_file($fname))
+				{
+					$cert = file_get_contents($fname);
+					$intermediate_check->loadX509($cert);
+					if (!($intermediate_check->validateSignature()))
+						throw new SiteConfigurationException("Invalid INTERMEDIATE CA certificate file found");
+					$intermediate_check->loadCA($cert);
+				}
 			}
 		}
 		return $intermediate_check;
