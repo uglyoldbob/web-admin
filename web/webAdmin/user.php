@@ -1,5 +1,7 @@
 <?php
 namespace webAdmin;
+require_once "global.php";
+require_once "webAdmin/table.php";
 
 class user
 {
@@ -63,13 +65,15 @@ class user
 					$x509 = new \File_X509();
 					$x509->loadX509($cert);
 					if (!($x509->validateSignature(false)))
-						throw new SiteConfigurationException("Invalid ROOT CA certificate file found");
+					{
+						throw new SiteConfigurationException("Invalid ROOT CA certificate file found: " . $f);
+					}
 					$intermediate_check->loadCA($cert);
 				}
 			}
 		}
 		return $intermediate_check;
-	}
+	}	
 	
 	private function verify_certificates()
 	{
@@ -99,7 +103,7 @@ class user
 					$cert = file_get_contents($fname);
 					$intermediate_check->loadX509($cert);
 					if (!($intermediate_check->validateSignature()))
-						throw new SiteConfigurationException("Invalid INTERMEDIATE CA certificate file found");
+						throw new SiteConfigurationException("Invalid INTERMEDIATE CA certificate file found: " . $f);
 					$intermediate_check->loadCA($cert);
 				}
 			}
@@ -266,7 +270,7 @@ class user
 			catch (CertificateException $e)
 			{
 				$this->require_login(1);
-				echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+				echo "<form action=\"" . curPageURL($this->config) . "\" method=\"post\">\n" .
 					 "	<input type=\"hidden\" name=\"action\" value=\"register_cert\">\n" .
 					 "	<input class=\"buttons\" type=\"submit\" value=\"Register certificate\">\n" .
 					 "</form>\n";
@@ -275,6 +279,66 @@ class user
 		catch (CertificateException $e)
 		{
 		}
+	}
+	
+	//check to see if a request has been made to revoke a certificate
+	public function revoke_own_certificates()
+	{
+		if ($_POST["action"] == "revoke_certificate")
+		{
+			$this->require_login_or_registered_certificate();
+			$query = "UPDATE " . $this->user_cert_table . 
+			 " SET userid=NULL WHERE id='" . $_POST["id"] . "' " .
+			 " AND userid='" . $this->userid . "';";
+			$result = $this->mysql_db->query($query);
+			if (!$result)
+			{
+				echo $this->mysql_db->error . "<br />\n";
+				throw new CertificateException("Failed to revoke user certificate");
+			}
+		}
+	}
+	
+	public function registered_certs_data()
+	{
+		$ret = [];
+		try
+		{
+			$this->require_login_or_registered_certificate();
+			$query = "SELECT `id`,`serial`,`identifier`,`issuer` FROM " . $this->user_cert_table . 
+			 " WHERE `userid` = '" . $this->userid . "';";
+			$result = $this->mysql_db->query($query);
+			if ($result->num_rows <= 0)
+			{
+				$this->registered_cert = -1;
+				throw new CertificateException("Unregistered certificate");
+			}
+			else
+			{
+				$ret = make_double_array_mysqli($result);
+				$ret[0][0] = "Action";
+				for ($i = 1; $i < count($ret[0]); $i++)
+				{
+					$ret[0][$i] = "<form action=\"" . curPageURL($this->config) . "\" method=\"post\"> " .
+						 " <input type=\"hidden\" name=\"action\" value=\"revoke_certificate\"> " .
+						 " <input type=\"hidden\" name=\"id\" value=\"" . $ret[0][$i] . "\"> " .
+						 " <input class=\"buttons\" type=\"submit\" value=\"Revoke\">" .
+						 "</form>\n";
+				}
+			}
+		}
+		catch (CertificateException $e)
+		{
+			$ret[0] = [];
+			$ret[0][0] = "Action";
+			$ret[1] = [];
+			$ret[1][0] = "serial";
+			$ret[2] = [];
+			$ret[2][0] = "identifier";
+			$ret[3] = [];
+			$ret[3][0] = "issuer";
+		}
+		return $ret;
 	}
 	
 	public function require_login_or_registered_certificate()

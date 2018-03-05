@@ -214,7 +214,7 @@ CREATE TABLE `user_certs` (
   `serial` varchar(32) NOT NULL,
   `issuer` varchar(1024) NOT NULL,
   `identifier` varchar(1024) NOT NULL,
-  `userid` int(11) NOT NULL,
+  `userid` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 CREATE TABLE `version` (

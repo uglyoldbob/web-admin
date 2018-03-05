@@ -22,6 +22,7 @@ class Autoloader
 Autoloader::register();
 
 require_once("webAdmin/exceptions.php");
+require_once("webAdmin/table.php");
 require_once("global.php");
 
 if (!headers_sent())
@@ -72,6 +73,11 @@ try
 
 	echo "<b>Possible transaction categories</b><br>\n";
 	\webAdmin\finance::table_of_transaction_categories();
+	
+	$currentUser->revoke_own_certificates();
+	$stuff = $currentUser->registered_certs_data();
+	\webAdmin\double_array_table($stuff);
+	echo "<br />\n";
 
 	echo "	<input class=\"buttons\" type=\"checkbox\" name=\"debug_session\" ";
 	echo "onclick=\"cb_hide_show(this, $('#debug_session_data'));\" />Show session data<br >\n";
