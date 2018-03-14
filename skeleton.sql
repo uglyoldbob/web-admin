@@ -28,10 +28,11 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `contact_permission` (
+CREATE TABLE `user_permission` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id1` int(11) DEFAULT NULL,
-  `id2` int(11) NOT NULL,
+  `id2` int(11) DEFAULT NULL,
+  `field` varchar(32) DEFAULT NULL,
   `permission` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `id1` (`id1`,`id2`)

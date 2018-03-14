@@ -22,7 +22,7 @@ class Autoloader
 Autoloader::register();
 
 require_once("webAdmin/exceptions.php");
-require_once("global.php");
+require_once("webAdmin/global.php");
 
 if (!headers_sent())
 {
@@ -38,17 +38,17 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config($config);
+	\webAdmin\test_config($config);
 
 	global $mysql_db;
-	$mysql_db = openDatabase($config);
+	$mysql_db = \webAdmin\openDatabase($config);
 	
 	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-	start_my_session();	//start php session
+	\webAdmin\start_my_session();	//start php session
 
 ?>
-	<title>Payment Details: <?php sitename($config)?></title>
-	<?php do_css($config) ?>
+	<title>Payment Details: <?php \webAdmin\sitename($config)?></title>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 
 	<body>
@@ -122,7 +122,7 @@ try
 		$start_page = 0;
 	}
 	
-	do_top_menu(1, $config);
+	\webAdmin\do_top_menu(1, $config);
 	if ($_POST["action"] == "apply")
 	{	//apply the stuff
 		$error = 0;
@@ -276,9 +276,9 @@ try
 		{
 			$query = "SELECT * FROM payments WHERE payment_id = " .
 				$id_num;
-			if (getPeriodComparison("date_earned") != "")
+			if (\webAdmin\getPeriodComparison("date_earned") != "")
 			{
-				$query = $query . " AND" . getPeriodComparison("date_earned");
+				$query = $query . " AND" . \webAdmin\getPeriodComparison("date_earned");
 			}
 		}
 		else
@@ -340,23 +340,23 @@ try
 	if ($contact != 0)
 	{
 		echo "<h3>Payment Details for: ";
-		echo print_contact($contact);
+		echo \webAdmin\print_contact($contact);
 		echo "</h3>\n";
 	
-		echo "<form action=\"" . rootPageURL($config) . "/contacts.php?contact=" . 
+		echo "<form action=\"" . \webAdmin\rootPageURL($config) . "/contacts.php?contact=" . 
 			$contact . "\" method=\"post\">\n" .
 			"	<input type=\"hidden\" name=\"action\"" . 
 			" value=\"view\">\n" .
 			"	<input class=\"buttons\" type=\"submit\" value=\"View  ";
-		echo print_contact($contact);
+		echo \webAdmin\print_contact($contact);
 		echo "'s Information\"/>\n" . "</form>\n";
 
 		$query = "SELECT COUNT( *  ) AS `Rows` , `category`" .
 			"FROM `payments` WHERE (paid_by = " . $contact .
 			" OR pay_to = " . $contact . ")";
-		if (getPeriodComparison("date_earned") != "")
+		if (\webAdmin\getPeriodComparison("date_earned") != "")
 		{
-			$query = $query . " AND" . getPeriodComparison("date_earned");
+			$query = $query . " AND" . \webAdmin\getPeriodComparison("date_earned");
 		}
 		$query = $query . " GROUP BY `category` ORDER BY `category`";
 		$categories = $mysql_db->query($query);
@@ -364,7 +364,7 @@ try
 		{
 			if ($row['Rows'] != 0)
 			{
-			echo "<form action=\"" . rootPageURL($config) . 
+			echo "<form action=\"" . \webAdmin\rootPageURL($config) . 
 				"/payments.php\" method=\"get\">\n" .
 				'	<input type="hidden" name="contact"' .
 				' value="' . $contact . "\">\n" .
@@ -372,7 +372,7 @@ try
 				' value="' . $row['category'] . '">' . "\n" .
 				'	<input class="buttons" type="submit" value=' . 
 				'"View Category: ' . $row['category']  . " " .
-				get_category_sum($contact, $row['category']) .
+				\webAdmin\get_category_sum($contact, $row['category']) .
 				'"/>' . "\n</form>\n";
 			}
 		}
@@ -409,9 +409,9 @@ try
 				$query = $query . " AND `category` = '" .
 					$category . "'";
 			}
-			if (getPeriodComparison("date_earned") != "")
+			if (\webAdmin\getPeriodComparison("date_earned") != "")
 			{
-				$query = $query . " AND" . getPeriodComparison("date_earned");
+				$query = $query . " AND" . \webAdmin\getPeriodComparison("date_earned");
 			}
 			$query = $query . " ORDER BY date_paid DESC LIMIT " . 
 				($start_page*30) . ", " . ($start_page*30+30);
@@ -424,17 +424,17 @@ try
 				$query = $query . " WHERE `category` = '" .
 					$category . "'";
 			}
-			if (getPeriodComparison("date_earned") != "")
+			if (\webAdmin\getPeriodComparison("date_earned") != "")
 			{
 				if ($category == "")
 				{
 					$query = $query . " WHERE" . 
-						getPeriodComparison("date_earned");
+						\webAdmin\getPeriodComparison("date_earned");
 				}
 				else
 				{
 					$query = $query . " AND" . 
-						getPeriodComparison("date_earned");
+						\webAdmin\getPeriodComparison("date_earned");
 				}
 			}
 			$query = $query . " ORDER BY date_paid DESC LIMIT " . 
@@ -454,7 +454,7 @@ try
 				echo "	<tr>\n";
 			
 				echo "		<td>" . $row['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL($config) . 
+				echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"copy\">\n" .
@@ -463,7 +463,7 @@ try
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
 					"\"Copy\"/>\n" .
 					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL($config) . 
+				echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
 					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"edit\">\n" .
@@ -475,16 +475,16 @@ try
 				echo "</td>\n";
 			
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($config) . 
+				echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
 					"/payments.php?contact=" . $row['pay_to'] . "\"> ";
-				echo print_contact($row['pay_to']);
+				echo \webAdmin\print_contact($row['pay_to']);
 				echo "</a>";
 				echo "</td>\n";
 			
 				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($config) . 
+				echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
 					"/payments.php?contact=" . $row['paid_by'] . "\"> ";
-				echo print_contact($row['paid_by']);
+				echo \webAdmin\print_contact($row['paid_by']);
 				echo "</a>";
 				echo "</td>\n";
 			
@@ -516,10 +516,10 @@ try
 				}
 				echo "$" . $row['amount_earned'] . "</td>\n";
 			
-				echo "		<td>" . blank_check($row['date_earned']) . "</td>\n";
-				echo "		<td>" . blank_check($row['date_paid']) . "</td>\n";
-				echo "		<td>" . blank_check($row['comments']) . "</td>\n";
-				echo "		<td>" . blank_check($row['category']) . "</td>\n";
+				echo "		<td>" . \webAdmin\blank_check($row['date_earned']) . "</td>\n";
+				echo "		<td>" . \webAdmin\blank_check($row['date_paid']) . "</td>\n";
+				echo "		<td>" . \webAdmin\blank_check($row['comments']) . "</td>\n";
+				echo "		<td>" . \webAdmin\blank_check($row['category']) . "</td>\n";
 			
 				if ($contact != 0)
 				{
@@ -553,7 +553,7 @@ try
 				}
 				else
 				{
-					echo "		<td>" . '<a href="' . rootPageURL($config) .
+					echo "		<td>" . '<a href="' . \webAdmin\rootPageURL($config) .
 						'/' . $row['invoice'] . 
 						'" target="_blank">Download</a></td>' . "\n";
 				}
@@ -576,14 +576,14 @@ try
 		{
 			if ($start_page > 0)
 			{
-				echo '<a href="' . rootPageURL($config) . 
+				echo '<a href="' . \webAdmin\rootPageURL($config) . 
 					'/payments.php?contact=' . $contact . 
 					'&page=' . ($start_page-1) . 
 					'">Previous page</a>  ';
 			}
 			if ($next_page == 1)
 			{
-				echo '<a href="' . rootPageURL($config) . '/payments.php?contact=' .
+				echo '<a href="' . \webAdmin\rootPageURL($config) . '/payments.php?contact=' .
 					$contact . '&page=' . ($start_page+1) . 
 					'">Next page</a>' . "<br >\n";
 			}
@@ -599,16 +599,16 @@ try
 		else
 		{
 			if ($start_page > 0)
-				echo '<a href="' . rootPageURL($config) . 
+				echo '<a href="' . \webAdmin\rootPageURL($config) . 
 					'/payments.php?page=' . ($start_page-1) . 
 					'">Previous page</a>  ';
 			if ($next_page == 1)
 			{
-				echo '<a href="' . rootPageURL($config) . '/payments.php?page=' . 
+				echo '<a href="' . \webAdmin\rootPageURL($config) . '/payments.php?page=' . 
 					($start_page+1) . '">Next page</a>' . "<br >\n";
 			}
 
-			echo "	<form action=\"" . rootPageURL($config) . 
+			echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
 				"/payments.php\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"action\" value=\"edit\">\n" .
@@ -626,7 +626,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -640,7 +640,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -654,7 +654,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -668,7 +668,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 {
 	echo "<h3>Invalid username or password</h3>\n";
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -676,7 +676,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -685,7 +685,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 catch (\webAdmin\NotLoggedInException $e)
 {
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -693,7 +693,7 @@ catch (\webAdmin\NotLoggedInException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -711,7 +711,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

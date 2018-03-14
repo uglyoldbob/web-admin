@@ -1,5 +1,5 @@
 <?php
-
+namespace webAdmin;
 include_once("passwords.php");
 
 function test_config($config)
@@ -70,6 +70,38 @@ function do_css($config)
 	}
 	do_css_one_file($file, "media=\"only screen and (max-device-width: 800px)\"");
 
+}
+
+function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions, $autolist)
+{
+	echo "<div>\n";
+	echo $disp . "\n";
+	echo '<input class="fields" type="text" autocomplete="off" value="';
+	if ($fill_val != 0)
+	{
+		echo print_contact($fill_val);
+	}
+	else
+	{
+		$fill_val = '';
+	}
+	echo '" name="' . $name . '" id="' . $name . '" 
+		onkeyup="lookupLastName(this.value, \'' . $fillfunc . '\', 
+			$(\'#' . $suggestions . '\'), 
+			$(\'#' . $autolist . '\'),
+			&quot;$(\'#' . $name . '\')&quot;,
+			&quot;$(\'#' . $id . '\')&quot;,
+			&quot;$(\'#' . $suggestions . '\')&quot;);"
+		 >' . "\n";
+		 //onblur="&quot;$(\'#' . $suggestions . '\')&quot;.hide().delay(500);"
+		 //TODO when the onblur is added, autocomplete fails to insert data
+	echo '	<div id="' . $suggestions . '" style="display: none;">' . "\n";
+	echo '		<div id="' . $autolist . '">' . "\n";
+	echo '			&nbsp;' . "\n";
+	echo '		</div>' . "\n";
+	echo '	</div><br >' . "\n";
+	echo '	 <input type="hidden" value="' . $fill_val . '" name="' . $id . '" id="' . $id . '">' . "\n";
+	echo "</div>\n";
 }
 
 function do_top_menu($indx, $config)
@@ -235,7 +267,7 @@ function start_my_session()
 //open database connection
 function openDatabase($config)
 {
-	$mysql_db = new mysqli($config["database_server"], 
+	$mysql_db = new \mysqli($config["database_server"], 
 		$config["database_username"], $config["database_password"], 
 		$config["database_name"], $config["database_port"]);
 	if ($mysql_db->connect_errno)
@@ -245,112 +277,6 @@ function openDatabase($config)
 	//TODO: implement calling this function
 	//mysqli_set_charset()
 	return $mysql_db;
-}
-
-
-//r = read
-//w = write
-//p = modify password
-function check_permission($table, $idfrom, $idto, $mask)
-{	//returns an array containing "master", "public", "global", "normal", "none"
-	global $mysql_db;
-	$output = array();
-	$query = "SELECT * FROM `" . $table . "` WHERE " .
-		"((id1 IS NULL) OR (id1 = " . $idto . ")) AND " .
-		"((id2 IS NULL) OR (id2 = " . $idfrom . ")) " .
-		"AND (permission LIKE '" . $mask . "');";
-	$result = $mysql_db->query($query);
-	if ($row = $result->fetch_array(MYSQLI_BOTH))
-	{
-		do
-		{
-			if (!is_null($row['id1']) && !is_null($row['id2']))
-			{
-				array_push($output, array($row['id'], "normal"));
-			}
-			else if (is_null($row['id1']) && !is_null($row['id2']))
-			{
-				array_push($output, array($row['id'], "global"));
-			}
-			else if (!is_null($row['id1']) && is_null($row['id2']))
-			{
-				array_push($output, array($row['id'], "public"));
-			}
-			else if (is_null($row['id1']) && is_null($row['id2']))
-			{
-				array_push($output, array($row['id'], "master"));
-			}
-		} while ($row = $result->fetch_array(MYSQLI_BOTH));
-	}
-	else
-	{
-		array_push($output, array($row['id'], "none"));
-	}
-	$result->close();
-	
-	return $output;
-}
-
-function check_specific_permission($results, $permission)
-{	//check for the presence of a certain type of permission
-	//use on the results of check_permission
-	foreach ($results as $permcheck)
-	{
-		if ($permcheck[1] == $permission)
-		{
-			return "yes";
-		}
-	}
-	return "no";
-}
-
-function mod_permission($table, $idfrom, $idto, $op, $perm)
-{	//used to add or remove a single attribute from a permission table
-	global $mysql_db;
-	
-	//should detect null values
-	if ((is_numeric($idto) == FALSE) || (is_numeric($idfrom) == FALSE))
-	{
-		echo "<b>You can't do that</b><br >\n";
-		return;
-	}
-	
-	$permcheckarray = check_permission($table, $idfrom, $idto, '%' . $perm . '%');
-
-	//because there could be multiple elements 	
-	foreach ($permcheckarray as $permcheck)
-	{
-		if ($permcheck[1] == "normal")
-		{	//regular permission exists
-			if ($op == "-")
-			{	//remove the permission that exists
-				$query = "UPDATE `" . $table . "` SET permission = " .
-					"REPLACE(permission, '" . $perm . "', '') WHERE (id = " .
-					$permcheck[0] . ") AND (id1 = " . $idto . ");";
-				$mysql_db->query($query);
-				//TODO: remove rows that do not add permissions
-			}
-		}
-		else if ($permcheck[1] == "none")
-		{	//no permission exists
-			if ($op == "+")
-			{	//try to add to an existing normal permission
-				$query = "UPDATE `" . $table . "` SET permission = " .
-					"CONCAT(permission, '" . $perm . "') WHERE (id = " .
-					$idfrom . ") AND (id1 = " . $idto . ");";
-				if($result = $mysql_db->query($query))
-				{
-					if ($mysql_db->affected_rows == 0)
-					{	//add a new normal permission entry
-						$query = "INSERT INTO `" . $table . "` (id1, id2, permission)" .
-							" VALUES ('" . $idto . "', '" . $idfrom . "', '" . $perm .
-							"');";
-						$mysql_db->query($query);
-					}
-				}
-			}
-		}
-	}
 }
 
 function selectTimePeriod()

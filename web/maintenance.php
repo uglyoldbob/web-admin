@@ -22,7 +22,7 @@ class Autoloader
 Autoloader::register();
 
 require_once("webAdmin/exceptions.php");
-require_once("global.php");
+require_once("webAdmin/global.php");
 
 if (!headers_sent())
 {
@@ -38,17 +38,17 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config($config);
+	\webAdmin\test_config($config);
 
 	global $mysql_db;
-	$mysql_db = openDatabase($config);
+	$mysql_db = \webAdmin\openDatabase($config);
 	
 	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-	start_my_session();	//start php session
+	\webAdmin\start_my_session();	//start php session
 
 	?>
-	<title>Maintenance: <?php sitename($config)?></title>
-	<?php do_css($config) ?>
+	<title>Maintenance: <?php \webAdmin\sitename($config)?></title>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 
@@ -81,7 +81,7 @@ try
 		$id_valid = 0;
 	}
 
-	do_top_menu(5, $config);
+	\webAdmin\do_top_menu(5, $config);
 
 	if (isset($_POST["action"]))
 	{
@@ -179,7 +179,7 @@ try
 			$expense_found = 1;
 			echo "	<tr>\n";				
 			echo "		<td>" . $expenserow['payment_id'] . " ";
-			echo "	<form action=\"" . rootPageURL($config) . 
+			echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
 				"/payments.php\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"action\" value=\"edit\">\n" .
@@ -188,7 +188,7 @@ try
 				"		<input class=\"buttons\" type=\"submit\" value=" . 
 				"\"Edit\"/>\n" .
 				"	</form>\n";
-			echo "	<form action=\"" . rootPageURL($config) . 
+			echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
 					"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"action\" value=\"remove_expense\">\n" .
@@ -200,14 +200,14 @@ try
 			echo "</td>\n";
 		
 			echo "		<td>";
-			echo "<a href=\"" . rootPageURL($config) . 
+			echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
 				"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
 			echo print_contact($expenserow['pay_to']);
 			echo "</a>";
 			echo "</td>\n";
 		
 			echo "		<td>";
-			echo "<a href=\"" . rootPageURL($config) . 
+			echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
 				"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
 			echo print_contact($expenserow['paid_by']);
 			echo "</a>";
@@ -264,7 +264,7 @@ try
 			}
 			else
 			{
-				echo "		<td>" . '<a href="' . rootPageURL($config) .
+				echo "		<td>" . '<a href="' . \webAdmin\rootPageURL($config) .
 					'/' . $expenserow['invoice'] . 
 					'" target="_blank">Download</a></td>' . "\n";
 			}
@@ -292,7 +292,7 @@ try
 		
 		if (isset($_SESSION['payment_reference']))
 		{
-			echo "    <form action=\"" . rootPageURL($config) . 
+			echo "    <form action=\"" . \webAdmin\rootPageURL($config) . 
 				"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
 				"		<input type=\"hidden\" name=" . 
 				"\"action\" value=\"add_expense\">\n" .
@@ -306,7 +306,7 @@ catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -320,7 +320,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -334,7 +334,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -348,7 +348,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 {
 	echo "<h3>Invalid username or password</h3>\n";
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -356,7 +356,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -365,7 +365,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 catch (\webAdmin\NotLoggedInException $e)
 {
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -373,7 +373,7 @@ catch (\webAdmin\NotLoggedInException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -391,7 +391,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>

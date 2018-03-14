@@ -22,7 +22,7 @@ class Autoloader
 Autoloader::register();
 
 require_once("webAdmin/exceptions.php");
-require_once("global.php");
+require_once("webAdmin/global.php");
 
 if (!headers_sent())
 {
@@ -38,17 +38,17 @@ if (!headers_sent())
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config($config);
+	\webAdmin\test_config($config);
 	
 	global $mysql_db;
-	$mysql_db = openDatabase($config);
+	$mysql_db = \webAdmin\openDatabase($config);
 	
 	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-	start_my_session();	//start php session
+	\webAdmin\start_my_session();	//start php session
 	
 ?>
-	<title>Contact Listing: <?php sitename($config)?></title>
-	<?php do_css($config) ?>
+	<title>Contact Listing: <?php \webAdmin\sitename($config)?></title>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 
@@ -58,16 +58,13 @@ try
 
 	$currentUser->show_register_certificate_button();
 	$currentUser->require_login_or_registered_certificate();
-	
-	$contacts = new \webAdmin\contacts($config);
-	#TODO : add photos for contacts
 
-	do_top_menu(2, $config);
+	\webAdmin\do_top_menu(2, $config);
 
 	//update contact information
 	if ($_POST["action"] == "update")
 	{
-		$contacts->update($_POST);
+		$currentUser->update($_POST, 1);
 		$_POST["action"] = "";	//go back to contact viewing
 	}
 	else if ($_POST["action"] == "cpass")
@@ -96,14 +93,14 @@ try
 			$val = 0;
 		}
 		$userid = $_SESSION['user']['emp_id'];
-		$allow = check_permission("contact_permission", $userid, $val, "%p%");
-		if (check_specific_permission($allow, "global") == "yes")
+		$allow = \webAdmin\check_permission("contact_permission", $userid, $val, "%p%");
+		if (\webAdmin\check_specific_permission($allow, "global") == "yes")
 		{
 			$newpass = $mysql_db->real_escape_string($_POST['pass2']);
 			$passmatch = $mysql_db->real_escape_string($_POST['pass3']);
 			if ($newpass == $passmatch)
 			{
-				contacts::mod_user_pword($val, $newpass);
+				//contacts::mod_user_pword($val, $newpass);
 			}
 			else
 			{
@@ -121,25 +118,25 @@ try
 	//edit or view contact information
 	if (($_POST["action"] == "edit"))
 	{
-		$contacts->single();
+		//$contacts->single();
 	}
 	else if ($_POST["action"] == "create")
 	{
 		echo "<h3>Creating new contact:</h3>\n<br >\n";
-		$contacts->make_form(0, '', '', '',
+		$currentUser->make_form(0, '', '', '',
 			'', '', '', '', '',
 			'', '', '', '', '', '', '');
 	}
 	else if ($_POST["action"] == "")
 	{	//display all contacts
-		$contacts->table();
+		$currentUser->table();
 	}
 }
 catch (\webAdmin\ConfigurationMissingException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -153,7 +150,7 @@ catch (\webAdmin\DatabaseConnectionFailedException $e)
 {
 	?>
 	<title>Site Configuration Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Site configuration error</h1>
@@ -167,7 +164,7 @@ catch (\webAdmin\PermissionDeniedException $e)
 {
 	?>
 	<title>Permission Denied</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Permission Denied</h1>
@@ -181,7 +178,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 {
 	echo "<h3>Invalid username or password</h3>\n";
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -189,7 +186,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -198,7 +195,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 catch (\webAdmin\NotLoggedInException $e)
 {
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -206,7 +203,7 @@ catch (\webAdmin\NotLoggedInException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -224,7 +221,7 @@ catch (Exception $e)
 {
 	?>
 	<title>Error</title>
-	<?php do_css($config) ?>
+	<?php \webAdmin\do_css($config) ?>
 	</head>
 	<body>
 	<h1>Error</h1>
