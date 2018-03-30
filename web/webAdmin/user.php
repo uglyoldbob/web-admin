@@ -267,7 +267,7 @@ class user
 			try
 			{
 				$this->require_registered_certificate();
-				echo "You have an unregistered certificate<br />\n";
+				echo "You have a registered certificate<br />\n";
 			}
 			catch (CertificateException $e)
 			{
