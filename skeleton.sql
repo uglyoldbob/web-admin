@@ -144,7 +144,6 @@ CREATE TABLE `job_tasks` (
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `locations` (
   `id` int(32) NOT NULL AUTO_INCREMENT,
-  `owner` int(11) NOT NULL,
   `position` int(32) NOT NULL DEFAULT '0',
   `description` varchar(255) NOT NULL,
   `location` varchar(255) NOT NULL,

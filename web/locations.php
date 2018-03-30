@@ -140,7 +140,7 @@ try
 
 	if ($_POST["action"] == "do_equ")
 	{
-		\webAdmin\do_equ(1);
+		\webAdmin\location::create_equipment($mysql_db);
 	}
 
 	if ($_POST["action"] == "confirm_del_equ")
@@ -190,14 +190,15 @@ try
 		$_POST["action"] = "";
 	}
 
-	if (($_POST["action"] == "del_equ") && ($_POST["move"] != ""))
+	if (($_POST["action"] == "del_equ") && array_key_exists("move", $_POST))
 	{
-		$amount = $_POST['amount'];	//possible number of items to delete
+		$amount = $_POST['amount'];	//possible number of items to move
 	
 		echo "<form method='POST'>\n";
+		$j = 0;
 		for ($i = 0; $i < $amount; $i++)
 		{
-			if ($mysql_db->real_escape_string($_POST['data'][$i]['delete']) == "on")
+			if ($_POST['data'][$i]['delete'] == "on")
 			{
 				$query = "SELECT * FROM equipment WHERE id = " .
 					$mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
@@ -214,13 +215,13 @@ try
 		}
 
 
-		$query = "SELECT * FROM locations WHERE id = position;";
+		$query = "SELECT * FROM locations WHERE position = $root_number;";
 		$results = $mysql_db->query($query);
 		if ($row = $results->fetch_array(MYSQLI_BOTH))
 		{
 			echo "	<select name=\"move_to\">\n";
 			echo "		<option value=\"nothing\">Select a location</option>\n";
-			\webAdmin\list_location("MASTER", $row['id'], $database);
+			\webAdmin\list_location("", $root_number, $database);
 			echo "	</select>\n";
 			echo "	<input type=\"hidden\" name=\"action\" value=\"move_equ\"><br>\n";
 			echo "  <input type=\"hidden\" name=\"amount\" value=" . $j . "><br >\n";
@@ -229,7 +230,7 @@ try
 		}
 	}
 
-	if (($_POST["action"] == "del_equ") && ($_POST["delete"] != ""))
+	if (($_POST["action"] == "del_equ") && array_key_exists("delete", $_POST))
 	{
 		$amount = $_POST['amount'];	//possible number of items to delete
 		if (is_numeric($location) == FALSE)
@@ -280,7 +281,7 @@ try
 
 	if ($_POST["action"] == "add_equ")
 	{	
-		\webAdmin\do_equ(0);
+		\webAdmin\location::new_equipment_form($config, $location);
 	}
 
 
@@ -460,7 +461,7 @@ try
 					}
 					else
 					{
-						echo \webAdmin\no_image() . "\n";
+						echo '<div style="width:128px;height:96px;border:1px solid #000;">No Image</div>' . "\n";
 						echo "		";
 					}
 					echo "</a></td>\n";
