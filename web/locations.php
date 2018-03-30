@@ -62,42 +62,20 @@ try
 	if (isset($_GET["id"]))
 	{
 		$location = $_GET["id"];
+		$root_location = 0;
 	}
 	else
 	{
 		$location = 0;
+		$root_location = 1;
 	}
 	if (is_numeric($location) == FALSE)
 	{
 		$location = 0;
+		$root_location = 1;
 	}
 
-	$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
-	$results = $mysql_db->query($query);
-	if ($results && ($results->num_rows > 0))
-	{
-		if ($row = $results->fetch_array(MYSQLI_BOTH))
-		{
-			if (($location == 0) || ($row['id'] == $location))
-			{
-				$root_number = $row['id'];
-				$location = $root_number;
-				$root_location = 1;
-			}
-			else
-			{
-				$root_location = 0;
-			}
-		}
-		else
-		{
-			$root_location = 0;
-		}
-	}
-	else
-	{
-		$root_location = 0;
-	}
+	$root_number = 0;
 
 	\webAdmin\do_top_menu(4, $config);
 
@@ -110,23 +88,23 @@ try
 	
 		$scan_loc = 0;
 	
-		$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
+		$query = "SELECT * FROM locations WHERE id = " . $location . ";";
 		$results = $mysql_db->query($query);
 		if ($row = $results->fetch_array(MYSQLI_BOTH))
 		{
 			$return_to = $row['position'];
 		}
 	
-		$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND position = " . $location . ";";
+		$query = "SELECT * FROM locations WHERE position = " . $location . ";";
 		$results = $mysql_db->query($query);
 		if ($row = $results->fetch_array(MYSQLI_BOTH))
 		{
 			$scan_loc = 1;
 		}
 	
-		$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND location = " . $location . ";";
+		$query = "SELECT * FROM equipment WHERE location = " . $location . ";";
 		$results = $mysql_db->query($query);
-		if ($row = $results->fetch_array(MYSQLI_BOTH))
+		if ($results && ($row = $results->fetch_array(MYSQLI_BOTH)))
 		{
 			$scan_loc = 1;
 		}
@@ -136,7 +114,7 @@ try
 			throw new Exception('This location cannot be deleted because it contains locations/equipment');
 		}
 	
-		$query = "DELETE FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
+		$query = "DELETE FROM locations WHERE id = " . $location . ";";
 		if (!$mysql_db->query($query))
 		{
 			throw new Exception("Error: " . $mysql_db->error . "<br >\n");
@@ -152,12 +130,12 @@ try
 
 	if ($_POST["action"] == "do_loc")
 	{	//apply location changes
-		\webAdmin\do_loc(1);
+		\webAdmin\location::create_location($mysql_db);
 	}
 
 	if ($_POST["action"] == "add_loc")
 	{	//create menu to ask how to change locations
-		\webAdmin\do_loc(0);
+		\webAdmin\location::new_location_form($config, $location);
 	}
 
 	if ($_POST["action"] == "do_equ")
@@ -173,8 +151,7 @@ try
 		
 		for ($i = 0; $i < $amount; $i++)
 		{
-			$query = "DELETE FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . 
-				" AND id = " . $mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
+			$query = "DELETE FROM equipment WHERE id = " . $mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
 			if (!$mysql_db->query($query))
 			{
 				throw new Exception("Error: " . $mysql_db->error . "<br >\n");
@@ -202,8 +179,7 @@ try
 		
 		for ($i = 0; $i < $amount; $i++)
 		{
-			$query = "UPDATE equipment SET location = " . $move_to . " WHERE OWNER = " . $_SESSION['user']['emp_id'] . 
-				" AND id = " . $mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
+			$query = "UPDATE equipment SET location = " . $move_to . " WHERE id = " . $mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
 			if (!$mysql_db->query($query))
 			{
 				throw new Exception("Error: " . $mysql_db->error . "<br >\n");
@@ -223,7 +199,7 @@ try
 		{
 			if ($mysql_db->real_escape_string($_POST['data'][$i]['delete']) == "on")
 			{
-				$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " .
+				$query = "SELECT * FROM equipment WHERE id = " .
 					$mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
 				$results =$mysql_db->query($query);
 				if ($row = $results->fetch_array(MYSQLI_BOTH))
@@ -238,7 +214,7 @@ try
 		}
 
 
-		$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = position;";
+		$query = "SELECT * FROM locations WHERE id = position;";
 		$results = $mysql_db->query($query);
 		if ($row = $results->fetch_array(MYSQLI_BOTH))
 		{
@@ -270,7 +246,7 @@ try
 		{
 			if ($mysql_db->real_escape_string($_POST['data'][$i]['delete']) == "on")
 			{
-				$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " .
+				$query = "SELECT * FROM equipment WHERE id = " .
 					$mysql_db->real_escape_string($_POST['data'][$i]['id']) . ";";
 				$results = $mysql_db->query($query);
 				if ($row = $results->fetch_array(MYSQLI_BOTH))
@@ -310,17 +286,12 @@ try
 
 	if ($_POST["action"] == "")
 	{
-		$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $location . ";";
-		$results = $mysql_db->query($query);
-		if ($results && ($row = $results->fetch_array(MYSQLI_BOTH)))
+		if ($location != $root_number)
 		{
-			$loc_name = $row['description'];
-			$query2 = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . 
-				" AND id = " . $row['position'] . ";";
-			$results2 = $mysql_db->query($query2);
-			if ($row2 = $results2->fetch_array(MYSQLI_BOTH))
+			$query = "SELECT * FROM locations WHERE id = " . $location . ";";
+			$results = $mysql_db->query($query);
+			if ($results && ($row = $results->fetch_array(MYSQLI_BOTH)))
 			{
-				$loc_name = $row['description'];
 				if ($root_location == 0)
 				{
 					echo "<h2>Information for location " . $row['description'] . 
@@ -332,29 +303,43 @@ try
 					}
 					else
 					{
-						echo \webAdmin\no_image() . " <br >\n";
+						echo '<div style="width:128px;height:96px;border:1px solid #000;">No Image</div>' . " <br >\n";
 					}
 					//TODO: add capability of changing, removing, adding a photo for the location
 				}
+				$loc_name = $row['description'];
+				if ($row['position'] != $root_number)
+				{
+					$query2 = "SELECT * FROM locations WHERE id = " . $row['position'] . ";";
+					$results2 = $mysql_db->query($query2);
+					if ($row2 = $results2->fetch_array(MYSQLI_BOTH))
+					{
+						$loc_name = $row['description'];
+						if ($root_location == 0)
+						{
+							echo '<a href="' . \webAdmin\rootPageURL($config) . '/locations.php?id=' . $row2['id'] . '">Return to ' . 
+								$row2['description'] . '</a>' . "<br >\n";
+						}
+					}
+					else
+					{
+						throw new Exception('An internal error occurred');
+					}
+				}
 				else
 				{
-					//TODO: can a root location have a photo? if so the previous TODOS go after this if/else statement
-					echo "<h2>Information for top-level locations</h2><br >\n";
-				}
-				if ($root_location == 0)
-				{
-					echo '<a href="' . \webAdmin\rootPageURL($config) . '/locations.php?id=' . $row2['id'] . '">Return to ' . 
-						$row2['description'] . '</a>' . "<br >\n";
+					echo '<a href="' . \webAdmin\rootPageURL($config) . '/locations.php">Return to main locations</a>' . "<br >\n";
 				}
 			}
 			else
 			{
-				throw new Exception('An internal error occurred');
+				echo "No locations found<br />\n";
+				$root_location = 1;
 			}
 		}
 		else
 		{
-			throw new Exception('Invalid location (' . $location . ') specified');
+			$root_location = 1;
 		}
 	
 		if ($root_location == 0)
@@ -366,37 +351,40 @@ try
 				"</form>";
 		}
 	
-		$query = "SELECT * FROM locations WHERE owner = " . $_SESSION['user']['emp_id'] . " AND position = " . $location . 
+		$query = "SELECT * FROM locations WHERE position = " . $location . 
 			" ORDER BY description;";
 		$results = $mysql_db->query($query);
 	
 		$locations_exist = 0;
 	
-		while($row = $results->fetch_array(MYSQLI_BOTH))
+		if ($results)
 		{
-			if ($row['id'] != $root_number)
+			while($row = $results->fetch_array(MYSQLI_BOTH))
 			{
-				if ($locations_exist == 0)
+				if ($row['id'] != $root_number)
 				{
-					echo "<div class=\"loc_grid\">\n";
-					echo "	<h3>Locations : </h3><br >\n";
-					$locations_exist = 1;
-				}
+					if ($locations_exist == 0)
+					{
+						echo "<div class=\"loc_grid\">\n";
+						echo "	<h3>Locations : </h3><br >\n";
+						$locations_exist = 1;
+					}
 
-				echo "	<div class=\"loc_grid_elem\">\n";
-				echo '		<a href="' . \webAdmin\rootPageURL($config) . '/locations.php?id=' . $row['id'] . "\"><br>\n";
+					echo "	<div class=\"loc_grid_elem\">\n";
+					echo '		<a href="' . \webAdmin\rootPageURL($config) . '/locations.php?id=' . $row['id'] . "\"><br>\n";
 
-				if ($row['img_id'])
-				{
-					echo '		<img src="' . \webAdmin\rootPageURL($config) .
-						'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">";
+					if ($row['img_id'])
+					{
+						echo '		<img src="' . \webAdmin\rootPageURL($config) .
+							'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">";
+					}
+					else
+					{
+						echo '<div style="width:128px;height:96px;border:1px solid #000;">No Image</div>';
+					}
+					echo $row['description'] . ' (' . $row['location'] . ')</a>' . "<br >\n";
+					echo "	</div>\n";
 				}
-				else
-				{
-					echo \webAdmin\no_image();
-				}
-				echo $row['description'] . ' (' . $row['location'] . ')</a>' . "<br >\n";
-				echo "	</div>\n";
 			}
 		}
 	
@@ -424,93 +412,100 @@ try
 		}
 		echo "</form>";
 	
-		$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND location = " . $location . 
-			" ORDER BY name;";
-		$results = $mysql_db->query($query);
-		$equipment_exist = 0;
 	
-		while($row = $results->fetch_array(MYSQLI_BOTH))
+		if ($root_location == 0)
 		{
+			$query = "SELECT * FROM equipment WHERE location = " . $location . 
+				" ORDER BY name;";
+			$results = $mysql_db->query($query);
+			$equipment_exist = 0;
+		
+			if ($results)
+			{
+				while($row = $results->fetch_array(MYSQLI_BOTH))
+				{
+					if ($equipment_exist == 0)
+					{
+						echo "<h3>Equipment : </h3><br >\n";
+						$equipment_exist = 1;
+						$i = 0;
+						echo "<form method='post'>\n";
+						echo "<table border=\"1\">\n";
+						echo "	<tr>\n";
+						echo "		<th></th>\n";
+						echo "		<th>Photo</th>\n";
+						echo "		<th>Quantity</th>\n";
+						echo "		<th>Units</th>\n";
+						echo "		<th>Name</th>\n";
+						echo "		<th>Description</th>\n";
+						echo "	</tr>\n";
+					}
+					//echo '<a href="' . rootPageURL($config) . '/equipment.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
+					//echo $row['quantity'] . " " . $row['unit'] . " " . $row['name'] . ", (" . $row['description'] . ")<br >\n";
+
+					echo "	<tr>\n";
+
+					echo "		<td>\n";
+					echo "			<input name=\"data[" . $i . "][delete]\" type=\"checkbox\">\n";
+					echo "			<input type=\"hidden\" name=\"data[" . $i . "][id]\" value=\"" . $row['id'] . "\">\n";
+					echo "		</td>\n";
+					$i = $i + 1;
+
+					echo "		<td><a href=maintenance.php?id=" . $row['id'] . ">\n";
+					if ($row['img_id'])
+					{
+						echo '<img src="' . \webAdmin\rootPageURL($config) .
+								'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">\n";
+						echo "		";
+					}
+					else
+					{
+						echo \webAdmin\no_image() . "\n";
+						echo "		";
+					}
+					echo "</a></td>\n";
+
+
+
+					echo "		<td>" . $row['quantity'] . "</td>\n";
+					echo "		<td>" . $row['unit'] . "</td>\n";
+					echo "		<td>" . $row['name'] . "</td>\n";
+					echo "		<td>" . $row['description'] . "</td>\n";
+					
+					echo "	</tr>\n";
+				}
+			}
+		
 			if ($equipment_exist == 0)
 			{
-				echo "<h3>Equipment : </h3><br >\n";
-				$equipment_exist = 1;
-				$i = 0;
-				echo "<form method='post'>\n";
-				echo "<table border=\"1\">\n";
-				echo "	<tr>\n";
-				echo "		<th></th>\n";
-				echo "		<th>Photo</th>\n";
-				echo "		<th>Quantity</th>\n";
-				echo "		<th>Units</th>\n";
-				echo "		<th>Name</th>\n";
-				echo "		<th>Description</th>\n";
-				echo "	</tr>\n";
-			}
-			//echo '<a href="' . rootPageURL($config) . '/equipment.php?id=' . $row['id'] . '">' . $row['description']. '</a>' . "<br >\n";
-			//echo $row['quantity'] . " " . $row['unit'] . " " . $row['name'] . ", (" . $row['description'] . ")<br >\n";
-
-			echo "	<tr>\n";
-
-			echo "		<td>\n";
-			echo "			<input name=\"data[" . $i . "][delete]\" type=\"checkbox\">\n";
-			echo "			<input type=\"hidden\" name=\"data[" . $i . "][id]\" value=\"" . $row['id'] . "\">\n";
-			echo "		</td>\n";
-			$i = $i + 1;
-
-			echo "		<td><a href=maintenance.php?id=" . $row['id'] . ">\n";
-			if ($row['img_id'])
-			{
-				echo '<img src="' . \webAdmin\rootPageURL($config) .
-						'/uploads/image.php?id=' . $row['img_id'] . ".jpg&amp;thumb=1\" alt=\"No image\">\n";
-				echo "		";
+				echo "<h3>There is no equipment here</h3><br >\n";
 			}
 			else
 			{
-				echo \webAdmin\no_image() . "\n";
-				echo "		";
+				echo "</table><br>\n";
+				echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
+				echo "	<input type=\"hidden\" name=\"action\" value=\"del_equ\"><br>\n";
+				echo "  <input type=\"hidden\" name=\"amount\" value=" . $i . "><br >\n";
+				echo "	<input type='submit' value='Delete selected equipment' name=\"delete\">\n";
+				echo "	<input type='submit' value='Move selected equipment' name=\"move\">\n";
+				echo "</form>\n";
 			}
-			echo "</a></td>\n";
-
-
-
-			echo "		<td>" . $row['quantity'] . "</td>\n";
-			echo "		<td>" . $row['unit'] . "</td>\n";
-			echo "		<td>" . $row['name'] . "</td>\n";
-			echo "		<td>" . $row['description'] . "</td>\n";
-			
-			echo "	</tr>\n";
+		
+			echo "<form action=\"" . \webAdmin\curPageURL() . "\" method=\"post\">\n" .
+				"	<input type=\"hidden\" name=\"action\" value=\"add_equ\"><br>\n";
+		
+			//TODO : seperate adding multiple pieces of equipment (no photo uploading capabilities and single equipment add (photo upload)
+			if ($root_location == 0)
+			{
+				echo "	<input class=\"buttons\" type=\"submit\" value=\"Add equipment to " . $loc_name . "\">\n";
+			}
+			else
+			{
+				echo "	<input class=\"buttons\" type=\"submit\" value=\"Add equipment\">\n";
+			}
+		
+			echo "</form>";
 		}
-	
-		if ($equipment_exist == 0)
-		{
-			echo "<h3>There is no equipment here</h3><br >\n";
-		}
-		else
-		{
-			echo "</table><br>\n";
-			echo "  <input type=\"hidden\" name=\"position\" value=" . $location . "><br >\n";
-			echo "	<input type=\"hidden\" name=\"action\" value=\"del_equ\"><br>\n";
-			echo "  <input type=\"hidden\" name=\"amount\" value=" . $i . "><br >\n";
-			echo "	<input type='submit' value='Delete selected equipment' name=\"delete\">\n";
-			echo "	<input type='submit' value='Move selected equipment' name=\"move\">\n";
-			echo "</form>\n";
-		}
-	
-		echo "<form action=\"" . \webAdmin\curPageURL() . "\" method=\"post\">\n" .
-			"	<input type=\"hidden\" name=\"action\" value=\"add_equ\"><br>\n";
-	
-		//TODO : seperate adding multiple pieces of equipment (no photo uploading capabilities and single equipment add (photo upload)
-		if ($root_location == 0)
-		{
-			echo "	<input class=\"buttons\" type=\"submit\" value=\"Add equipment to " . $loc_name . "\">\n";
-		}
-		else
-		{
-			echo "	<input class=\"buttons\" type=\"submit\" value=\"Add equipment\">\n";
-		}
-	
-		echo "</form>";
 	}
 }
 catch (\webAdmin\ConfigurationMissingException $e)
