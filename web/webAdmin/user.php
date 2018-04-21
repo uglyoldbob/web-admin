@@ -600,6 +600,139 @@ class user
 		//TODO: handle errors?
 		return $this->mysql_db->insert_id;
 	}
+	
+	public function attempt_registration($attempt_username, $attempt_email, $attempt_pass1)
+	{
+		//validate the email address?
+		if (!filter_var($attempt_email, FILTER_VALIDATE_EMAIL))
+		{
+			echo "Invalid email address!<br>\n";
+			$_POST["action"] = "register";
+			return 0;	//invalid email
+		}
+		if ($this->does_user_exist($attempt_username))
+		{
+			return 0;
+		}
+		
+		//ok, create the user
+		$temp_uid = $this->create_user($attempt_username, $attempt_email);
+		$this->set_user_password($temp_uid, $attempt_pass1);
+		
+		return 1;
+	}
+	
+	public function login_form()
+	{
+		if ($_POST["action"] != 'register')
+		{
+			echo "<b>Please login</b>\n" .
+				"<form action=\"" . \webAdmin\curPageURL($this->config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+				"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
+				"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
+				"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
+				"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
+				"</form>\n";
+		}
+		if ($this->config['allow_user_create'] == 1)
+		{
+			$this->check_register_user();
+			echo $this->user_registration_form();
+		}
+	}
+	
+	public function check_register_user()
+	{
+		if (($_POST["action"] == "create_user") && ($this->config['allow_user_create']=1) &&
+		 ($this->config['user_create_type'] == 'direct'))
+		{
+			if (isset($_POST["username"]))
+			{
+				$attempt_username = $this->mysql_db->real_escape_string($_POST["username"]);
+				
+				if (isset($_POST["email"]))
+				{
+					$attempt_email = $this->mysql_db->real_escape_string($_POST["email"]);
+					if (isset($_POST["pass2"]))
+					{
+						$attempt_pass1 = $this->mysql_db->real_escape_string($_POST["pass2"]);
+						if (isset($_POST["pass3"]))
+						{
+							$attempt_pass2 = $this->mysql_db->real_escape_string($_POST["pass3"]);						
+							if ($attempt_pass1 != $attempt_pass2)
+							{
+								echo "Passwords do not match!<br>\n";
+								$_POST["action"] = "register";
+							}
+							else
+							{
+								if (($attempt_pass1 != '') && 
+									($attempt_username != '') &&
+									($attempt_email != ''))
+								{
+									if ($this->attempt_registration($attempt_username, $attempt_email, $attempt_pass1)==0)
+									{
+										echo "Failed to register<br>\n";
+									}
+									else
+									{
+										echo "Registered successfully<br>\n";
+									}
+								}
+								else
+								{
+									$_POST["action"] = "register";
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	public function user_registration_form()
+	{
+		$ret = "";
+		if ($this->config['allow_user_create']=1)
+		{
+			if (($_POST["action"] == "register"))
+			{
+				if (isset($_POST["username"]))
+				{
+					$previous_username = $this->mysql_db->real_escape_string($_POST["username"]);
+				}
+				else
+				{
+					$previous_username = "";
+				}
+				if (isset($_POST["email"]))
+				{
+					$previous_email = $this->mysql_db->real_escape_string($_POST["email"]);
+				}
+				else
+				{
+					$previous_email = "";
+				}
+				$ret =  	"<form action=\"" . \webAdmin\curPageURL($this->config) . "\" method=\"post\">\n" .
+							"	<input type=\"hidden\" name=\"action\" value=\"create_user\">\n" .
+							"	Username: <input type=\"text\" name=\"username\" ><br>\n" .
+							"	Email: <input type=\"text\" name=\"email\" ><br>\n" .
+							"	Password: <input type=\"password\" name=\"pass2\" ><br>\n" .
+							"	Password again: <input type=\"password\" name=\"pass3\" ><br>\n" .
+							"	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+							"</form>\n";
+			}
+			else
+			{
+				$ret = "<form action=\"" . \webAdmin\curPageURL($this->config) . "\" method=\"post\">\n" .
+				 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
+				 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
+				 "</form>\n";
+			}
+		}
+		return $ret;
+	}
 
 	private function set_user_password($userid, $pw)
 	{

@@ -149,37 +149,11 @@ catch (\webAdmin\PermissionDeniedException $e)
 catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 {
 	echo "<h3>Invalid username or password</h3>\n";
-	echo "<b>Please login</b>\n" .
-		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
-		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
-		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
-		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
-		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
-		"</form>\n";
-	if ($config['allow_user_create'] == 1)
-	{
-		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
-			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
-			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
-			 "</form>\n";
-	}
+	$currentUser->login_form();
 }
 catch (\webAdmin\NotLoggedInException $e)
 {
-	echo "<b>Please login</b>\n" .
-		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
-		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
-		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
-		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
-		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
-		"</form>\n";
-	if ($config['allow_user_create'] == 1)
-	{
-		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
-			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
-			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
-			 "</form>\n";
-	}
+	$currentUser->login_form();
 }
 catch (\webAdmin\CertificateException $e)
 {
