@@ -189,6 +189,7 @@ class indexTest extends ModifiedTestCase
 	 */
 	public function testPage4()
 	{
+		require_once("webAdmin/global.php");
 		$mysql_db = \webAdmin\openDatabase($config);
 		$query = "select * from users;";
 		$result = $mysql_db->query($query);

@@ -23,18 +23,18 @@ class Autoloader
 Autoloader::register();
 
 require_once("webAdmin/exceptions.php");
-require_once("global.php");
+require_once("webAdmin/global.php");
 
 try
 {
 	$config = parse_ini_file("config.ini");
-	test_config($config);
+	\webAdmin\test_config($config);
 
 	global $mysql_db;
-	$mysql_db = openDatabase($config);
+	$mysql_db = \webAdmin\openDatabase($config);
 	
 	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-	start_my_session();	//start php session
+	\webAdmin\start_my_session();	//start php session
 	
 	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
 	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
@@ -77,8 +77,8 @@ try
 		echo "<!DOCTYPE HTML SYSTEM>\n" . 
 			 "<html>\n" . 
 			 "<head>\n" .
-			 "<title>" .sitename($config) . "</title>\n";
-		do_css($config);
+			 "<title>" . \webAdmin\sitename($config) . "</title>\n";
+		\webAdmin\do_css($config);
 		echo	 "</head>\n" .
 			 "<body>\n" .
 			 "<h3>The image cannot be retrieved.</h3>\n<br >\n" .
@@ -144,7 +144,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 {
 	echo "<h3>Invalid username or password</h3>\n";
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -152,7 +152,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
@@ -161,7 +161,7 @@ catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 catch (\webAdmin\NotLoggedInException $e)
 {
 	echo "<b>Please login</b>\n" .
-		"<form action=\"" . curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
+		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
 		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
 		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
 		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
@@ -169,7 +169,7 @@ catch (\webAdmin\NotLoggedInException $e)
 		"</form>\n";
 	if ($config['allow_user_create'] == 1)
 	{
-		echo "<form action=\"" . curPageURL($config) . "\" method=\"post\">\n" .
+		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
 			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
 			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
 			 "</form>\n";
