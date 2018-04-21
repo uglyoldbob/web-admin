@@ -45,38 +45,6 @@ class jobs
 		}
 	}
 	
-	public static function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions, $autolist)
-	{
-		echo "<div>\n";
-		echo $disp . "\n";
-		echo '<input class="fields" type="text" autocomplete="off" value="';
-		if ($fill_val != 0)
-		{
-			echo print_contact($fill_val);
-		}
-		else
-		{
-			$fill_val = '';
-		}
-		echo '" name="' . $name . '" id="' . $name . '" 
-			onkeyup="lookupLastName(this.value, \'' . $fillfunc . '\', 
-				$(\'#' . $suggestions . '\'), 
-				$(\'#' . $autolist . '\'),
-				&quot;$(\'#' . $name . '\')&quot;,
-				&quot;$(\'#' . $id . '\')&quot;,
-				&quot;$(\'#' . $suggestions . '\')&quot;);"
-			 >' . "\n";
-			 //onblur="&quot;$(\'#' . $suggestions . '\')&quot;.hide().delay(500);"
-			 //TODO when the onblur is added, autocomplete fails to insert data
-		echo '	<div id="' . $suggestions . '" style="display: none;">' . "\n";
-		echo '		<div id="' . $autolist . '">' . "\n";
-		echo '			&nbsp;' . "\n";
-		echo '		</div>' . "\n";
-		echo '	</div><br >' . "\n";
-		echo '	 <input type="hidden" value="' . $fill_val . '" name="' . $id . '" id="' . $id . '">' . "\n";
-		echo "</div>\n";
-	}
-	
 	public static function table_of_job_status()
 	{
 		global $mysql_db;
@@ -123,15 +91,18 @@ class jobs
 		}
 		$output .= " >Don't update</option>\n";
 		
-		while ($row = $result->fetch_array(MYSQLI_BOTH))
+		if ($result)
 		{
-			$output .= $prefix . "	<option value=" .
-				$mysql_db->real_escape_string($row['code']);
-			if ($selected == $mysql_db->real_escape_string($row['code']))
-				$output .= " selected";
-			$output .= " >" . 
-				$mysql_db->real_escape_string($row['Description']) .
-				"</option>\n";
+			while ($row = $result->fetch_array(MYSQLI_BOTH))
+			{
+				$output .= $prefix . "	<option value=" .
+					$mysql_db->real_escape_string($row['code']);
+				if ($selected == $mysql_db->real_escape_string($row['code']))
+					$output .= " selected";
+				$output .= " >" . 
+					$mysql_db->real_escape_string($row['Description']) .
+					"</option>\n";
+			}
 		}
 		$output .= $prefix . "</select>\n";		
 		return $output;
@@ -187,9 +158,9 @@ class jobs
 	
 		echo '	<b>Job name: </b><input type="text" autocomplete="off" value="" name="jobname" id="jobname">' . "\n";
 		
-		jobs::make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
+		make_autocomplete("<b>Customer Name:</b>", '', "cust1", "cust1_id", 
 			"fillNames", "cust1_suggest", "cust1_list");
-		jobs::make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
+		make_autocomplete("<b>Deliver to:</b>", '', "cust2", "cust2_id",
 			"fillNames", "cust2_suggest", "cust2_list");
 		
 		echo '	<b>Comments: </b><br >' . "\n" . '<textarea name="comments" id="comments" rows=4 cols=75 ></textarea><br >' . "\n";
@@ -319,10 +290,10 @@ class jobs
 				echo "</td>\n";
 		
 				echo "		<td>";
-				echo print_contact($mysql_db->real_escape_string($row['cust_billing']));
+//				echo print_contact($mysql_db->real_escape_string($row['cust_billing']));
 				echo "</td>\n";
 				echo "		<td>";
-				echo print_contact($mysql_db->real_escape_string($row['cust_shipping']));
+//				echo print_contact($mysql_db->real_escape_string($row['cust_shipping']));
 				echo "</td>\n";
 				echo "		<td>" . $mysql_db->real_escape_string($row['comments']) . "</td>\n";
 		
@@ -356,9 +327,9 @@ class jobs
 				 "	<input type=\"hidden\" name=\"id\" value=\"" . $this->job . "\">\n";
 			
 			echo "	<b>Billing name:</b> ";
-			echo print_contact($row['cust_billing']);
+//			echo print_contact($row['cust_billing']);
 			echo "	<br >\n<b>Shipping name:</b> ";
-			echo print_contact($row['cust_shipping']);
+//			echo print_contact($row['cust_shipping']);
 			echo "	<br >\n";
 
 			//load number information				
@@ -421,10 +392,13 @@ class jobs
 					 "job_status.datetime ASC;";
 			$statresult = $mysql_db->query($query);
 			echo "	<b>Job status history</b>:<br >\n";
-			while ($statrow = $statresult->fetch_array(MYSQLI_BOTH))
+			if ($statresult)
 			{
-				echo $statrow['datetime'] . ": " . $statrow['Description'] . 
-					", " . $statrow['what_happened'] . "<br >\n";  
+				while ($statrow = $statresult->fetch_array(MYSQLI_BOTH))
+				{
+					echo $statrow['datetime'] . ": " . $statrow['Description'] . 
+						", " . $statrow['what_happened'] . "<br >\n";  
+				}
 			}
 			
 			echo "	<b>Update job status:</b> \n";
@@ -453,101 +427,104 @@ class jobs
 			$liable = 0;
 			$o_assets = 0;
 			$o_liable = 0;
-			while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
+			if ($expense_result)
 			{
-				$expense_found = 1;
-				echo "	<tr>\n";				
-				echo "		<td>" . $expenserow['payment_id'] . " ";
-				echo "	<form action=\"" . rootPageURL($this->config) . 
-					"/payments.php\" method=\"post\">\n" .
-					"		<input type=\"hidden\" name=" . 
-					"\"action\" value=\"edit\">\n" .
-					"		<input type=\"hidden\" name=" . 
-					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
-					"		<input class=\"buttons\" type=\"submit\" value=" . 
-					"\"Edit\"/>\n" .
-					"	</form>\n";
-				echo "	<form action=\"" . rootPageURL($this->config) . 
-					"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
-					"		<input type=\"hidden\" name=" . 
-					"\"action\" value=\"remove_expense\">\n" .
-					"		<input type=\"hidden\" name=" . 
-					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
-					"		<input class=\"buttons\" type=\"submit\" value=" . 
-					"\"Remove\"/>\n" .
-					"	</form>\n";
-				echo "</td>\n";
-				
-				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($this->config) . 
-					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
-				echo print_contact($expenserow['pay_to']);
-				echo "</a>";
-				echo "</td>\n";
-				
-				echo "		<td>";
-				echo "<a href=\"" . rootPageURL($this->config) . 
-					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
-				echo print_contact($expenserow['paid_by']);
-				echo "</a>";
-				echo "</td>\n";
-				
-				echo "		<td>";
-				if (isset($contact))
+				while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
 				{
-					if ($contact != 0)
+					$expense_found = 1;
+					echo "	<tr>\n";				
+					echo "		<td>" . $expenserow['payment_id'] . " ";
+					echo "	<form action=\"" . rootPageURL($this->config) . 
+						"/payments.php\" method=\"post\">\n" .
+						"		<input type=\"hidden\" name=" . 
+						"\"action\" value=\"edit\">\n" .
+						"		<input type=\"hidden\" name=" . 
+						"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
+						"		<input class=\"buttons\" type=\"submit\" value=" . 
+						"\"Edit\"/>\n" .
+						"	</form>\n";
+					echo "	<form action=\"" . rootPageURL($this->config) . 
+						"/jobs.php?job=" . $this->job . "\" method=\"post\">\n" .
+						"		<input type=\"hidden\" name=" . 
+						"\"action\" value=\"remove_expense\">\n" .
+						"		<input type=\"hidden\" name=" . 
+						"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
+						"		<input class=\"buttons\" type=\"submit\" value=" . 
+						"\"Remove\"/>\n" .
+						"	</form>\n";
+					echo "</td>\n";
+					
+					echo "		<td>";
+					echo "<a href=\"" . rootPageURL($this->config) . 
+						"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
+					echo print_contact($expenserow['pay_to']);
+					echo "</a>";
+					echo "</td>\n";
+					
+					echo "		<td>";
+					echo "<a href=\"" . rootPageURL($this->config) . 
+						"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
+					echo print_contact($expenserow['paid_by']);
+					echo "</a>";
+					echo "</td>\n";
+					
+					echo "		<td>";
+					if (isset($contact))
+					{
+						if ($contact != 0)
+						{
+							if ($expenserow['expense'] == 0)
+							{
+								echo "+";
+							}
+							else
+							{
+								echo "-";
+							}
+						}
+					}
+					echo "$" . $expenserow['amount_earned'] . "</td>\n";
+					//blank_check function on next 4 lines
+					echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
+					echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
+					echo "		<td>" . ($expenserow['comments']) . "</td>\n";
+					echo "		<td>" . ($expenserow['category']) . "</td>\n";				
+					if ($expenserow['date_paid'] != "0000-00-00")
 					{
 						if ($expenserow['expense'] == 0)
 						{
-							echo "+";
+							$assets += $expenserow['amount_earned'];
 						}
 						else
 						{
-							echo "-";
+							$liable += $expenserow['amount_earned'];
 						}
 					}
-				}
-				echo "$" . $expenserow['amount_earned'] . "</td>\n";
-				//blank_check function on next 4 lines
-				echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
-				echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
-				echo "		<td>" . ($expenserow['comments']) . "</td>\n";
-				echo "		<td>" . ($expenserow['category']) . "</td>\n";				
-				if ($expenserow['date_paid'] != "0000-00-00")
-				{
-					if ($expenserow['expense'] == 0)
+					else
 					{
-						$assets += $expenserow['amount_earned'];
+						if ($expenserow['expense'] == 0)
+						{
+							$o_assets += $expenserow['amount_earned'];
+						}
+						else
+						{
+							$o_liable += $expenserow['amount_earned'];
+						}
+					}
+			
+					if ($expenserow['invoice'] == "")
+					{
+						echo "		<td>Not available</td>\n";
 					}
 					else
 					{
-						$liable += $expenserow['amount_earned'];
+						echo "		<td>" . '<a href="' . rootPageURL($this->config) .
+							'/' . $expenserow['invoice'] . 
+							'" target="_blank">Download</a></td>' . "\n";
 					}
-				}
-				else
-				{
-					if ($expenserow['expense'] == 0)
-					{
-						$o_assets += $expenserow['amount_earned'];
-					}
-					else
-					{
-						$o_liable += $expenserow['amount_earned'];
-					}
-				}
-		
-				if ($expenserow['invoice'] == "")
-				{
-					echo "		<td>Not available</td>\n";
-				}
-				else
-				{
-					echo "		<td>" . '<a href="' . rootPageURL($this->config) .
-						'/' . $expenserow['invoice'] . 
-						'" target="_blank">Download</a></td>' . "\n";
-				}
-				echo "	</tr>\n";
+					echo "	</tr>\n";
 
+				}
 			}
 			if ($expense_found == 0)
 			{

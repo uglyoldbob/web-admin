@@ -406,7 +406,7 @@ function get_phone_options($id1, $id2)
 	for ($i = 0; $i < 2; $i++)
 	{
 		$query = "SELECT phone_mobile, phone_home, phone_other " .
-			"FROM contacts WHERE emp_id = ";
+			"FROM users WHERE emp_id = ";
 		if ($i == 0)
 		{
 			$query .= $id1;
@@ -424,11 +424,11 @@ function get_phone_options($id1, $id2)
 			{
 				if ($i == 0)
 				{
-					$phone[$i*3+$j]['name'] = print_contact($id1);
+//					$phone[$i*3+$j]['name'] = print_contact($id1);
 				}
 				else
 				{
-					$phone[$i*3+$j]['name'] = print_contact($id2);
+//					$phone[$i*3+$j]['name'] = print_contact($id2);
 				}
 				switch($j)
 				{
@@ -477,7 +477,7 @@ function list_location($pre_name, $loc_num)
 function get_location($equ)
 {
 	global $mysql_db;
-	$query = "SELECT * FROM equipment WHERE owner = " . $_SESSION['user']['emp_id'] . " AND id = " . $equ . ";";
+	$query = "SELECT * FROM equipment WHERE id = " . $equ . ";";
 	$result = $mysql_db->query($query);
 	if ($row = $result->fetch_array(MYSQLI_BOTH))
 	{

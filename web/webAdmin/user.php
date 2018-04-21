@@ -700,7 +700,7 @@ class user
 			"((id2 IS NULL) OR (id2 = " . $idfrom . ")) " .
 			"AND (permission LIKE '" . $mask . "');";
 		$result = $mysql_db->query($query);
-		if (is_array($result) && ($row = $result->fetch_array(MYSQLI_BOTH)) )
+		if (($result) && ($row = $result->fetch_array(MYSQLI_BOTH)) )
 		{
 			do
 			{
@@ -727,7 +727,6 @@ class user
 		{
 			$output[0] = array(NULL, "none");
 		}
-		
 		return $output;
 	}
 
@@ -755,7 +754,7 @@ class user
 			return;
 		}
 		
-		$permcheckarray = check_permission($table, $idfrom, $idto, '%' . $perm . '%');
+		$permcheckarray = $this->check_permission($idfrom, $idto, '%' . $perm . '%');
 
 		//because there could be multiple elements 	
 		foreach ($permcheckarray as $permcheck)
@@ -798,7 +797,7 @@ class user
 		global $mysql_db;
 		$start_page = 0;	//TODO: fix this
 		$uid = $_SESSION['user']['emp_id'];
-		$query = "SELECT * FROM " . $this->user_cert_table . ", contact_permission WHERE " .
+		$query = "SELECT * FROM " . $this->table_name . ", user_permission WHERE " .
 				 "(((id2 = " . $uid . ") OR (id2 IS NULL)) AND " . 
 				 "((id1 = emp_id) OR (id1 IS NULL)) AND ".
 				 "(permission LIKE '%r%'))" .
@@ -825,8 +824,8 @@ class user
 					 "\">View</a>";
 
 				$uid = $_SESSION['user']['emp_id'];
-				$allow = check_permission("contact_permission", $uid, $row['emp_id'], "%p%");
-				if (check_specific_permission($allow, "global") == "yes")
+				$allow = $this->check_permission($uid, $row['emp_id'], "%p%");
+				if ($this->check_specific_permission($allow, "global") == "yes")
 				{
 					if (is_null($row['password']))
 					{
@@ -908,7 +907,163 @@ class user
 			 "				<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
 			 "				<input class=\"buttons\" type=\"submit\" value=\"New contact\"/>\n" .
 			 "			</form>";
-	}		
+	}
+	
+	public function print_user($contact_id)
+	{	//outputs the contact name
+		$output = "";
+		$query = "SELECT last_name, first_name FROM contacts WHERE emp_id = " . $contact_id;
+		
+		$contact_results = $this->mysql_db->query($query);
+		
+		$last_name_first = $this->config['last_name_first']; 
+		
+		if ($row = $contact_results->fetch_array(MYSQLI_BOTH))
+		{
+			if ($last_name_first == 1)
+			{
+				if ($row['last_name'] != "")
+					$output .= $row['last_name'];
+				if ($row['first_name'] != "")
+					$output .= ', ' . $row['first_name'];
+			}
+			else
+			{
+				if ($row['first_name'] != "")
+					$output .= $row['first_name'];
+				if ($row['last_name'] != "")
+					$output .= ' ' . $row['last_name'];
+			}
+			$contact_results->free();
+		}
+		else
+		{
+			$output .= "ERROR";
+		}
+		return $output;
+	}
+
+	public function single()
+	{
+		global $mysql_db;
+		$uid = $_SESSION['user']['emp_id'];
+		
+		$contact = $_GET["contact"];
+		if (!is_numeric($contact))
+		{
+			$contact = 0;
+		}
+		
+		$allow = $this->check_permission($uid, $contact, "%w%");
+		if ($allow[0][1] == "none")
+		{
+			$_POST["action"] = "";
+		}
+		
+		$query = "SELECT * FROM users, user_permission WHERE " .
+				 "(((id2 = " . $uid . ") OR (id2 IS NULL)) AND " .
+				 "((id1 = emp_id) OR (id1 IS NULL)) AND " .
+				 "(emp_id = " . $contact . ") AND " .
+				 "(permission LIKE '%r%')) LIMIT 1;";
+		$results = $mysql_db->query($query);
+		if ($results && ($row = $results->fetch_array(MYSQLI_BOTH)))
+		{
+			if ($_POST["action"] == "")
+			{	//viewing profile
+				echo "<h3>Viewing Profile for: ";
+			}
+			else if ($_POST["action"] == "edit")
+			{	//editing information
+				echo "<h3>Editing Details for: ";
+			}
+			else if ($_POST["action"] == "view")
+			{
+				echo "<h3>Viewing Profile for: ";
+				$_POST["action"] = "";
+			}
+			//echo print_contact($this->contact);
+			echo "</h3>\n";
+			echo "<a href=\"" . rootPageURL($this->config) . "/payments.php?contact=" . $contact . "\">View payments</a><br>\n";
+			echo "	<form action=\"" . rootPageURL($this->config) . "/payments.php\" method=\"post\">\n" .
+				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
+				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
+				 "		<input type=\"hidden\" name=\"payer\" value=\"" . $row['emp_id'] . "\">\n" .
+				 "		<input class=\"buttons\" type=\"submit\" value=\"This contact made a payment\"/>\n" .
+				 "	</form>\n";
+			echo "	<form action=\"" . rootPageURL($this->config) . "/payments.php\" method=\"post\">\n" .
+				 "		<input type=\"hidden\" name=\"action\" value=\"edit\">\n" .
+				 "		<input type=\"hidden\" name=\"id\" value=\"0\">\n" .
+				 "		<input type=\"hidden\" name=\"payee\" value=\"" . $row['emp_id'] . "\">\n" .
+				 "		<input class=\"buttons\" type=\"submit\" value=\"This contact was paid\"/>\n" .
+				 "	</form>\n";
+			if ($_POST["action"] != "edit")
+			{	//viewing profile
+				if ($row['website'] != "")
+				{
+					echo " : Visit their website by ";
+					echo " <a href=\"" . $row['website'] . "\" target=\"_blank\">Clicking Here" . "</a>";
+				}
+				echo "<br>\n";
+				echo $row['address'];
+				if ($row['city'] != "")
+				{
+					echo "<br>\n" . $row['city'];
+				}
+				if ($row['state'] != "")
+				{
+					echo ", " . $row['state'];
+				}
+				if ($row['zipcode'] != "")
+				{
+					echo " " . $row['zipcode'];
+				}
+				echo "<br >\n";
+				echo "TODO: Add preferred method of contact<br>\n";
+				if ($row['phone_mobile'] != "")
+				{
+					echo "Mobile: " . $row['phone_mobile'] . "<br>\n";
+				}
+				if ($row['phone_home'] != "")
+				{
+					echo "Home/Office: " . $row['phone_home'] . "<br>\n";
+				}
+				if ($row['phone_other'] != "")
+				{
+					echo "Other: " . $row['phone_other'] . "<br>\n";
+				}
+				if ($row['email'] != "")
+				{
+					echo "Contact via e-mail at " . $row['email'] .
+						' <a href="mailto:' . $row['email'] . '">e-mail</a>' . "<br>\n";
+				}
+				
+				echo "This " . $row['classification'] . " is ";
+				if ($row['payment_eligible'] == 0)
+				{
+					echo "<b>NOT</b> ";
+				}
+				echo "eligible to be paid<br>\n";
+				
+				echo "Soon to print payment information<br>\n";
+				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
+					$row['payment_eligible'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
+					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],
+					$row['username']);
+			}
+			else
+			{	//editing information
+				$this->make_form($row['emp_id'], $row['last_name'], $row['first_name'], $row['classification'],
+					$row['payment_eligible'], $row['phone_mobile'], $row['phone_home'], $row['phone_other'],
+					$row['website'], $row['email'], $row['address'], $row['city'], $row['state'], $row['zipcode'],
+					$row['username']);
+			}
+			
+		}
+		else
+		{
+			echo "<h3>Invalid contact id number</h3>\n";
+		}
+	}	
 	
 	public function make_form($id, $last_name, $first_name, $classify, $eligible, $mobile, $home, $other,
 		$website, $email, $street, $city, $state, $zip, $username)
@@ -920,7 +1075,7 @@ class user
 		if ($other == "")
 			$other = "&nbsp;";
 		$uid = $_SESSION['user']['emp_id'];
-		$allow = check_permission("contact_permission", $uid, $id, "%w%");
+		$allow = $this->check_permission($uid, $id, "%w%");
 		echo "<b> If a customer wants to be contacted about a job, contact information must be entered here</b><br >\n";
 		if ($_POST["action"] == "")
 		{
@@ -950,13 +1105,13 @@ class user
 		}
 		if ($id != 0)
 		{
-			$table_data["Id number"] = "<input type=\"text\" name=\"id\" value=\"" . $id . "\" size=\"70\" disabled >";
+			$table_data["Id number"] = "<input type=\"text\" name=\"id\" value=\"" . $id . "\" size=\"70\" readonly >";
 		}
 		
 		$is_disabled = "";
 		if ($_POST["action"] == "")
 		{
-			$is_disabled = " disabled";
+			$is_disabled = " readonly";
 		}
 		
 		$table_data["Last Name"] = "<input type=\"text\" name=\"last_name\" value=\"" . 
@@ -1015,9 +1170,17 @@ class user
 		}
 	}
 	
-	public function update($withdata, $id_num)
+	public function update($withdata)
 	{
 		global $mysql_db;
+		if (array_key_exists("id", $withdata))
+		{
+			$id_num = $withdata["id"];
+		}
+		else
+		{
+			$id_num = 0;
+		}
 		if (is_numeric($id_num) == FALSE)
 		{
 			$id_num = 0;
@@ -1050,12 +1213,20 @@ class user
 				$allowed_to_perform = 1;
 			}
 			
-			$query = "UPDATE `" . $this->user_cert_table . "` SET " .
+			$query = "UPDATE `" . $this->table_name . "` SET " .
 					"`last_name` = '" . $last_name .
-					"', `first_name` = '" . $first_name .
-					"', `username` = '" . $username .
-					"', `classification` = '" . $classification .
-					"', `payment_eligible` = " . $eligibility .
+					"', `first_name` = '" . $first_name;
+			
+			if ($username != "")
+			{
+				$query = $query . "', `username` = '" . $username . "'";
+			}
+			else
+			{
+				$query = $query . "', `username` = NULL";
+			}
+			$query = $query . ", `classification` = '" . $classification .
+					"', `payment_eligible` = '" . $eligibility .
 					"', `phone_mobile` = '" . $mobile .
 					"', `phone_home` = '" . $home .
 					"', `phone_other` = '" . $other .
@@ -1070,14 +1241,22 @@ class user
 		else
 		{
 			$allowed_to_perform = 1;
-			$query = "INSERT INTO `" . $this->user_cert_table . "` " .
+			$query = "INSERT INTO `" . $this->table_name . "` " .
 					 "(last_name, first_name, username, classification, payment_eligible, " .
 					 "phone_mobile, phone_home, phone_other, website, email, address, city, state, zipcode) " .
 					 "VALUES (" .
 					 "'" . $last_name .  "'," .
-					 "'" . $first_name .  "'," .
-					 "'" . $username . "', " .
-					 "'" . $classification . "'," .
+					 "'" . $first_name .  "',";
+					 
+			if ($username != "")
+			{
+				$query = $query . "'" . $username . "', ";
+			}
+			else
+			{
+				$query = $query . "NULL, ";
+			}
+			$query = $query . "'" . $classification . "'," .
 					 "'" . $eligibility .  "'," .
 					 "'" . $mobile . "'," .
 					 "'" . $home .  "'," .
@@ -1101,10 +1280,10 @@ class user
 				if ($id_num == 0)
 				{ 
 					$new_id = $mysql_db->insert_id;
-					mod_permission("contact_permission", $uid, $new_id, "+", 'r');
-					mod_permission("contact_permission", $uid, $new_id, "+", 'w');
-					mod_permission("contact_permission", $new_id, $new_id, "+", 'r');
-					mod_permission("contact_permission", $new_id, $new_id, "+", 'w');
+					$this->mod_permission("contact_permission", $uid, $new_id, "+", 'r');
+					$this->mod_permission("contact_permission", $uid, $new_id, "+", 'w');
+					$this->mod_permission("contact_permission", $new_id, $new_id, "+", 'r');
+					$this->mod_permission("contact_permission", $new_id, $new_id, "+", 'w');
 				}
 				echo "Contact information updated successfully.<br >\n";
 			}

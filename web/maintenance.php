@@ -172,103 +172,112 @@ try
 		$liable = 0;
 		$o_assets = 0;
 		$o_liable = 0;
-		while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
+		if ($expense_result)
 		{
-			$expenserow['expense'] = 1;
-			$expense_found = 1;
-			echo "	<tr>\n";				
-			echo "		<td>" . $expenserow['payment_id'] . " ";
-			echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
-				"/payments.php\" method=\"post\">\n" .
-				"		<input type=\"hidden\" name=" . 
-				"\"action\" value=\"edit\">\n" .
-				"		<input type=\"hidden\" name=" . 
-				"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
-				"		<input class=\"buttons\" type=\"submit\" value=" . 
-				"\"Edit\"/>\n" .
-				"	</form>\n";
-			echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
-					"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
+			while ($expenserow = $expense_result->fetch_array(MYSQLI_BOTH))
+			{
+				$expenserow['expense'] = 1;
+				$expense_found = 1;
+				echo "	<tr>\n";				
+				echo "		<td>" . $expenserow['payment_id'] . " ";
+				echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
+					"/payments.php\" method=\"post\">\n" .
 					"		<input type=\"hidden\" name=" . 
-					"\"action\" value=\"remove_expense\">\n" .
+					"\"action\" value=\"edit\">\n" .
 					"		<input type=\"hidden\" name=" . 
 					"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
 					"		<input class=\"buttons\" type=\"submit\" value=" . 
-					"\"Remove\"/>\n" .
+					"\"Edit\"/>\n" .
 					"	</form>\n";
-			echo "</td>\n";
-		
-			echo "		<td>";
-			echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
-				"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
-			echo print_contact($expenserow['pay_to']);
-			echo "</a>";
-			echo "</td>\n";
-		
-			echo "		<td>";
-			echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
-				"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
-			echo print_contact($expenserow['paid_by']);
-			echo "</a>";
-			echo "</td>\n";
-		
-			echo "		<td>";
-			if (isset($contact))
-			{
-				if ($contact != 0)
+				echo "	<form action=\"" . \webAdmin\rootPageURL($config) . 
+						"/maintenance.php?id=" . $id . "\" method=\"post\">\n" .
+						"		<input type=\"hidden\" name=" . 
+						"\"action\" value=\"remove_expense\">\n" .
+						"		<input type=\"hidden\" name=" . 
+						"\"id\" value=\"" . $expenserow['payment_id'] . "\">\n" .
+						"		<input class=\"buttons\" type=\"submit\" value=" . 
+						"\"Remove\"/>\n" .
+						"	</form>\n";
+				echo "</td>\n";
+			
+				echo "		<td>";
+				echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
+					"/payments.php?contact=" . $expenserow['pay_to'] . "\"> ";
+				echo print_contact($expenserow['pay_to']);
+				echo "</a>";
+				echo "</td>\n";
+			
+				echo "		<td>";
+				echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
+					"/payments.php?contact=" . $expenserow['paid_by'] . "\"> ";
+				echo print_contact($expenserow['paid_by']);
+				echo "</a>";
+				echo "</td>\n";
+			
+				echo "		<td>";
+				if (isset($contact))
+				{
+					if ($contact != 0)
+					{
+						if ($expenserow['expense'] == 0)
+						{
+							echo "+";
+						}
+						else
+						{
+							echo "-";
+						}
+					}
+				}
+				echo "$" . $expenserow['amount_earned'] . "</td>\n";
+				//blank_check function on next 4 lines
+				echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
+				echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
+				echo "		<td>" . ($expenserow['comments']) . "</td>\n";
+				echo "		<td>" . ($expenserow['category']) . "</td>\n";
+			
+				if ($expenserow['date_paid'] != "0000-00-00")
 				{
 					if ($expenserow['expense'] == 0)
 					{
-						echo "+";
+						$assets += $expenserow['amount_earned'];
 					}
 					else
 					{
-						echo "-";
+						$liable += $expenserow['amount_earned'];
 					}
 				}
-			}
-			echo "$" . $expenserow['amount_earned'] . "</td>\n";
-			//blank_check function on next 4 lines
-			echo "		<td>" . ($expenserow['date_earned']) . "</td>\n";
-			echo "		<td>" . ($expenserow['date_paid']) . "</td>\n";
-			echo "		<td>" . ($expenserow['comments']) . "</td>\n";
-			echo "		<td>" . ($expenserow['category']) . "</td>\n";
-		
-			if ($expenserow['date_paid'] != "0000-00-00")
-			{
-				if ($expenserow['expense'] == 0)
+				else
 				{
-					$assets += $expenserow['amount_earned'];
+					if ($expenserow['expense'] == 0)
+					{
+						$o_assets += $expenserow['amount_earned'];
+					}
+					else
+					{
+						$o_liable += $expenserow['amount_earned'];
+					}
+				}
+
+				if ($expenserow['invoice'] == "")
+				{
+					echo "		<td>Not available</td>\n";
 				}
 				else
 				{
-					$liable += $expenserow['amount_earned'];
+					echo "		<td>" . '<a href="' . \webAdmin\rootPageURL($config) .
+						'/' . $expenserow['invoice'] . 
+						'" target="_blank">Download</a></td>' . "\n";
 				}
-			}
-			else
-			{
-				if ($expenserow['expense'] == 0)
-				{
-					$o_assets += $expenserow['amount_earned'];
-				}
-				else
-				{
-					$o_liable += $expenserow['amount_earned'];
-				}
-			}
+				echo "	</tr>\n";
 
-			if ($expenserow['invoice'] == "")
-			{
-				echo "		<td>Not available</td>\n";
 			}
-			else
-			{
-				echo "		<td>" . '<a href="' . \webAdmin\rootPageURL($config) .
-					'/' . $expenserow['invoice'] . 
-					'" target="_blank">Download</a></td>' . "\n";
-			}
-			echo "	</tr>\n";
-
+		}
+		else
+		{
+			$o_liable = 0;
+			$o_assets = 0;
+			$liable = 0;
 		}
 		if ($expense_found == 0)
 		{

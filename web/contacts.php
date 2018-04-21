@@ -63,7 +63,7 @@ try
 	//update contact information
 	if ($_POST["action"] == "update")
 	{
-		$currentUser->update($_POST, 1);
+		$currentUser->update($_POST);
 		$_POST["action"] = "";	//go back to contact viewing
 	}
 	else if ($_POST["action"] == "cpass")
@@ -115,9 +115,9 @@ try
 
 
 	//edit or view contact information
-	if (($_POST["action"] == "edit"))
+	if (($_POST["action"] == "edit") || array_key_exists("contact", $_GET))
 	{
-		//$contacts->single();
+		$currentUser->single();
 	}
 	else if ($_POST["action"] == "create")
 	{

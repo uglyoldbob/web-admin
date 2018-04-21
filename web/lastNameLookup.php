@@ -20,8 +20,11 @@ class Autoloader
 }
 Autoloader::register();
 
+require_once("webAdmin/exceptions.php");
+require_once("webAdmin/global.php");
+
 	$config = parse_ini_file("config.ini");
-	test_config($config);
+	\webAdmin\test_config($config);
 
 	// PHP5 Implementation - uses MySQLi.
 	// mysqli('localhost', 'yourUsername', 'yourPassword', 'yourDatabase');
@@ -58,7 +61,7 @@ Autoloader::register();
 				// YOU NEED TO ALTER THE QUERY TO MATCH YOUR DATABASE.
 				// eg: SELECT yourColumnName FROM yourTable WHERE yourColumnName LIKE '$queryString%' LIMIT 10
 				
-				$query = $db->query("SELECT * FROM contacts WHERE last_name LIKE '%$queryString%' LIMIT 10");
+				$query = $db->query("SELECT * FROM users WHERE last_name LIKE '%$queryString%' LIMIT 10");
 				if($query) 
 				{
 					while ($result = $query ->fetch_object()) 
