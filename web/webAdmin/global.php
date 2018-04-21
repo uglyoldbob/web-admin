@@ -272,7 +272,7 @@ function openDatabase($config)
 		$config["database_name"], $config["database_port"]);
 	if ($mysql_db->connect_errno)
 	{
-		throw new \webAdmin\DatabaseConnectionFailedException();
+		throw new \webAdmin\DatabaseConnectionFailedException($mysql_db->connect_error);
 	}
 	//TODO: implement calling this function
 	//mysqli_set_charset()
