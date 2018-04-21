@@ -1,5 +1,5 @@
  <phpunit
-  backupGlobals="true"
+  backupGlobals="false"
   processIsolation="true"
   stderr="true"
   verbose="true"
