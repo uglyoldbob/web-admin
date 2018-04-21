@@ -38,8 +38,8 @@ class indexTest extends ModifiedTestCase
 			$this->setExpectedException('\webAdmin\ConfigurationMissingException');
 		}
 		require_once("webAdmin/exceptions.php");
-		require_once("global.php");
-		test_config($config);
+		require_once("webAdmin/global.php");
+		\webAdmin\test_config($config);
 	}
 	
 	/**
@@ -50,8 +50,8 @@ class indexTest extends ModifiedTestCase
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		require_once("webAdmin/exceptions.php");
-		require_once("global.php");
-		test_config($config);
+		require_once("webAdmin/global.php");
+		\webAdmin\test_config($config);
 		$this->assertNoErrors();
 	}
 
@@ -63,8 +63,8 @@ class indexTest extends ModifiedTestCase
 		$config = parse_ini_file($this->config_name);
 		$this->assertNotEquals($config, FALSE);
 		require_once("webAdmin/exceptions.php");
-		require_once("global.php");
-		openDatabase($config);
+		require_once("webAdmin/global.php");
+		\webAdmin\openDatabase($config);
 		$this->assertNoErrors();
 	}
 	
@@ -86,8 +86,8 @@ class indexTest extends ModifiedTestCase
 		$config["database_username"] = "notRealUser";
 		$config["database_password"] = "notActualPassword";
 		require_once("webAdmin/exceptions.php");
-		require_once("global.php");
-		openDatabase($config);
+		require_once("webAdmin/global.php");
+		\webAdmin\openDatabase($config);
 		$this->assertNoErrors();
 	}
 	
@@ -95,12 +95,12 @@ class indexTest extends ModifiedTestCase
 	{
 		require_once("webAdmin/exceptions.php");
 		require_once("webAdmin/session.php");
-		require_once("global.php");
+		require_once("webAdmin/global.php");
 		$config = parse_ini_file($this->config_name);
-		test_config($config);
-		$mysql_db = openDatabase($config);
+		\webAdmin\test_config($config);
+		$mysql_db = \webAdmin\openDatabase($config);
 		$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-		start_my_session();
+		\webAdmin\start_my_session();
 		$this->assertNoErrors();
 		$this->assertTrue($_SESSION['initiated']);
 		$this->assertEquals($_SESSION['HTTP_USER_AGENT'], md5(""));
@@ -117,12 +117,12 @@ class indexTest extends ModifiedTestCase
 		$_SERVER['HTTP_USER_AGENT'] = "WHATEVER";
 		require_once("webAdmin/exceptions.php");
 		require_once("webAdmin/session.php");
-		require_once("global.php");
+		require_once("webAdmin/global.php");
 		$config = parse_ini_file($this->config_name);
-		test_config($config);
-		$mysql_db = openDatabase($config);
+		\webAdmin\test_config($config);
+		$mysql_db = \webAdmin\openDatabase($config);
 		$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-		start_my_session();
+		\webAdmin\start_my_session();
 		$this->assertNoErrors();
 		if (isset($_SESSION['username']))
 		{
@@ -170,7 +170,26 @@ class indexTest extends ModifiedTestCase
 		require_once("index.php");
 		$this->assertNoErrors();
 		$this->errors = array();	//clear errors
-		$mysql_db = openDatabase($config);
+		$mysql_db = \webAdmin\openDatabase($config);
+		$query = "select * from users;";
+		$result = $mysql_db->query($query);
+		$this->assertNoErrors();
+		$this->assertEquals(1, $result->num_rows);
+		$row = $result->fetch_row();
+		$this->assertNoErrors();
+		$this->assertEquals($this->test_user, $row[4]);
+		$this->assertNotEquals(indexTest::$test_pw, $row[5]);
+		$this->assertNotEquals('', $row[6]);
+		$this->assertEquals(169000, $row[7]);
+		$this->assertEquals($this->test_email, $row[16]);
+	}
+	
+	/**
+	 * @depends testPage3
+	 */
+	public function testPage4()
+	{
+		$mysql_db = \webAdmin\openDatabase($config);
 		$query = "select * from users;";
 		$result = $mysql_db->query($query);
 		$this->assertNoErrors();
@@ -185,9 +204,9 @@ class indexTest extends ModifiedTestCase
 	}
 
 	/**
-	 * @depends testPage3
+	 * @depends testPage4
 	 */
-	public function testPage4()
+	public function testPage5()
 	{
 		$_POST["action"] = "login";
 		$_POST["username"] = $this->test_user;
@@ -197,9 +216,9 @@ class indexTest extends ModifiedTestCase
 	}
 
 	/**
-	 * @depends testPage4
+	 * @depends testPage5
 	 */
-	public function testPage5()
+	public function testPage6()
 	{
 		$_POST["action"] = "logout";
 		require_once("index.php");
