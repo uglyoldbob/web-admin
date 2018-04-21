@@ -170,6 +170,8 @@ class indexTest extends ModifiedTestCase
 		require_once("index.php");
 		$this->assertNoErrors();
 		$this->errors = array();	//clear errors
+		$config = parse_ini_file($this->config_name);
+		\webAdmin\test_config($config);
 		$mysql_db = \webAdmin\openDatabase($config);
 		$query = "select * from users;";
 		$result = $mysql_db->query($query);
@@ -191,6 +193,8 @@ class indexTest extends ModifiedTestCase
 	{
 		require_once("webAdmin/global.php");
 		require_once("webAdmin/exceptions.php");
+		$config = parse_ini_file($this->config_name);
+		\webAdmin\test_config($config);
 		$mysql_db = \webAdmin\openDatabase($config);
 		$query = "select * from users;";
 		$result = $mysql_db->query($query);
