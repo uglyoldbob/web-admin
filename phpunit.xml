@@ -1,6 +1,6 @@
  <phpunit
-  backupGlobals="false"
-  backupStaticAttributes="false"
+  backupGlobals="true"
+  backupStaticAttributes="true"
   processIsolation="true"
   stderr="true"
   verbose="true"

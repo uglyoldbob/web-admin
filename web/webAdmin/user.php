@@ -351,14 +351,7 @@ class user
 		}
 		catch (InvalidUsernameOrPasswordException $e)
 		{
-			try
-			{
-				$this->require_registered_certificate();
-			}
-			catch (CertificateException $f)
-			{
-				throw new NotLoggedInException();
-			}
+			throw $e;
 		}
 		catch (NotLoggedInException $e)
 		{
