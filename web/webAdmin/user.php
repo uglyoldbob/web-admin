@@ -446,7 +446,6 @@ class user
 				}
 				else
 				{	//password fail match
-					echo "PASS: ~" . $row['password'] . "~ FAILS ~" . $_SESSION['password'] . "~<br />\n";
 					$query = "UPDATE " . $this->table_name . " SET fail_logins=fail_logins+1 WHERE username = " . $_SESSION['username'] . ";";
 					$this->mysql_db->query($query);
 					unset($_SESSION['username']);
