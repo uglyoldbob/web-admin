@@ -201,6 +201,15 @@ function rootPageURL($config)
 		}
 	}
 	$pageURL .= "://";
+	//set some defaults for unspecified things
+	if (!array_key_exists("SERVER_PORT", $_SERVER))
+	{
+		$_SERVER["SERVER_PORT"] = "80";
+	}
+	if (!array_key_exists("SERVER_NAME", $_SERVER))
+	{
+		$_SERVER["SERVER_NAME"] = "www.example.com";
+	}
 	if (($_SERVER["SERVER_PORT"] != "80") && ($_SERVER["SERVER_PORT"] != "443"))
 	{
 		$pageURL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"]. $config["location"];
