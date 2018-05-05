@@ -9,12 +9,20 @@ class indexTest extends ModifiedTestCase
 	private $test_user = "testuser";
 	private static $test_pw = "";
 	private $test_email = "test@testing.com";
+	private static $pw_file = "./stuff.txt";
 
 	public static function setUpBeforeClass()
 	{
 		//generate a password for testing
-		//not actually cryptographically secure or sufficiently random
-		indexTest::$test_pw = substr(md5(rand()), 0, 16);
+		if (file_exists(indexTest::$pw_file))
+		{
+			indexTest::$test_pw = file_get_contents(indexTest::$pw_file);
+		}
+		else
+		{
+			indexTest::$test_pw = openssl_random_pseudo_bytes(16);
+			file_put_contents(indexTest::$pw_file, indexTest::$test_pw);
+		}
 	}
 	
     public function testConfig1()
