@@ -14,6 +14,106 @@ function test_config($config)
 	}
 }
 
+function runSite()
+{
+	try
+	{
+		$config = parse_ini_file("config.ini");
+		test_config($config);
+
+		global $mysql_db;
+		$mysql_db = openDatabase($config);
+
+		$cust_session = new session($config, $mysql_db, "sessions");
+		start_my_session();	//start php session
+
+		call_user_func('website', $mysql_db, $config, $cust_session);
+	}
+	catch (\webAdmin\ConfigurationMissingException $e)
+	{
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Site Configuration Error</title>\n";
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Site configuration error</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+		echo "</body>\n";
+		echo "</html>\n";
+	}
+	catch (\webAdmin\SiteConfigurationException $e)
+	{
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Site Configuration Error</title>\n";
+		webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Site configuration error</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+		echo "</body>\n";
+		echo "</html>\n";
+	}
+	catch (\webAdmin\DatabaseConnectionFailedException $e)
+	{
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Site Configuration Error</title>\n";
+		webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Site configuration error</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+		echo "</body>\n";
+		echo "</html>\n";
+	}
+	catch (Exception $e)
+	{
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Site Configuration Error</title>\n";
+		webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Error</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+		echo "</body>\n";
+		echo "</html>\n";
+	}
+}
+
 function sitename($config)
 {
 	echo $config["name"];

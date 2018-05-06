@@ -24,136 +24,84 @@ Autoloader::register();
 require_once("webAdmin/exceptions.php");
 require_once("webAdmin/global.php");
 
-if (!headers_sent())
+\webAdmin\runSite();
+
+function website($mysql_db, $config, $cust_session)
 {
-	header('Content-type: text/html; charset=utf-8');
+	if (!headers_sent())
+	{
+		header('Content-type: text/html; charset=utf-8');
+	}
+	echo "<!DOCTYPE HTML>\n";
+	echo "<html>\n";
+	try
+	{
+		$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+		$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
+	
+		$currentUser->require_login_or_registered_certificate();
+	
+		echo "<head>\n";
+		echo "	<title>";
+		\webAdmin\sitename($config);
+		echo "</title>\n";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		\webAdmin\do_top_menu(0, $config);
+		echo "Something goes here?<br>\n";	
+	}
+	catch (\webAdmin\PermissionDeniedException $e)
+	{
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\m";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Permission Denied</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+	}
+	catch (\webAdmin\InvalidUsernameOrPasswordException $e)
+	{
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\m";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "<h3>Invalid username or password</h3>\n";
+		$currentUser->login_form();
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+	}
+	catch (\webAdmin\NotLoggedInException $e)
+	{
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\m";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		$currentUser->login_form();
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+	}
+	catch (\webAdmin\CertificateException $e)
+	{
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\m";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "<b>A certificate is required to access this page</b><br />\n";
+	}
+	echo "</body>\n";
 }
 
 ?>
-<!DOCTYPE HTML>
-<html>
-<head>
-<?php
-
-try
-{
-	$config = parse_ini_file("config.ini");
-	\webAdmin\test_config($config);
-
-	global $mysql_db;
-	$mysql_db = \webAdmin\openDatabase($config);
-	
-	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-	\webAdmin\start_my_session();	//start php session
-
-	
-	?>
-	<title><?php \webAdmin\sitename($config)?></title>
-	<?php \webAdmin\do_css($config) ?>
-</head>
-<body>
-	<?php
-
-	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
-	
-	$currentUser->require_login_or_registered_certificate();
-	
-	\webAdmin\do_top_menu(0, $config);
-	echo "Something goes here?<br>\n";
-}
-catch (\webAdmin\ConfigurationMissingException $e)
-{
-	?>
-	<title>Site Configuration Error</title>
-	</head>
-	<body>
-	<h1>Site configuration error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\SiteConfigurationException $e)
-{
-	?>
-	<title>Site Configuration Error</title>
-	<?php \webAdmin\do_css($config) ?>
-	</head>
-	<body>
-	<h1>Site configuration error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\DatabaseConnectionFailedException $e)
-{
-	?>
-	<title>Site Configuration Error</title>
-	<?php \webAdmin\do_css($config) ?>
-	</head>
-	<body>
-	<h1>Site configuration error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\PermissionDeniedException $e)
-{
-	?>
-	<title>Permission Denied</title>
-	<?php \webAdmin\do_css($config) ?>
-	</head>
-	<body>
-	<h1>Permission Denied</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\InvalidUsernameOrPasswordException $e)
-{
-	echo "<h3>Invalid username or password</h3>\n";
-	$currentUser->login_form();
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\NotLoggedInException $e)
-{
-	$currentUser->login_form();
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\CertificateException $e)
-{
-	echo "<b>A certificate is required to access this page</b><br />\n";
-}
-catch (Exception $e)
-{
-	?>
-	<title>Error</title>
-	<?php \webAdmin\do_css($config) ?>
-	</head>
-	<body>
-	<h1>Error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-
-?>
-
-</body>
 </html>

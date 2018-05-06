@@ -25,168 +25,179 @@ Autoloader::register();
 require_once("webAdmin/exceptions.php");
 require_once("webAdmin/global.php");
 
-try
+\webAdmin\runSite();
+
+function website($mysql_db, $config, $cust_session)
 {
-	$config = parse_ini_file("config.ini");
-	\webAdmin\test_config($config);
-
-	global $mysql_db;
-	$mysql_db = \webAdmin\openDatabase($config);
-	
-	$cust_session = new \webAdmin\session($config, $mysql_db, "sessions");
-	\webAdmin\start_my_session();	//start php session
-	
-	$currentUser = new \webAdmin\user($config, $mysql_db, "users");
-	$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
-
-	$currentUser->require_login_or_registered_certificate();
-	
-	if (!(array_key_exists("id", $_GET)))
-		throw new Exception("Id not specified");
-	
-	$filename = $mysql_db->real_escape_string($_GET['id']);
-	$thumb = @$_GET['thumb'];
-	if (is_numeric($thumb) == FALSE)
-		$location = 0;
-	//verify permissions first
-	$query = "SELECT * FROM images WHERE id='" . $filename . "'";
-	$results = $mysql_db->query($query);
-	$permission = false;
-	if ($results && ($results->num_rows > 0))
+	try
 	{
-		if ($row = $results->fetch_array(MYSQLI_BOTH))
+		$currentUser = new \webAdmin\user($config, $mysql_db, "users");
+		$currentUser->certificate_tables("root_ca", "intermediate_ca", "user_certs");
+		$currentUser->require_login_or_registered_certificate();
+
+		if (!(array_key_exists("id", $_GET)))
+			throw new Exception("Id not specified");
+
+		$filename = $mysql_db->real_escape_string($_GET['id']);
+		$thumb = @$_GET['thumb'];
+		if (is_numeric($thumb) == FALSE)
+			$location = 0;
+		//verify permissions first
+		$query = "SELECT * FROM images WHERE id='" . $filename . "'";
+		$results = $mysql_db->query($query);
+		$permission = false;
+		if ($results && ($results->num_rows > 0))
 		{
-			$permission = check_for_read_permission($filename);
+			if ($row = $results->fetch_array(MYSQLI_BOTH))
+			{
+				$permission = check_for_read_permission($filename);
+			}
+			else
+			{
+				$error = "Invalid image.";
+			}
 		}
 		else
 		{
 			$error = "Invalid image.";
 		}
-	}
-	else
-	{
-		$error = "Invalid image.";
-	}
 
-	if ($permission == false)
+		if ($permission == false)
+		{
+			if (!headers_sent())
+			{
+				header('Content-type: text/html; charset=utf-8');
+			}
+			echo "<!DOCTYPE HTML SYSTEM>\n" . 
+				 "<html>\n" . 
+				 "<head>\n" .
+				 "<title>" . \webAdmin\sitename($config) . "</title>\n";
+			\webAdmin\do_css($config);
+			echo	 "</head>\n" .
+				 "<body>\n" .
+				 "<h3>The image cannot be retrieved.</h3>\n<br >\n" .
+				 $error .
+				 "\n</body>\n" .
+				 "\n</html>";
+		}
+		else
+		{
+			if ($thumb != 0)
+			{
+				$file_path=$_SERVER['DOCUMENT_ROOT'].$config['location'].'/'.$row['file_thumb'];
+			}
+			else
+			{
+				$file_path=$_SERVER['DOCUMENT_ROOT'].$config['location'].'/'.$row['file_vga'];
+			}
+
+			$img = new SimpleImage();
+			$img->load($file_path);
+
+			ob_start();
+			if (!headers_sent())
+			{
+				header('Content-Type: image/jpeg');
+			}
+			ob_end_flush();
+
+			$img->output();
+		}
+	}
+	catch (\webAdmin\PermissionDeniedException $e)
 	{
 		if (!headers_sent())
 		{
 			header('Content-type: text/html; charset=utf-8');
 		}
-		echo "<!DOCTYPE HTML SYSTEM>\n" . 
-			 "<html>\n" . 
-			 "<head>\n" .
-			 "<title>" . \webAdmin\sitename($config) . "</title>\n";
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\n";
 		\webAdmin\do_css($config);
-		echo	 "</head>\n" .
-			 "<body>\n" .
-			 "<h3>The image cannot be retrieved.</h3>\n<br >\n" .
-			 $error .
-			 "\n</body>\n" .
-			 "\n</html>";
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Permission Denied</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+		echo "</body>\n";
+		echo "</html>\n";
 	}
-	else
+	catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 	{
-		if ($thumb != 0)
-		{
-			$file_path=$_SERVER['DOCUMENT_ROOT'].$config['location'].'/'.$row['file_thumb'];
-		}
-		else
-		{
-			$file_path=$_SERVER['DOCUMENT_ROOT'].$config['location'].'/'.$row['file_vga'];
-		}
-
-		$img = new SimpleImage();
-		$img->load($file_path);
-
-		ob_start();
 		if (!headers_sent())
 		{
-			header('Content-Type: image/jpeg');
+			header('Content-type: text/html; charset=utf-8');
 		}
-		ob_end_flush();
-
-		$img->output();
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\n";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h3>Invalid username or password</h3>\n";
+		$currentUser->login_form();
+		echo "</body>\n";
+		echo "</html>\n";
 	}
-}
-catch (\webAdmin\ConfigurationMissingException $e)
-{
-	?>
-	<h1>Site configuration error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
+	catch (\webAdmin\NotLoggedInException $e)
 	{
-		echo "Details: " . (string)$e . "<br />\n";
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\n";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		$currentUser->login_form();
+		echo "</body>\n";
+		echo "</html>\n";
 	}
-}
-catch (\webAdmin\DatabaseConnectionFailedException $e)
-{
-	?>
-	<h1>Site configuration error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
+	catch (\webAdmin\CertificateException $e)
 	{
-		echo "Details: " . (string)$e . "<br />\n";
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\n";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Permission Denied</h1>\n";
+		echo "<b>A certificate is required to access this page</b><br />\n";
+		echo "</body>\n";
+		echo "</html>\n";
 	}
-}
-catch (\webAdmin\PermissionDeniedException $e)
-{
-	?>
-	<h1>Permission Denied</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
+	catch (Exception $e)
 	{
-		echo "Details: " . (string)$e . "<br />\n";
-	}
-}
-catch (\webAdmin\InvalidUsernameOrPasswordException $e)
-{
-	echo "<h3>Invalid username or password</h3>\n";
-	echo "<b>Please login</b>\n" .
-		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
-		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
-		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
-		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
-		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
-		"</form>\n";
-	if ($config['allow_user_create'] == 1)
-	{
-		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
-			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
-			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
-			 "</form>\n";
-	}
-}
-catch (\webAdmin\NotLoggedInException $e)
-{
-	echo "<b>Please login</b>\n" .
-		"<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\" autocomplete=\"on\" >\n" .
-		"	<input type=\"hidden\" name=\"action\" value=\"login\">\n" .
-		"	<label for=\"username\"> Username: <input type=\"text\" name=\"username\" autocomplete=\"on\" ><br>\n" .
-		"	<label for=\"password\"> Password: <input type=\"password\" name=\"password\" autocomplete=\"on\" ><br>\n" .
-		"	<input class=\"buttons\" type=\"submit\" name=\"do_login\" value=\"Login\">\n" .
-		"</form>\n";
-	if ($config['allow_user_create'] == 1)
-	{
-		echo "<form action=\"" . \webAdmin\curPageURL($config) . "\" method=\"post\">\n" .
-			 "	<input type=\"hidden\" name=\"action\" value=\"register\">\n" .
-			 "	<input class=\"buttons\" type=\"submit\" value=\"Register\">\n" .
-			 "</form>\n";
-	}
-}
-catch (\webAdmin\CertificateException $e)
-{
-	echo "<b>A certificate is required to access this page</b><br />\n";
-}
-catch (Exception $e)
-{
-	?>
-	<h1>Error</h1>
-	<?php
-	if (isset($_GET['debug']) || ($config['debug']==1))
-	{
-		echo "Details: " . (string)$e . "<br />\n";
+		if (!headers_sent())
+		{
+			header('Content-type: text/html; charset=utf-8');
+		}
+		echo "<!DOCTYPE HTML>\n";
+		echo "<html>\n";
+		echo "<head>\n";
+		echo "	<title>Permission Denied</title>\n";
+		\webAdmin\do_css($config);
+		echo "</head>\n";
+		echo "<body>\n";
+		echo "	<h1>Permission Denied</h1>\n";
+		if (isset($_GET['debug']) || ($config['debug']==1))
+		{
+			echo "Details: " . (string)$e . "<br />\n";
+		}
+		echo "</body>\n";
+		echo "</html>\n";
 	}
 }
 
