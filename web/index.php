@@ -78,15 +78,6 @@ function website($mysql_db, $config, $cust_session)
 			echo "Details: " . (string)$e . "<br />\n";
 		}
 	}
-	catch (\webAdmin\CertificateException $e)
-	{
-		echo "<head>\n";
-		echo "	<title>Permission Denied</title>\m";
-		\webAdmin\do_css($config);
-		echo "</head>\n";
-		echo "<body>\n";
-		echo "<b>A certificate is required to access this page</b><br />\n";
-	}
 	echo "</body>\n";
 }
 

@@ -228,11 +228,23 @@ class indexTest extends ModifiedTestCase
 		require_once("index.php");
 		$this->assertNoErrors();
 	}
-
+	
 	/**
 	 * @depends testPage5
 	 */
 	public function testPage6()
+	{
+		$_POST["action"] = "login";
+		$_POST["username"] = $this->test_user;
+		$_POST["password"] = openssl_random_pseudo_bytes(16);
+		require_once("index.php");
+		$this->assertNoErrors();
+	}
+
+	/**
+	 * @depends testPage5
+	 */
+	public function testPage7()
 	{
 		$_POST["action"] = "logout";
 		require_once("index.php");
