@@ -51,19 +51,6 @@ function website($mysql_db, $config, $cust_session)
 		\webAdmin\do_top_menu(0, $config);
 		echo "Something goes here?<br>\n";	
 	}
-	catch (\webAdmin\PermissionDeniedException $e)
-	{
-		echo "<head>\n";
-		echo "	<title>Permission Denied</title>\m";
-		\webAdmin\do_css($config);
-		echo "</head>\n";
-		echo "<body>\n";
-		echo "	<h1>Permission Denied</h1>\n";
-		if (isset($_GET['debug']) || ($config['debug']==1))
-		{
-			echo "Details: " . (string)$e . "<br />\n";
-		}
-	}
 	catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 	{
 		echo "<head>\n";

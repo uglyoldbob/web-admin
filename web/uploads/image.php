@@ -104,27 +104,6 @@ function website($mysql_db, $config, $cust_session)
 			$img->output();
 		}
 	}
-	catch (\webAdmin\PermissionDeniedException $e)
-	{
-		if (!headers_sent())
-		{
-			header('Content-type: text/html; charset=utf-8');
-		}
-		echo "<!DOCTYPE HTML>\n";
-		echo "<html>\n";
-		echo "<head>\n";
-		echo "	<title>Permission Denied</title>\n";
-		\webAdmin\do_css($config);
-		echo "</head>\n";
-		echo "<body>\n";
-		echo "	<h1>Permission Denied</h1>\n";
-		if (isset($_GET['debug']) || ($config['debug']==1))
-		{
-			echo "Details: " . (string)$e . "<br />\n";
-		}
-		echo "</body>\n";
-		echo "</html>\n";
-	}
 	catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 	{
 		if (!headers_sent())

@@ -94,19 +94,6 @@ function website($mysql_db, $config, $cust_session)
 		echo "<br>\n";
 		echo "	</div>\n";
 	}
-	catch (\webAdmin\PermissionDeniedException $e)
-	{
-		echo "<head>\n";
-		echo "	<title>Permission Denied</title>\n";
-		\webAdmin\do_css($config);
-		echo "</head>\n";
-		echo "<body>\n";
-		echo "	<h1>Permission Denied</h1>\n";
-		if (isset($_GET['debug']) || ($config['debug']==1))
-		{
-			echo "Details: " . (string)$e . "<br />\n";
-		}
-	}
 	catch (\webAdmin\InvalidUsernameOrPasswordException $e)
 	{
 		echo "<head>\n";
