@@ -151,8 +151,12 @@ class indexTest extends ModifiedTestCase
 	 */
 	public function testPage1()
 	{
+		ob_start();
 		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
+		$this->assertContains('Please login', $results);
 	}
 	
 	/**
@@ -161,8 +165,12 @@ class indexTest extends ModifiedTestCase
 	public function testPage2()
 	{
 		$_POST["action"] = "register";
+		ob_start();
 		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
+		$this->assertContains('Password again', $results);
 	}
 
 	/**
@@ -175,8 +183,12 @@ class indexTest extends ModifiedTestCase
 		$_POST["pass2"] = indexTest::$test_pw;
 		$_POST["pass3"] = indexTest::$test_pw;
 		$_POST["email"] = $this->test_email;
+		ob_start();
 		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
+		$this->assertContains('Registered successfully', $results);
 		$this->errors = array();	//clear errors
 		$config = parse_ini_file($this->config_name);
 		\webAdmin\test_config($config);
@@ -225,8 +237,12 @@ class indexTest extends ModifiedTestCase
 		$_POST["action"] = "login";
 		$_POST["username"] = $this->test_user;
 		$_POST["password"] = indexTest::$test_pw;
+		ob_start();
 		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
+		$this->assertContains('topmenu', $results);
 	}
 	
 	/**
@@ -237,8 +253,12 @@ class indexTest extends ModifiedTestCase
 		$_POST["action"] = "login";
 		$_POST["username"] = $this->test_user;
 		$_POST["password"] = openssl_random_pseudo_bytes(16);
+		ob_start();
 		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
+		$this->assertContains('Invalid username or password', $results);
 	}
 
 	/**
@@ -247,8 +267,14 @@ class indexTest extends ModifiedTestCase
 	public function testPage7()
 	{
 		$_POST["action"] = "logout";
+		ob_start();
 		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
+		//this test should catch that the user actually logged out
+		//but it can't yet because the test does not save cookies
+		$this->assertContains('Please login', $results);
 	}
 }
 ?>

@@ -57,6 +57,18 @@ class ModifiedTestCase extends TestCase
 		}
 		$this->fail("Error with level " . $errno . " and message '" . $errstr . "' not found in:\n" . $state);
 	}
+
+	public function assertNotContains($nothere, $search)
+	{
+		if (strpos($search, $nothere))
+		{
+			$this->fail("Failed asserting that '" . $nothere . "' was NOT in the results\n");
+		}
+		else
+		{
+			$this->assertTrue(true);
+		}
+	}
 	
 	public function assertNoErrors()
 	{

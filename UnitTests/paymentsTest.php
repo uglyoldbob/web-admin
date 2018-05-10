@@ -19,7 +19,10 @@ class paymentsTest extends ModifiedTestCase
 	
 	public function testPage1()
 	{
+		ob_start();
 		require_once("payments.php");
+		$results = ob_get_contents();
+		ob_end_clean();
 		$this->assertNoErrors();
 	}
 }
