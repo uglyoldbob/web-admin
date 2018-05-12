@@ -5,9 +5,6 @@ use PHPUnit\Framework\TestCase;
 class ModifiedTestCase extends TestCase
 {
 	protected $config_name = "config.ini";
-	protected $session_file = "./session_id.txt";
-	
-	protected $session_id;
 	protected $errors;
 	
 	protected function setUp()
@@ -15,22 +12,11 @@ class ModifiedTestCase extends TestCase
 		chdir("./web");
 		$this->clearErrors();
 		set_error_handler(array($this, "errorHandler"));
-		if ($this->session_id = @file_get_contents($this->session_file))
-		{
-			session_id($this->session_id);
-		}
-		else
-		{
-			file_put_contents($this->session_file, session_id());
-		}
 	}
 	
 	protected function tearDown()
 	{
-		//handle cases where session_id is regenerated
-		file_put_contents($this->session_file, session_id());
-		session_write_close();
-		session_unset();
+		$this->clearErrors();
 	}
 
 	function startCookies($name)

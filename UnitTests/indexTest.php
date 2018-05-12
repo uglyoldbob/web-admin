@@ -251,6 +251,7 @@ class indexTest extends ModifiedTestCase
 		$this->assertNoErrors();
 		$this->assertContains('topmenu', $results);
 		$this->endCookies(get_class($this));
+		print_r($_COOKIES);
 	}
 	
 	/**
