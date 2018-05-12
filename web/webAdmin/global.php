@@ -392,6 +392,11 @@ function start_my_session()
 	{
 		$_POST["action"] = "";
 	}
+	
+	echo "SESSION DATA AFTER STARTING SESSION:\n";
+	$sess = print_r($_SESSION, true);
+	echo $sess;
+	echo "\n";
 }
 
 //open database connection
