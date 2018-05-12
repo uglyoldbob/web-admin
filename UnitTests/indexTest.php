@@ -263,7 +263,7 @@ class indexTest extends ModifiedTestCase
 		$_POST["password"] = indexTest::$test_pw;
 		$this->startCookies(get_class($this));
 		ob_start();
-		require_once("index.php");
+		require("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
@@ -273,7 +273,7 @@ class indexTest extends ModifiedTestCase
 		
 		$this->startCookies(get_class($this));
 		ob_start();
-		require_once("index.php");
+		require("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
