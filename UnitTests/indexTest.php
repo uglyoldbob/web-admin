@@ -251,9 +251,6 @@ class indexTest extends ModifiedTestCase
 		$this->assertNoErrors();
 		$this->assertContains('topmenu', $results);
 		$this->endCookies(get_class($this));
-		$testme = print_r($_COOKIES, TRUE);
-		echo $testme;
-		$this->assertContains('nothinginparticular', $testme);
 	}
 	
 	/**
@@ -261,6 +258,19 @@ class indexTest extends ModifiedTestCase
 	 */
 	public function testPage6()
 	{
+		$_POST["action"] = "login";
+		$_POST["username"] = $this->test_user;
+		$_POST["password"] = indexTest::$test_pw;
+		$this->startCookies(get_class($this));
+		ob_start();
+		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
+		$this->assertNoErrors();
+		$this->assertContains('topmenu', $results);
+		$this->endCookies(get_class($this));
+		$_POST = [];
+		
 		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
