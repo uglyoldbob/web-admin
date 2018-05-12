@@ -258,21 +258,19 @@ class indexTest extends ModifiedTestCase
 	 */
 	public function testPage6()
 	{
-		$_POST["action"] = "login";
-		$_POST["username"] = $this->test_user;
-		$_POST["password"] = openssl_random_pseudo_bytes(16);
 		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
-		$this->assertContains('Invalid username or password', $results);
+		$this->assertContains('topmenu', $results);
 		$this->endCookies(get_class($this));
+		echo "Stayed logged in test?:\n" . $results;
 	}
-
+	
 	/**
-	 * @depends testPage5
+	 * @depends testPage6
 	 */
 	public function testPage7()
 	{
@@ -289,5 +287,24 @@ class indexTest extends ModifiedTestCase
 		$this->endCookies(get_class($this));
 		echo $results;
 	}
+	
+	/**
+	 * @depends testPage7
+	 */
+	public function testPage8()
+	{
+		$_POST["action"] = "login";
+		$_POST["username"] = $this->test_user;
+		$_POST["password"] = openssl_random_pseudo_bytes(16);
+		$this->startCookies(get_class($this));
+		ob_start();
+		require_once("index.php");
+		$results = ob_get_contents();
+		ob_end_clean();
+		$this->assertNoErrors();
+		$this->assertContains('Invalid username or password', $results);
+		$this->endCookies(get_class($this));
+	}
+
 }
 ?>
