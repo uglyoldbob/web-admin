@@ -39,21 +39,14 @@ class ModifiedTestCase extends TestCase
 		$cookie_file = "./" . $name . ".txt";
 		if (file_exists($cookie_file))
 		{
-			$_COOKIE['PHPSESSION'] = file_get_contents($cookie_file);
+			$_SESSION = unserialize(file_get_contents($cookie_file));
 		}
 	}
 
 	function endCookies($name)
 	{
 		$cookie_file = "./" . $name . ".txt";
-		if (array_key_exists('PHPSESSION', $_COOKIE))
-		{
-			file_put_contents($cookie_file, $_COOKIE['PHPSESSION']);
-		}
-		else if (file_exists($cookie_file))
-		{
-			unlink($cookie_file);
-		}
+		file_put_contents($cookie_file, serialize($_SESSION));
 	}
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
