@@ -361,7 +361,7 @@ class user
 			}
 			catch (CertificateException $f)
 			{
-				throw new NotLoggedInException();
+				throw $e;
 			}
 		}
 	}
@@ -385,6 +385,14 @@ class user
 			$username = $this->mysql_db->real_escape_string($_POST["username"]);
 			$passworder = $this->mysql_db->real_escape_string($_POST["password"]);
 			$_SESSION['username'] = $username;	
+		}
+		
+		if ($_POST["action"] == "logout")
+		{
+			unset($_SESSION['username']);
+			unset($_SESSION['password']);
+			echo "Logged out<br />\n";
+			throw new NotLoggedInException("Logged out");
 		}
 
 		#logic for logging in and normal activity
