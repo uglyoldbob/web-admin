@@ -32,6 +32,28 @@ class ModifiedTestCase extends TestCase
 		session_write_close();
 		session_unset();
 	}
+
+	function startCookies($name)
+	{
+		$cookie_file = "./" . $name . ".txt";
+		if (file_exists($cookie_file))
+		{
+			$_COOKIE['PHPSESSION'] = file_get_contents($cookie_file);
+		}
+	}
+
+	function endCookies($name)
+	{
+		$cookie_file = "./" . $name . ".txt";
+		if (array_key_exists('PHPSESSION', $_COOKIE))
+		{
+			file_put_contents($cookie_file, $_COOKIE['PHPSESSION']);
+		}
+		else if (file_exists($cookie_file))
+		{
+			unlink($cookie_file);
+		}
+	}
 	
 	public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
 	{

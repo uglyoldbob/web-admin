@@ -24,30 +24,6 @@ class indexTest extends ModifiedTestCase
 			file_put_contents(indexTest::$pw_file, indexTest::$test_pw);
 		}
 	}
-	
-	protected function setUp()
-	{
-		parent::setUp();
-		$cookie_file = "./" . get_called_class() . ".txt";
-		if (file_exists($cookie_file))
-		{
-			$_COOKIE['PHPSESSION'] = file_get_contents($cookie_file);
-		}
-	}
-
-	protected function tearDown()
-	{
-		parent::tearDown();
-		$cookie_file = "./" . get_called_class() . ".txt";
-		if (array_key_exists('PHPSESSION', $_COOKIE))
-		{
-			file_put_contents($cookie_file, $_COOKIE['PHPSESSION']);
-		}
-		else if (file_exists($cookie_file))
-		{
-			unlink($cookie_file);
-		}
-	}
 
     public function testConfig1()
 	{
@@ -175,12 +151,14 @@ class indexTest extends ModifiedTestCase
 	 */
 	public function testPage1()
 	{
+		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
 		$this->assertContains('Please login', $results);
+		$this->endCookies(get_class($this));
 	}
 	
 	/**
@@ -189,12 +167,14 @@ class indexTest extends ModifiedTestCase
 	public function testPage2()
 	{
 		$_POST["action"] = "register";
+		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
 		$this->assertContains('Password again', $results);
+		$this->endCookies(get_class($this));
 	}
 
 	/**
@@ -207,6 +187,7 @@ class indexTest extends ModifiedTestCase
 		$_POST["pass2"] = indexTest::$test_pw;
 		$_POST["pass3"] = indexTest::$test_pw;
 		$_POST["email"] = $this->test_email;
+		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
@@ -228,6 +209,7 @@ class indexTest extends ModifiedTestCase
 		$this->assertNotEquals('', $row[6]);
 		$this->assertEquals(169000, $row[7]);
 		$this->assertEquals($this->test_email, $row[16]);
+		$this->endCookies(get_class($this));
 	}
 	
 	/**
@@ -261,12 +243,14 @@ class indexTest extends ModifiedTestCase
 		$_POST["action"] = "login";
 		$_POST["username"] = $this->test_user;
 		$_POST["password"] = indexTest::$test_pw;
+		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
 		$this->assertContains('topmenu', $results);
+		$this->endCookies(get_class($this));
 	}
 	
 	/**
@@ -277,12 +261,14 @@ class indexTest extends ModifiedTestCase
 		$_POST["action"] = "login";
 		$_POST["username"] = $this->test_user;
 		$_POST["password"] = openssl_random_pseudo_bytes(16);
+		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
 		ob_end_clean();
 		$this->assertNoErrors();
 		$this->assertContains('Invalid username or password', $results);
+		$this->endCookies(get_class($this));
 	}
 
 	/**
@@ -291,6 +277,7 @@ class indexTest extends ModifiedTestCase
 	public function testPage7()
 	{
 		$_POST["action"] = "logout";
+		$this->startCookies(get_class($this));
 		ob_start();
 		require_once("index.php");
 		$results = ob_get_contents();
@@ -299,6 +286,7 @@ class indexTest extends ModifiedTestCase
 		//this test should catch that the user actually logged out
 		//but it can't yet because the test does not save cookies
 		$this->assertContains('Please login', $results);
+		$this->endCookies(get_class($this));
 		echo $results;
 	}
 }
