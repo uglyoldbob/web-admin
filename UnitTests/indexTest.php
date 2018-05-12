@@ -25,6 +25,30 @@ class indexTest extends ModifiedTestCase
 		}
 	}
 	
+	protected function setUp()
+	{
+		parent::setUp();
+		$cookie_file = "./" . get_called_class() . ".txt";
+		if (file_exists($cookie_file))
+		{
+			$_COOKIE['PHPSESSION'] = file_get_contents($cookie_file);
+		}
+	}
+
+	protected function tearDown()
+	{
+		parent::tearDown();
+		$cookie_file = "./" . get_called_class() . ".txt";
+		if (array_key_exists('PHPSESSION', $_COOKIE))
+		{
+			file_put_contents($cookie_file, $_COOKIE['PHPSESSION']);
+		}
+		else if (file_exists($cookie_file))
+		{
+			unlink($cookie_file);
+		}
+	}
+
     public function testConfig1()
 	{
 		$config = parse_ini_file($this->config_name);
@@ -275,6 +299,7 @@ class indexTest extends ModifiedTestCase
 		//this test should catch that the user actually logged out
 		//but it can't yet because the test does not save cookies
 		$this->assertContains('Please login', $results);
+		echo $results;
 	}
 }
 ?>
