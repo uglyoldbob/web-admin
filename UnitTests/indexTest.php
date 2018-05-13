@@ -251,9 +251,6 @@ class indexTest extends ModifiedTestCase
 		$this->assertNoErrors();
 		$this->assertContains('topmenu', $results);
 		$this->endCookies(get_class($this));
-		$testme = print_r($_SESSION, true);
-		echo $testme . "\n";
-		$this->assertContains('nothinginparticular', $testme);
 	}
 	
 	/**
