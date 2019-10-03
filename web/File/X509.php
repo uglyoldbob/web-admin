@@ -3446,7 +3446,6 @@ class File_X509
     function sign($issuer, $subject, $signatureAlgorithm = 'sha1WithRSAEncryption')
     {
         if (!is_object($issuer->privateKey) || empty($issuer->dn)) {
-			echo "<b>fail1</b><br />\n";
             return false;
         }
 

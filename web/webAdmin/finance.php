@@ -54,8 +54,8 @@ class finance
 			"id_payee", "fillNames", "payee_suggest", "payee_list");
 		
 		echo '	<b>Amount of Payment: </b>Dollar amount: $<input class="fields" type="text" value="' . $amount . '" name="amount_paid" id="amount_paid" ><br >' . "\n";
-		echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input class="fields" type="text" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";
-		echo '	<b>Date Paid: </b>Date (YYYY-MM-DD): <input class="fields" type="text" value="' . $paid . '" name="date_paid" id="date_paid" ><br >' . "\n";
+		echo '	<b>Date Earned: </b>Date (YYYY-MM-DD): <input class="fields" type="datetime-local" value="' . $earned . '" name="date_earned" id="date_earned" ><br >' . "\n";
+		echo '	<b>Date Paid: </b>Date (YYYY-MM-DD): <input class="fields" type="datetime-local" value="' . $paid . '" name="date_paid" id="date_paid" ><br >' . "\n";
 		echo '	<b>Comments: </b> <input class="fields" type="text" value="' . $comments . '" name="comments" id="comments" size=127 ><br >' . "\n";
 		echo '	<b>Category: </b> <select name="categori" class="fields">' . "<br>\n";
 

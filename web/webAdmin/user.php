@@ -351,7 +351,14 @@ class user
 		}
 		catch (InvalidUsernameOrPasswordException $e)
 		{
-			throw $e;
+			try
+			{
+				$this->require_registered_certificate();
+			}
+			catch (CertificateException $f)
+			{
+				throw new NotLoggedInException();
+			}
 		}
 		catch (NotLoggedInException $e)
 		{
@@ -361,7 +368,7 @@ class user
 			}
 			catch (CertificateException $f)
 			{
-				throw $e;
+				throw new NotLoggedInException();
 			}
 		}
 	}
@@ -386,14 +393,6 @@ class user
 			$passworder = $this->mysql_db->real_escape_string($_POST["password"]);
 			$_SESSION['username'] = $username;	
 		}
-		
-		if ($_POST["action"] == "logout")
-		{
-			unset($_SESSION['username']);
-			unset($_SESSION['password']);
-			echo "Logged out<br />\n";
-			throw new NotLoggedInException("Logged out");
-		}
 
 		#logic for logging in and normal activity
 		if (isset($_SESSION['username']))
@@ -404,63 +403,70 @@ class user
 			if ($results)
 			{
 				$row = $results->fetch_array(MYSQLI_BOTH);
-				#TODO : more testing of the failed login logic
-				if ($row['fail_logins'] >= $this->config['max_fail_logins'])
-				{	//TODO: set time period for waiting to login
-					unset($_SESSION['username']);
-					unset($_SESSION['password']);
-					throw new InvalidUsernameOrPasswordException();
-				}
-				
-				if ($_POST["action"] == "login")
+				if (!is_null($row))
 				{
-					//check to see if the password matches and the stretching does not match
-					//this piece allows the stretching value to be changed at any given time
-					//the only drawback is the password is hashed twice when the user logs in
-					//in order to change the stretching value
-					$temp = hash_password($passworder, $row['salt'], $row['stretching']);
-					if ( ($row['password'] == $temp) && ($row['stretching'] != $this->config['key_stretching_value']) )
-					{	//password is good, key stretching needs to be fixed
-						$this->set_user_pword($row['emp_id'], $passworder);
-						$fquery = "SELECT * From " . $this->table_name . " WHERE username='" . $_SESSION['username'] . "'LIMIT 1;";
-						$fresults = $this->mysql_db->query($fquery);
-						if ($fresults)
-						{
-							$row = $fresults->fetch_array(MYSQLI_BOTH);
-						}
-						else
-						{	//this should never happen
-							throw new Exception("Failed to reformat password");
-						}
-						$temp = hash_password($passworder, $row['salt'], $this->config['key_stretching_value']);
-						$row['password'] = $temp;
+					#TODO : more testing of the failed login logic
+					if ($row['fail_logins'] >= $this->config['max_fail_logins'])
+					{	//TODO: set time period for waiting to login
+						unset($_SESSION['username']);
+						unset($_SESSION['password']);
+						throw new InvalidUsernameOrPasswordException();
 					}
-					unset($passworder);
-					$_SESSION['password'] = $temp;
-					$this->passhash = $temp;
-				}
-				if (($row['password'] == $_SESSION['password']) && isset($_SESSION['password']) && ($_SESSION['password'] <> ""))
-				{	#successful login
-					#TODO : limit the number of valid sessions for users? create a valid session table?
-					$_SESSION['user'] = $row;
-					$this->userid = $row['emp_id'];
+					
 					if ($_POST["action"] == "login")
 					{
-						$query = "UPDATE " . $this->table_name . " SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
-						$this->mysql_db->query($query);
-						$query = "UPDATE " . $this->table_name . " SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
-						$this->mysql_db->query($query);
+						//check to see if the password matches and the stretching does not match
+						//this piece allows the stretching value to be changed at any given time
+						//the only drawback is the password is hashed twice when the user logs in
+						//in order to change the stretching value
+						$temp = hash_password($passworder, $row['salt'], $row['stretching']);
+						if ( ($row['password'] == $temp) && ($row['stretching'] != $this->config['key_stretching_value']) )
+						{	//password is good, key stretching needs to be fixed
+							$this->set_user_pword($row['emp_id'], $passworder);
+							$fquery = "SELECT * From " . $this->table_name . " WHERE username='" . $_SESSION['username'] . "'LIMIT 1;";
+							$fresults = $this->mysql_db->query($fquery);
+							if ($fresults)
+							{
+								$row = $fresults->fetch_array(MYSQLI_BOTH);
+							}
+							else
+							{	//this should never happen
+								throw new Exception("Failed to reformat password");
+							}
+							$temp = hash_password($passworder, $row['salt'], $this->config['key_stretching_value']);
+							$row['password'] = $temp;
+						}
+						unset($passworder);
+						$_SESSION['password'] = $temp;
+						$this->passhash = $temp;
 					}
+					if (($row['password'] == $_SESSION['password']) && isset($_SESSION['password']) && ($_SESSION['password'] <> ""))
+					{	#successful login
+						#TODO : limit the number of valid sessions for users? create a valid session table?
+						$_SESSION['user'] = $row;
+						$this->userid = $row['emp_id'];
+						if ($_POST["action"] == "login")
+						{
+							$query = "UPDATE " . $this->table_name . " SET fail_pass_change=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+							$this->mysql_db->query($query);
+							$query = "UPDATE " . $this->table_name . " SET fail_logins=0 WHERE emp_id = " . $_SESSION['user']['emp_id'] . ";";
+							$this->mysql_db->query($query);
+						}
+					}
+					else
+					{	//password fail match
+						$query = "UPDATE " . $this->table_name . " SET fail_logins=fail_logins+1 WHERE username = " . $_SESSION['username'] . ";";
+						$this->mysql_db->query($query);
+						unset($_SESSION['username']);
+						unset($_SESSION['password']);
+						throw new InvalidUsernameOrPasswordException();
+					}
+					$results->close();
 				}
 				else
-				{	//password fail match
-					$query = "UPDATE " . $this->table_name . " SET fail_logins=fail_logins+1 WHERE username = " . $_SESSION['username'] . ";";
-					$this->mysql_db->query($query);
-					unset($_SESSION['username']);
-					unset($_SESSION['password']);
+				{
 					throw new InvalidUsernameOrPasswordException();
 				}
-				$results->close();
 			}
 			else
 			{	//contact not found
@@ -1046,7 +1052,7 @@ class user
 	public function print_user($contact_id)
 	{	//outputs the contact name
 		$output = "";
-		$query = "SELECT last_name, first_name FROM contacts WHERE emp_id = " . $contact_id;
+		$query = "SELECT last_name, first_name FROM " . $this->table_name . " WHERE emp_id = " . $contact_id;
 		
 		$contact_results = $this->mysql_db->query($query);
 		

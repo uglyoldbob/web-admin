@@ -116,7 +116,13 @@ function website($mysql_db, $config, $cust_session)
 			$error = 0;
 		
 			if (isset($_POST["pay_id"]))
+            {
 				$pay_id = $_POST["pay_id"];
+            }
+            else
+            {
+                $pay_id = 0;
+            }
 			if (is_numeric($pay_id) == FALSE)
 			{
 				$pay_id = 0;
@@ -328,7 +334,7 @@ function website($mysql_db, $config, $cust_session)
 		if ($contact != 0)
 		{
 			echo "<h3>Payment Details for: ";
-			echo \webAdmin\print_contact($contact);
+			echo $currentUser->print_user($contact);
 			echo "</h3>\n";
 		
 			echo "<form action=\"" . \webAdmin\rootPageURL($config) . "/contacts.php?contact=" . 
@@ -336,7 +342,7 @@ function website($mysql_db, $config, $cust_session)
 				"	<input type=\"hidden\" name=\"action\"" . 
 				" value=\"view\">\n" .
 				"	<input class=\"buttons\" type=\"submit\" value=\"View  ";
-			echo \webAdmin\print_contact($contact);
+			echo $currentUser->print_user($contact);
 			echo "'s Information\"/>\n" . "</form>\n";
 
 			$query = "SELECT COUNT( *  ) AS `Rows` , `category`" .
@@ -366,7 +372,14 @@ function website($mysql_db, $config, $cust_session)
 			}
 			$balance = 0;
 			$due_balance = 0;
-			$category = $mysql_db->real_escape_string($_GET["category"]);
+            if (isset($_GET["category"]))
+            {
+                $category = $mysql_db->real_escape_string($_GET["category"]);
+            }
+            else
+            {
+                $category = "";
+            }
 		}
 		else
 		{
@@ -465,14 +478,14 @@ function website($mysql_db, $config, $cust_session)
 					echo "		<td>";
 					echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
 						"/payments.php?contact=" . $row['pay_to'] . "\"> ";
-					echo \webAdmin\print_contact($row['pay_to']);
+					echo $currentUser->print_user($row['pay_to']);
 					echo "</a>";
 					echo "</td>\n";
 				
 					echo "		<td>";
 					echo "<a href=\"" . \webAdmin\rootPageURL($config) . 
 						"/payments.php?contact=" . $row['paid_by'] . "\"> ";
-					echo \webAdmin\print_contact($row['paid_by']);
+					echo $currentUser->print_user($row['paid_by']);
 					echo "</a>";
 					echo "</td>\n";
 				

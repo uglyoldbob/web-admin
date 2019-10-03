@@ -59,7 +59,7 @@ function runSite()
 		echo "<html>\n";
 		echo "<head>\n";
 		echo "	<title>Site Configuration Error</title>\n";
-		webAdmin\do_css($config);
+		do_css($config);
 		echo "</head>\n";
 		echo "<body>\n";
 		echo "	<h1>Site configuration error</h1>\n";
@@ -80,7 +80,7 @@ function runSite()
 		echo "<html>\n";
 		echo "<head>\n";
 		echo "	<title>Site Configuration Error</title>\n";
-		webAdmin\do_css($config);
+		do_css($config);
 		echo "</head>\n";
 		echo "<body>\n";
 		echo "	<h1>Site configuration error</h1>\n";
@@ -200,7 +200,7 @@ function make_autocomplete($disp, $fill_val, $name, $id, $fillfunc, $suggestions
 	echo '<input class="fields" type="text" autocomplete="off" value="';
 	if ($fill_val != 0)
 	{
-		echo print_contact($fill_val);
+		echo $fill_val;
 	}
 	else
 	{
@@ -392,11 +392,6 @@ function start_my_session()
 	{
 		$_POST["action"] = "";
 	}
-	
-	echo "SESSION DATA AFTER STARTING SESSION:\n";
-	$sess = print_r($_SESSION, true);
-	echo $sess;
-	echo "\n";
 }
 
 //open database connection
